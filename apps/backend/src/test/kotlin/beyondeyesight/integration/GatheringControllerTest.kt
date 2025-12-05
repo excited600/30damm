@@ -29,6 +29,7 @@ class GatheringControllerTest: EndToEndTestBase() {
         )
         val anyInt = 1
         val anyString = "string"
+        val minFee = 1_000
         val request = OpenGatheringRequest(
             hostUuid = host.uuid,
             approveType = OpenGatheringRequest.ApproveType.FIRST_IN,
@@ -37,7 +38,7 @@ class GatheringControllerTest: EndToEndTestBase() {
             genderRatioEnabled = false,
             minAge = anyInt,
             maxAge = anyInt + 1,
-            fee = anyInt,
+            fee = minFee,
             discountEnabled = false,
             offline = true,
             place = anyString,
@@ -48,7 +49,8 @@ class GatheringControllerTest: EndToEndTestBase() {
             introduction = anyString,
             startDateTime = LocalDateTime.now().plusDays(7),
             maxMaleCount = null,
-            maxFemaleCount = null
+            maxFemaleCount = null,
+            duration = 2.5f
         )
 
         webTestClient.post()

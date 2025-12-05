@@ -41,6 +41,7 @@ class GatheringService(
         title: String,
         introduction: String,
         startDateTime: LocalDateTime,
+        duration: Duration?,
     ): GatheringEntity {
         validate(minAge, maxAge, maxMaleCount, maxFemaleCount, fee)
 
@@ -76,6 +77,7 @@ class GatheringService(
             title = title,
             introduction = introduction,
             startDateTime = startDateTime,
+            duration = duration
         )
         return gatheringRepository.create(entity)
     }

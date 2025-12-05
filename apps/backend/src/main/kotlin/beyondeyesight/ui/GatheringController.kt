@@ -3,9 +3,12 @@ package beyondeyesight.ui
 import beyondeyesight.application.GatheringApplicationService
 import beyondeyesight.domain.model.GatheringEntity
 import beyondeyesight.api.GatheringsApiService
+import beyondeyesight.config.toDurationHours
+import beyondeyesight.config.toHoursFloat
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
@@ -48,6 +51,7 @@ class GatheringController(
             title = openGatheringRequest.title,
             introduction = openGatheringRequest.introduction,
             startDateTime = openGatheringRequest.startDateTime,
+            duration = openGatheringRequest.duration.toDurationHours(),
             mapper = { gatheringEntity ->
                 beyondeyesight.model.OpenGatheringResponse(
                     uuid = gatheringEntity.uuid,
@@ -73,6 +77,7 @@ class GatheringController(
                         gatheringEntity.approveType.name
                     ),
                     startDateTime = gatheringEntity.startDateTime,
+                    duration = gatheringEntity.duration.toHoursFloat(),
                     clickCount = gatheringEntity.clickCount,
                     title = gatheringEntity.title,
                 )

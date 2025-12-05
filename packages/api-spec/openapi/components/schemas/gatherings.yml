@@ -81,6 +81,10 @@ OpenGatheringRequest:
       type: string
       format: date-time
       description: Start date and time of the gathering
+    duration:
+      type: number
+      format: float
+      description: Duration of the gathering in hours (can contain decimals)
 
 OpenGatheringResponse:
   type: object
@@ -178,5 +182,8 @@ OpenGatheringResponse:
       type: string
       format: date-time
       description: Start date and time of the gathering
-
+    duration:
+      type: number
+      format: float
+      description: Duration of the gathering in hours (can contain decimals)
 

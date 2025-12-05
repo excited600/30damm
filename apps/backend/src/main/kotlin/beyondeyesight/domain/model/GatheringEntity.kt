@@ -5,6 +5,9 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -62,6 +65,9 @@ class GatheringEntity(
     var clickCount: Int,
     @Column(nullable = false)
     val startDateTime: LocalDateTime,
+    @Column(columnDefinition = "interval", nullable = true)
+    @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
+    val duration: Duration?,
 ): BaseEntity(uuid = uuid) {
 
     fun close() {
@@ -90,6 +96,7 @@ class GatheringEntity(
             title: String,
             introduction: String,
             startDateTime: LocalDateTime,
+            duration: Duration?,
         ): GatheringEntity {
             return GatheringEntity(
                 uuid = UUID.randomUUID(),
@@ -115,7 +122,8 @@ class GatheringEntity(
                 title = title,
                 introduction = introduction,
                 clickCount = INITIAL_CLICK_COUNT,
-                startDateTime = startDateTime
+                startDateTime = startDateTime,
+                duration = duration
             )
         }
 

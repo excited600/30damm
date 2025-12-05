@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: 3040 API
+  description: |
+    3040 서비스의 API 명세서입니다.
+  version: 1.0.0
+  contact:
+    name: developer - xi600
+    email: excited600@gmail.com
+servers:
+  - url: http://localhost:8080
+    description: 로컬 서버
+tags:
+  - name: Gatherings
+    description: 모임
+  - name: Users
+    description: 사용자
+paths:
+  /gatherings:
+    post:
+      operationId: openGathering
+      tags:
+        - Gatherings
+      summary: Open a new gathering
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenGatheringRequest'
+      responses:
+        '201':
+          description: Gathering open successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenGatheringResponse'
+components:
+  schemas:
+    OpenGatheringRequest:
+      type: object
+      required:
+        - hostUuid
+        - approveType
+        - minCapacity
+        - maxCapacity
+        - genderRatioEnabled
+        - minAge
+        - maxAge
+        - fee
+        - discountEnabled
+        - offline
+        - place
+        - category
+        - subCategory
+        - imageUrl
+        - title
+        - introduction
+        - startDateTime
+      properties:
+        hostUuid:
+          type: string
+          format: uuid
+          description: UUID of the host. tmp property
+        approveType:
+          type: string
+          description: Ways how guest can join the gathering
+          enum:
+            - FIRST_IN
+            - APPROVAL
+        minCapacity:
+          type: integer
+          description: Minimum capacity of the gathering
+        maxCapacity:
+          type: integer
+          description: Maximum capacity of the gathering
+        maxMaleCount:
+          type: integer
+          description: Maximum number of male guests
+        maxFemaleCount:
+          type: integer
+          description: Maximum number of female guests
+        genderRatioEnabled:
+          type: boolean
+          description: If host can set gender ratio for the gathering
+        minAge:
+          type: integer
+          description: Minimum age of guests
+        maxAge:
+          type: integer
+          description: Maximum age of guests
+        fee:
+          type: integer
+          description: Fee to join the gathering
+        discountEnabled:
+          type: boolean
+          description: If host can set discount strategy for the gathering
+        offline:
+          type: boolean
+          description: If the gathering is offline
+        place:
+          type: string
+          description: Place where the gathering will be held
+        category:
+          type: string
+          description: Category of the gathering
+          enum:
+            - PARTY
+            - FOOD_DRINK
+            - STUDY
+            - INVEST
+            - LANGUAGE
+            - ACTIVITY
+            - CULTURE
+            - LOVE
+        subCategory:
+          type: string
+          description: Sub-category of the gathering
+          enum:
+            - HOME_PARTY
+        imageUrl:
+          type: string
+          description: URL of the gathering image
+        title:
+          type: string
+          description: Title of the gathering
+        introduction:
+          type: string
+          description: Introduction of the gathering
+        startDateTime:
+          type: string
+          format: date-time
+          description: Start date and time of the gathering
+        duration:
+          type: number
+          format: float
+          description: Duration of the gathering in hours (can contain decimals)
+    OpenGatheringResponse:
+      type: object
+      required:
+        - uuid
+        - approveType
+        - minCapacity
+        - maxCapacity
+        - genderRatioEnabled
+        - minAge
+        - maxAge
+        - totalAttendees
+        - fee
+        - discountEnabled
+        - offline
+        - place
+        - category
+        - subCategory
+        - status
+        - imageUrl
+        - title
+        - introduction
+        - clickCount
+        - startDateTime
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: UUID of the gathering
+        approveType:
+          type: string
+          description: The kinds of flow how guest can join the gathering
+          enum:
+            - FIRST_IN
+            - APPROVAL
+        minCapacity:
+          type: integer
+          description: Minimum capacity of the gathering
+        maxCapacity:
+          type: integer
+          description: Maximum capacity of the gathering
+        genderRatioEnabled:
+          type: boolean
+          description: If host can set gender ratio for the gathering
+        minAge:
+          type: integer
+          description: Minimum age of guests
+        maxAge:
+          type: integer
+          description: Maximum age of guests
+        maxMaleCount:
+          type: integer
+          description: Maximum number of male guests
+        maxFemaleCount:
+          type: integer
+          description: Maximum number of female guests
+        totalGuests:
+          type: integer
+          description: Total number of guests
+        fee:
+          type: integer
+          description: Fee to join the gathering
+        discountEnabled:
+          type: boolean
+          description: If host can set discount strategy for the gathering
+        offline:
+          type: boolean
+          description: If the gathering is offline
+        place:
+          type: string
+          description: Place where the gathering will be held
+        category:
+          type: string
+          description: Category of the gathering
+          enum:
+            - PARTY
+            - FOOD_DRINK
+            - STUDY
+            - INVEST
+            - LANGUAGE
+            - ACTIVITY
+            - CULTURE
+            - LOVE
+        subCategory:
+          type: string
+          description: Sub-category of the gathering
+          enum:
+            - HOME_PARTY
+        status:
+          type: string
+          description: Status of the gathering
+          enum:
+            - OPEN
+            - CLOSED
+            - IN_PROGRESS
+            - COMPLETED
+        imageUrl:
+          type: string
+          description: URL of the gathering image
+        title:
+          type: string
+          description: Title of the gathering
+        introduction:
+          type: string
+          description: Introduction of the gathering
+        clickCount:
+          type: integer
+          description: Number of clicks on the gathering
+        startDateTime:
+          type: string
+          format: date-time
+          description: Start date and time of the gathering
+        duration:
+          type: number
+          format: float
+          description: Duration of the gathering in hours (can contain decimals)

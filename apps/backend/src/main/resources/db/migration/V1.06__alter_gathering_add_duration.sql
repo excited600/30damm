@@ -1,0 +1,2 @@
+ALTER TABLE gatherings
+    ADD COLUMN duration INTERVAL NULL;

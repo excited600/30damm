@@ -5,6 +5,7 @@ import beyondeyesight.domain.service.GatheringService
 import beyondeyesight.domain.service.ParticipantService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -34,28 +35,30 @@ class GatheringApplicationService(
         title: String,
         introduction: String,
         startDateTime: LocalDateTime,
+        duration: Duration?,
         mapper: (GatheringEntity) -> R
     ): R {
         val gatheringEntity = gatheringService.open(
-            hostUuid,
-            approveType,
-            minCapacity,
-            maxCapacity,
-            genderRatioEnabled,
-            minAge,
-            maxAge,
-            maxMaleCount,
-            maxFemaleCount,
-            fee,
-            discountEnabled,
-            offline,
-            place,
-            category,
-            subCategory,
-            imageUrl,
-            title,
-            introduction,
-            startDateTime,
+            hostUuid = hostUuid,
+            approveType = approveType,
+            minCapacity = minCapacity,
+            maxCapacity = maxCapacity,
+            genderRatioEnabled = genderRatioEnabled,
+            minAge = minAge,
+            maxAge = maxAge,
+            maxMaleCount = maxMaleCount,
+            maxFemaleCount = maxFemaleCount,
+            fee = fee,
+            discountEnabled = discountEnabled,
+            offline = offline,
+            place = place,
+            category = category,
+            subCategory = subCategory,
+            imageUrl = imageUrl,
+            title = title,
+            introduction = introduction,
+            startDateTime = startDateTime,
+            duration = duration
         )
 
         participantService.join(
