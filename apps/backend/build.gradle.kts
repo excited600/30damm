@@ -56,7 +56,7 @@ allOpen {
 
 openApiGenerate {
     generatorName.set("kotlin-spring")
-    inputSpec.set("${rootDir}/../../packages/api-spec/openapi/bundled-api-spec.yml")
+    inputSpec.set("${rootDir}/../../packages/api-spec/openapi/3040-api-spec.yml")
     outputDir.set("${buildDir}/generated")
     apiPackage.set("beyondeyesight.api")
     modelPackage.set("beyondeyesight.model")
@@ -132,8 +132,12 @@ tasks.register<Exec>("bundleOpenApi") {
     workingDir = file("${rootDir}/../../packages/api-spec/openapi")
     commandLine(
         "sh", "-c",
-        "source ~/.nvm/nvm.sh && npx @redocly/cli bundle 3040-api-spec.yml -o bundled-api-spec.yml"
+        "source ~/.nvm/nvm.sh && npx @redocly/cli bundle 3040-api-spec-overview.yml -o 3040-api-spec.yml"
     )
+}
+
+tasks.compileKotlin {
+    dependsOn(tasks.openApiGenerate)
 }
 
 tasks.openApiGenerate {
@@ -154,9 +158,4 @@ tasks.withType<Test> {
         showStackTraces = true
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
-}
-
-
-tasks.compileKotlin {
-    dependsOn(tasks.openApiGenerate)
 }
