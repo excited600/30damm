@@ -1,5 +1,6 @@
 package beyondeyesight.domain.service
 
+import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.model.GatheringEntity
 import beyondeyesight.domain.model.UserEntity
@@ -41,6 +42,8 @@ class GatheringService(
         introduction: String,
         startDateTime: LocalDateTime,
     ): GatheringEntity {
+        validate(minAge, maxAge, maxMaleCount, maxFemaleCount, fee)
+
         val host = userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException(
             resourceName = "User",
             resourceId = hostUuid
@@ -75,6 +78,50 @@ class GatheringService(
             startDateTime = startDateTime,
         )
         return gatheringRepository.create(entity)
+    }
+
+    private fun validate(
+        minAge: Int,
+        maxAge: Int,
+        maxMaleCount: Int?,
+        maxFemaleCount: Int?,
+        fee: Int
+    ) {
+        if (minAge < 1) {
+            throw InvalidValueException(
+                valueName = "minAge",
+                value = minAge,
+                reason = null
+            )
+        }
+
+        if (maxAge < minAge) {
+            throw InvalidValueException(
+                valueName = "maxAge",
+                value = maxAge,
+                reason = "maxAge must be greater than or equal to minAge"
+            )
+        }
+
+        if (maxMaleCount != null && maxMaleCount < 0) {
+            throw InvalidValueException(
+                valueName = "maxMaleCount",
+                value = maxMaleCount,
+                reason = "maxMaleCount cannot be negative"
+            )
+        }
+
+        if (maxFemaleCount != null && maxFemaleCount < 0) {
+            throw InvalidValueException(
+                valueName = "maxFemaleCount",
+                value = maxFemaleCount,
+                reason = "maxFemaleCount cannot be negative"
+            )
+        }
+
+        if (fee % 1000 != 0) {
+            throw InvalidValueException("fee", fee, "must be a multiple of 1000")
+        }
     }
 
     fun close(uuid: UUID) {
