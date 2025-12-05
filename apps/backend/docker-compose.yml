@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: 3040-postgres
+    environment:
+      POSTGRES_DB: 3040
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: beyondeyesight
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,36 @@
+/gatherings:
+  post:
+    operationId: openGathering
+    tags:
+      - Gatherings
+    summary: Open a new gathering
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../3040-api-spec.yml#/components/schemas/OpenGatheringRequest'
+    responses:
+      '201':
+        description: Gathering open successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../3040-api-spec.yml#/components/schemas/OpenGatheringResponse'
+
+#  delete:
+#    operationId: closeGathering
+#    tags:
+#      - Gatherings
+#    summary: Close an gathering
+#    parameters:
+#      - name: gatheringId
+#        in: query
+#        required: true
+#        schema:
+#          type: string
+#          format: uuid
+#        description: The UUID of the gathering to be closed
+#    responses:
+#      '204':
+#        description: Gathering closed successfully
