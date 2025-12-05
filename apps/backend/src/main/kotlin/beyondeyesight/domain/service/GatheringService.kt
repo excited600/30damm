@@ -22,7 +22,7 @@ class GatheringService(
 
     fun open(
         hostUuid: UUID,
-        acceptType: GatheringEntity.AcceptType,
+        approveType: GatheringEntity.ApproveType,
         minCapacity: Int,
         maxCapacity: Int,
         genderRatioEnabled: Boolean,
@@ -53,7 +53,7 @@ class GatheringService(
                 0 to 1
             }
         val entity = GatheringEntity.open(
-            acceptType = acceptType,
+            approveType = approveType,
             minCapacity = minCapacity,
             maxCapacity = maxCapacity,
             genderRatioEnabled = genderRatioEnabled,

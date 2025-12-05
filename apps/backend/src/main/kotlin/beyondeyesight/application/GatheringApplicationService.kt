@@ -16,7 +16,7 @@ class GatheringApplicationService(
     @Transactional
     fun <R> open(
         hostUuid: UUID,
-        acceptType: GatheringEntity.AcceptType,
+        approveType: GatheringEntity.ApproveType,
         minCapacity: Int,
         maxCapacity: Int,
         genderRatioEnabled: Boolean,
@@ -38,7 +38,7 @@ class GatheringApplicationService(
     ): R {
         val gatheringEntity = gatheringService.open(
             hostUuid,
-            acceptType,
+            approveType,
             minCapacity,
             maxCapacity,
             genderRatioEnabled,

@@ -14,7 +14,7 @@ class GatheringEntity(
     uuid: UUID,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val acceptType: AcceptType,
+    val approveType: ApproveType,
     @Column(nullable = false)
     val minCapacity: Int,
     @Column(nullable = false)
@@ -70,7 +70,7 @@ class GatheringEntity(
 
     companion object {
         fun open(
-            acceptType: AcceptType,
+            approveType: ApproveType,
             minCapacity: Int,
             maxCapacity: Int,
             genderRatioEnabled: Boolean,
@@ -93,7 +93,7 @@ class GatheringEntity(
         ): GatheringEntity {
             return GatheringEntity(
                 uuid = UUID.randomUUID(),
-                acceptType = acceptType,
+                approveType = approveType,
                 minCapacity = minCapacity,
                 maxCapacity = maxCapacity,
                 genderRatioEnabled = genderRatioEnabled,
@@ -123,7 +123,7 @@ class GatheringEntity(
         const val INITIAL_CLICK_COUNT = 0
     }
 
-    enum class AcceptType {
+    enum class ApproveType {
         FIRST_IN,
         APPROVAL
     }

@@ -2,7 +2,7 @@ OpenGatheringRequest:
   type: object
   required:
     - hostUuid
-    - acceptType
+    - approveType
     - minCapacity
     - maxCapacity
     - genderRatioEnabled
@@ -23,7 +23,7 @@ OpenGatheringRequest:
       type: string
       format: uuid
       description: UUID of the host. tmp property
-    acceptType:
+    approveType:
       type: string
       description: Ways how guest can join the gathering
       enum: [ FIRST_IN, APPROVAL ]
@@ -86,7 +86,7 @@ OpenGatheringResponse:
   type: object
   required:
     - uuid
-    - acceptType
+    - approveType
     - minCapacity
     - maxCapacity
     - genderRatioEnabled
@@ -110,7 +110,7 @@ OpenGatheringResponse:
       type: string
       format: uuid
       description: UUID of the gathering
-    acceptType:
+    approveType:
       type: string
       description: The kinds of flow how guest can join the gathering
       enum: [ FIRST_IN, APPROVAL ]

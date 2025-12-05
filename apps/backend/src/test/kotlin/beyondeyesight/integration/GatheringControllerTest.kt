@@ -5,7 +5,6 @@ import beyondeyesight.domain.repository.UserRepository
 import beyondeyesight.model.OpenGatheringRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import java.time.LocalDateTime
 import kotlin.test.Test
 
@@ -14,19 +13,8 @@ class GatheringControllerTest: EndToEndTestBase() {
     @Autowired
     lateinit var userRepository: UserRepository
 
-    @Autowired
-    lateinit var context: ApplicationContext
-
-    @Autowired
-    lateinit var requestMappingHandlerMapping: org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-
-
-
     @Test
     fun `Gathering Open`() {
-//        requestMappingHandlerMapping.handlerMethods.forEach { (key, value) ->
-//            println("Mapping: $key -> ${value.method.name}")
-//        }
         val host = userRepository.save(
             UserEntity.signUp(
                 email = "email",
@@ -43,7 +31,7 @@ class GatheringControllerTest: EndToEndTestBase() {
         val anyString = "string"
         val request = OpenGatheringRequest(
             hostUuid = host.uuid,
-            acceptType = OpenGatheringRequest.AcceptType.FIRST_IN,
+            approveType = OpenGatheringRequest.ApproveType.FIRST_IN,
             minCapacity = anyInt,
             maxCapacity = anyInt + 1,
             genderRatioEnabled = false,

@@ -30,7 +30,7 @@ class GatheringController(
     override fun openGathering(openGatheringRequest: beyondeyesight.model.OpenGatheringRequest): beyondeyesight.model.OpenGatheringResponse {
         return gatheringApplicationService.open(
             hostUuid = openGatheringRequest.hostUuid,
-            acceptType = GatheringEntity.AcceptType.valueOf(openGatheringRequest.acceptType.name),
+            approveType = GatheringEntity.ApproveType.valueOf(openGatheringRequest.approveType.name),
             minCapacity = openGatheringRequest.minCapacity,
             maxCapacity = openGatheringRequest.maxCapacity,
             genderRatioEnabled = openGatheringRequest.genderRatioEnabled,
@@ -69,8 +69,8 @@ class GatheringController(
                     imageUrl = gatheringEntity.imageUrl,
                     status = beyondeyesight.model.OpenGatheringResponse.Status.valueOf(gatheringEntity.status.name),
                     introduction = gatheringEntity.introduction,
-                    acceptType = beyondeyesight.model.OpenGatheringResponse.AcceptType.valueOf(
-                        gatheringEntity.acceptType.name
+                    approveType = beyondeyesight.model.OpenGatheringResponse.ApproveType.valueOf(
+                        gatheringEntity.approveType.name
                     ),
                     startDateTime = gatheringEntity.startDateTime,
                     clickCount = gatheringEntity.clickCount,
