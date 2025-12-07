@@ -111,10 +111,6 @@ class GatheringApplicationService(
         )
     }
 
-    /*
-    *
-    * */
-
     @Transactional
     fun <R> open(
         hostUuid: UUID,

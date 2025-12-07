@@ -35,7 +35,7 @@ paths:
       summary: Open a new gathering
       tags:
       - Gatherings
-  /gatherings/schedules:
+  /series:
     post:
       operationId: scheduleSeries
       requestBody:

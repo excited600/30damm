@@ -1,21 +1,13 @@
 package beyondeyesight.domain.model.gathering
 
 import beyondeyesight.domain.exception.DataIntegrityException
-import beyondeyesight.domain.model.BaseEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.PostLoad
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.UUID
 
 @Entity
 @Table(name = "series_schedules")
@@ -35,9 +27,11 @@ class SeriesScheduleEntity(
     @Column(nullable = false)
     val time: LocalTime,
     @Column(nullable = true)
+    @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     val duration: Duration?,
-    @Column(nullable = false)
-    val scheduleUuid: UUID?
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "series_uuid", nullable = false)
+    val series: SeriesEntity,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,7 +60,7 @@ class SeriesScheduleEntity(
                     throw DataIntegrityException("series_schedules", "scheduleStartDate must be before or equal to scheduleEndDate when series is scheduled weekly")
                 }
 
-                if (date == null) {
+                if (date != null) {
                     throw DataIntegrityException("series_schedules", "date must be null when series is scheduled weekly")
                 }
             }

@@ -1,5 +1,6 @@
 package beyondeyesight.domain.service.gathering
 
+import beyondeyesight.config.isThirtyMinuteInterval
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.model.UserEntity
@@ -72,6 +73,7 @@ class GatheringService(
                 0 to 1
             }
         val entity = GatheringEntity.Companion.open(
+            hostUuid = host.uuid,
             approveType = approveType,
             minCapacity = minCapacity,
             maxCapacity = maxCapacity,
@@ -200,37 +202,131 @@ class GatheringService(
         maxMaleCount: Int?,
         maxFemaleCount: Int?
     ) {
-
-        SeriesEntity(
-            uuid = UUID.randomUUID(),
-            approveType = approveType,
-            minCapacity = minCapacity,
-            maxCapacity = maxCapacity,
-            genderRatioEnabled = genderRatioEnabled,
-            minAge = minAge,
-            maxAge = maxAge,
-            maxMaleCount = maxMaleCount,
-            maxFemaleCount = maxFemaleCount,
-            fee = fee,
-            discountEnabled = discountEnabled,
-            offline = offline,
-            place = place,
-            category = category,
-            subCategory = subCategory,
-            imageUrl = imageUrl,
-            title = title,
-            introduction = introduction,
+        userRepository.findByUuid(hostUuid)?: throw ResourceNotFoundException(
+            resourceName = "User",
+            resourceId = hostUuid
         )
 
-        SeriesScheduleEntity(
-            scheduleType = TODO(),
-            dayOfWeek = TODO(),
-            scheduleStartDate = TODO(),
-            scheduleEndDate = TODO(),
-            date = TODO(),
-            time = TODO(),
-            duration = TODO(),
-            scheduleUuid = TODO()
+        val series = seriesRepository.save(
+            SeriesEntity(
+                uuid = UUID.randomUUID(),
+                hostUuid = hostUuid,
+                approveType = approveType,
+                minCapacity = minCapacity,
+                maxCapacity = maxCapacity,
+                genderRatioEnabled = genderRatioEnabled,
+                minAge = minAge,
+                maxAge = maxAge,
+                maxMaleCount = maxMaleCount,
+                maxFemaleCount = maxFemaleCount,
+                fee = fee,
+                discountEnabled = discountEnabled,
+                offline = offline,
+                place = place,
+                category = category,
+                subCategory = subCategory,
+                imageUrl = imageUrl,
+                title = title,
+                introduction = introduction,
+            )
         )
+
+        when (scheduleType) {
+            ScheduleType.WEEKLY -> {
+                if (weeklySchedule == null) {
+                    throw InvalidValueException(
+                        valueName = "weeklySchedule",
+                        value = "null",
+                        reason = "weeklySchedule must be provided for WEEKLY scheduleType"
+                    )
+                }
+                if (weeklySchedule.summaries.isEmpty()) {
+                    throw InvalidValueException(
+                        valueName = "weeklySchedule.summaries",
+                        value = "empty",
+                        reason = "weeklySchedule.summaries must not be empty for WEEKLY scheduleType"
+                    )
+                }
+                if (dateSchedule != null) {
+                    throw InvalidValueException(
+                        valueName = "dateSchedule",
+                        value = "not null",
+                        reason = "dateSchedule must be null for WEEKLY scheduleType"
+                    )
+                }
+
+                for(summary in weeklySchedule.summaries) {
+                    if (!summary.startTime.isThirtyMinuteInterval()) {
+                        throw InvalidValueException(
+                            valueName = "summary.startTime",
+                            value = summary.startTime,
+                            reason = "startTime must be in 30-minute intervals"
+                        )
+                    }
+                    seriesScheduleRepository.save(
+                        SeriesScheduleEntity(
+                            scheduleType = scheduleType,
+                            dayOfWeek = summary.dayOfWeek,
+                            scheduleStartDate = weeklySchedule.startDate,
+                            scheduleEndDate = weeklySchedule.endDate,
+                            date = null,
+                            time = summary.startTime,
+                            duration = summary.duration,
+                            series = series
+                        )
+                    )
+                }
+            }
+            ScheduleType.DATE -> {
+                if (dateSchedule == null) {
+                    throw InvalidValueException(
+                        valueName = "dateSchedule",
+                        value = "null",
+                        reason = "dateSchedule must be provided for DATE scheduleType"
+                    )
+                }
+                if (dateSchedule.summaries.isEmpty()) {
+                    throw InvalidValueException(
+                        valueName = "dateSchedule.summaries",
+                        value = "empty",
+                        reason = "dateSchedule.summaries must not be empty for DATE scheduleType"
+                    )
+                }
+                if (weeklySchedule != null) {
+                    throw InvalidValueException(
+                        valueName = "weeklySchedule",
+                        value = "not null",
+                        reason = "weeklySchedule must be null for DATE scheduleType"
+                    )
+                }
+
+                for(summary in dateSchedule.summaries) {
+                    if (!summary.startTime.isThirtyMinuteInterval()) {
+                        throw InvalidValueException(
+                            valueName = "summary.startTime",
+                            value = summary.startTime,
+                            reason = "startTime must be in 30-minute intervals"
+                        )
+                    }
+                    seriesScheduleRepository.save(
+                        SeriesScheduleEntity(
+                            scheduleType = scheduleType,
+                            dayOfWeek = null,
+                            scheduleStartDate = null,
+                            scheduleEndDate = null,
+                            date = summary.date,
+                            time = summary.startTime,
+                            duration = summary.duration,
+                            series = series
+                        )
+                    )
+                }
+
+            }
+        }
+
+
+
+
     }
 }

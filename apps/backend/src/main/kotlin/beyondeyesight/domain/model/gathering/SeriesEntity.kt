@@ -3,10 +3,9 @@ package beyondeyesight.domain.model.gathering
 import beyondeyesight.domain.model.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
-import java.time.Duration
 import java.util.UUID
 
 @Entity
@@ -14,6 +13,9 @@ import java.util.UUID
 class SeriesEntity(
     override val uuid: UUID,
     @Column(nullable = false)
+    val hostUuid: UUID,
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     val approveType: GatheringEntity.ApproveType,
     @Column(nullable = false)
     val minCapacity: Int,
@@ -38,8 +40,10 @@ class SeriesEntity(
     @Column(nullable = false)
     val place: String,
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     val category: GatheringEntity.Category,
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     val subCategory: GatheringEntity.SubCategory,
     @Column(nullable = false)
     val imageUrl: String,

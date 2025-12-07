@@ -23,13 +23,13 @@ CREATE TABLE series (
 CREATE TABLE series_schedules(
     seq BIGSERIAL PRIMARY KEY,
     schedule_type TEXT NOT NULL CHECK (schedule_type IN ('WEEKLY', 'DATE')),
-    day_of_week TEXT NULL CHECK (day_of_week IN ('MON','TUE','WED','THU','FRI','SAT','SUN')),
+    day_of_week TEXT NULL CHECK (day_of_week IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')),
     schedule_start_date date NULL,
     schedule_end_date date NULL,
     date date NULL,
     time time NOT NULL,
     duration INTERVAL NULL,
-    schedule_uuid UUID,
+    series_uuid UUID NOT NULL,
 
     CONSTRAINT valid_weekly_schedule CHECK (
             schedule_type != 'WEEKLY' OR (

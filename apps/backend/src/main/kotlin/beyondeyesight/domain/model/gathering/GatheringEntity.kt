@@ -17,6 +17,8 @@ import java.util.UUID
 class GatheringEntity(
     uuid: UUID,
     @Column(nullable = false)
+    val hostUuid: UUID,
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val approveType: ApproveType,
     @Column(nullable = false)
@@ -77,6 +79,7 @@ class GatheringEntity(
 
     companion object {
         fun open(
+            hostUuid: UUID,
             approveType: ApproveType,
             minCapacity: Int,
             maxCapacity: Int,
@@ -101,6 +104,7 @@ class GatheringEntity(
         ): GatheringEntity {
             return GatheringEntity(
                 uuid = UUID.randomUUID(),
+                hostUuid = hostUuid,
                 approveType = approveType,
                 minCapacity = minCapacity,
                 maxCapacity = maxCapacity,

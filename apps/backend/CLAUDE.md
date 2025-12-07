@@ -12,8 +12,11 @@ This is a Spring Boot 4.0 application written in Kotlin for managing social gath
 
 ### Build and Run
 ```bash
-# Build the project
+# Build the project (includes OpenAPI generation)
 ./gradlew build
+
+# Build without running tests
+./gradlew build -x test
 
 # Run the application
 ./gradlew bootRun
@@ -28,12 +31,44 @@ This is a Spring Boot 4.0 application written in Kotlin for managing social gath
 ./gradlew clean
 ```
 
+### OpenAPI Code Generation
+The project uses OpenAPI Generator to generate API interfaces and models from a shared specification:
+
+```bash
+# Bundle OpenAPI spec from source YAML files
+./gradlew bundleOpenApi
+
+# Generate API code (automatically runs bundleOpenApi first)
+./gradlew openApiGenerate
+```
+
+**Important**: Generated code is placed in `build/generated/src/main/kotlin` with packages:
+- API interfaces: `beyondeyesight.api`
+- DTOs/Models: `beyondeyesight.model`
+
+Controllers implement these generated interfaces (e.g., `GatheringsApiImpl` implements `GatheringsApi`).
+
 ### Database Setup
 The application requires PostgreSQL and Redis running locally:
-- PostgreSQL: `localhost:5432/3040` (username: `root`, password: `beyondeyesight`)
-- Redis: `localhost:6379`
+- **Development PostgreSQL**: `localhost:5432/3040` (username: `root`, password: `beyondeyesight`)
+- **Test PostgreSQL**: `localhost:15432/testdb` (username: `test`, password: `test`)
+- **Redis**: `localhost:6379`
 
-Database schema is managed via Flyway migrations in `src/main/resources/db/migration/`.
+Database schema is managed via Flyway migrations in `src/main/resources/db/migration/` with naming convention `V1.XX__description.sql`.
+
+### Docker Database Management
+```bash
+# Development database
+./gradlew postgresUp        # Start PostgreSQL container
+./gradlew postgresDown      # Stop PostgreSQL container
+./gradlew postgresRemove    # Remove PostgreSQL container
+./gradlew postgresStatus    # Check PostgreSQL status
+
+# Test database
+./gradlew testPostgresUp    # Start test PostgreSQL container
+./gradlew testPostgresDown  # Stop test PostgreSQL container
+./gradlew testPostgresStatus # Check test PostgreSQL status
+```
 
 ## Architecture
 
@@ -75,6 +110,12 @@ userApplicationService.signUp(..., mapper = { userEntity -> SignUpResponse.from(
 
 **GatheringEntity**: Represents social gatherings with complex rules around capacity, gender ratios, age restrictions, application types (FIRST_IN, APPROVAL), and status (OPEN, CLOSED, CANCELLED).
 
+**SeriesEntity**: Represents recurring gathering series that share common properties (capacity, fees, category, etc.). Individual gatherings can be scheduled based on series templates.
+
+**SeriesScheduleEntity**: Defines schedules for series using `ScheduleType` (WEEKLY or DATE). Includes validation logic in `@PostLoad` to ensure data integrity based on schedule type. Uses a sequence-based ID (`seq`) instead of UUID.
+
+**ParticipantEntity**: Represents user participation in gatherings with various states and approval workflows.
+
 **BaseEntity**: Parent entity providing UUID-based identity and audit fields (createdAt, updatedAt).
 
 ### Database Management
@@ -95,3 +136,15 @@ userApplicationService.signUp(..., mapper = { userEntity -> SignUpResponse.from(
 - Domain entities should have factory methods in companion objects
 - Use `@Transactional` only at the application service layer
 - Repository adapters in `infra/` should be thin wrappers around Spring Data JPA repositories
+- Controllers should implement generated OpenAPI interfaces (e.g., `GatheringsApiImpl : GatheringsApi`)
+- Entity validation logic can be placed in `init` blocks or `@PostLoad` methods for data integrity checks
+
+## Testing
+
+Integration tests extend `EndToEndTestBase` which provides:
+- `WebTestClient` for HTTP request testing
+- `JdbcTemplate` for database access
+- Automatic database cleanup after each test (truncates all tables except `flyway_schema_history`)
+- `ObjectMapper` configured for Jackson serialization
+
+Tests run against a random port (`@SpringBootTest(webEnvironment = RANDOM_PORT)`) and use the test database configuration.
