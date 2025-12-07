@@ -62,10 +62,14 @@ openApiGenerate {
     modelPackage.set("beyondeyesight.model")
     typeMappings.set(mapOf(
         "date-time" to "LocalDateTime",
-        "DateTime" to "LocalDateTime"
+        "DateTime" to "LocalDateTime",
+        "time" to "LocalTime",
+        "date" to "LocalDate"
     ))
     importMappings.set(mapOf(
-        "LocalDateTime" to "java.time.LocalDateTime"
+        "LocalDateTime" to "java.time.LocalDateTime",
+        "LocalTime" to "java.time.LocalTime",
+        "LocalDate" to "java.time.LocalDate"
     ))
     configOptions.set(mapOf(
         "interfaceOnly" to "false",
@@ -75,9 +79,9 @@ openApiGenerate {
         "dateLibrary" to "java8",
         "serializationLibrary" to "jackson",
         "exceptionHandler" to "false",
-        "skipDefaultInterface" to "true"
+        "skipDefaultInterface" to "true",
+        "useOneOfInterfaces" to "true"
     ))
-
 }
 
 sourceSets {
@@ -94,37 +98,37 @@ tasks.withType<Test> {
 
 tasks.register<Exec>("postgresUp") {
     description = "PostgreSQL 컨테이너 시작"
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml up -d postgres")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml up -d postgres")
 }
 
 tasks.register<Exec>("postgresDown") {
     description = "PostgreSQL 컨테이너 종료"
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml stop postgres")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml stop postgres")
 }
 
 tasks.register<Exec>("postgresRemove") {
     description = "PostgreSQL 컨테이너 삭제"
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml rm -sf postgres")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml rm -sf postgres")
 }
 
 tasks.register<Exec>("postgresStatus") {
     description = "PostgreSQL 컨테이너 상태 확인"
-    commandLine("sh", "-c", "docker compose -f docker-compose.yml ps postgres")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml ps postgres")
 }
 
 tasks.register<Exec>("testPostgresUp") {
     description = "테스트용 PostgreSQL 컨테이너 시작"
-    commandLine("sh", "-c", "docker compose -f docker-compose.test.yml up -d")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml up -d")
 }
 
 tasks.register<Exec>("testPostgresDown") {
     description = "테스트용 PostgreSQL 컨테이너 종료"
-    commandLine("sh", "-c", "docker compose -f docker-compose.test.yml down")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml down")
 }
 
 tasks.register<Exec>("testPostgresStatus") {
     description = "테스트용 PostgreSQL 컨테이너 상태 확인"
-    commandLine("sh", "-c", "docker compose -f docker-compose.test.yml ps")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml ps")
 }
 
 tasks.register<Exec>("bundleOpenApi") {

@@ -1,18 +1,14 @@
-package beyondeyesight.infra.repository
+package beyondeyesight.infra.repository.gathering
 
-import beyondeyesight.domain.model.GatheringEntity
-import beyondeyesight.domain.repository.GatheringRepository
+import beyondeyesight.domain.model.gathering.GatheringEntity
+import beyondeyesight.domain.repository.gathering.GatheringRepository
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
 class GatheringJpaRepositoryAdapterI(
     private val gatheringJpaRepository: GatheringJpaRepository,
 ): GatheringRepository {
-    override fun create(gatheringEntity: GatheringEntity): GatheringEntity {
-        return gatheringJpaRepository.save(gatheringEntity)
-    }
 
     override fun findByUuid(uuid: UUID): GatheringEntity? {
         return gatheringJpaRepository.findById(uuid).orElse(null)

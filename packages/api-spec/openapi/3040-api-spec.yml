@@ -37,7 +37,7 @@ paths:
                 $ref: '#/components/schemas/OpenGatheringResponse'
   /gatherings/schedules:
     post:
-      operationId: scheduleGatherings
+      operationId: scheduleSeries
       tags:
         - Gatherings
       summary: Schedule gatherings based on host setting
@@ -46,7 +46,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScheduleGatheringsRequest'
+              $ref: '#/components/schemas/ScheduleSeriesRequest'
       responses:
         '201':
           description: Gatherings scheduled successfully
@@ -230,18 +230,18 @@ components:
           type: number
           format: float
           description: Duration of the gathering in hours (can contain decimals)
-    ScheduleGatheringsRequest:
+    ScheduleSeriesRequest:
       oneOf:
-        - $ref: '#/components/schemas/WeeklyScheduleGatheringsRequest'
-        - $ref: '#/components/schemas/DateScheduleGatheringsRequest'
+        - $ref: '#/components/schemas/WeeklyScheduleSeriesRequest'
+        - $ref: '#/components/schemas/DateScheduleSeriesRequest'
       discriminator:
         propertyName: scheduleType
         mapping:
-          WEEKLY: '#/components/schemas/WeeklyScheduleGatheringsRequest'
-          DATE: '#/components/schemas/DateScheduleGatheringsRequest'
-    WeeklyScheduleGatheringsRequest:
+          WEEKLY: '#/components/schemas/WeeklyScheduleSeriesRequest'
+          DATE: '#/components/schemas/DateScheduleSeriesRequest'
+    WeeklyScheduleSeriesRequest:
       allOf:
-        - $ref: '#/components/schemas/BaseScheduleGatheringsRequest'
+        - $ref: '#/components/schemas/BaseScheduleSeriesRequest'
         - type: object
           required:
             - scheduleType
@@ -253,9 +253,9 @@ components:
                 - WEEKLY
             weeklySchedule:
               $ref: '#/components/schemas/Gathering_WeeklySchedule'
-    DateScheduleGatheringsRequest:
+    DateScheduleSeriesRequest:
       allOf:
-        - $ref: '#/components/schemas/BaseScheduleGatheringsRequest'
+        - $ref: '#/components/schemas/BaseScheduleSeriesRequest'
         - type: object
           required:
             - scheduleType
@@ -267,7 +267,7 @@ components:
                 - DATE
             dateSchedule:
               $ref: '#/components/schemas/Gathering_DateSchedule'
-    BaseScheduleGatheringsRequest:
+    BaseScheduleSeriesRequest:
       type: object
       required:
         - hostUuid
@@ -386,7 +386,6 @@ components:
       required:
         - dayOfWeek
         - startTime
-        - duration
       properties:
         dayOfWeek:
           $ref: '#/components/schemas/Gathering_DayOfWeek'

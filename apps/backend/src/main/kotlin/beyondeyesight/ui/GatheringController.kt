@@ -1,14 +1,25 @@
 package beyondeyesight.ui
 
 import beyondeyesight.application.GatheringApplicationService
-import beyondeyesight.domain.model.GatheringEntity
+import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.api.GatheringsApiService
 import beyondeyesight.config.toDurationHours
 import beyondeyesight.config.toHoursFloat
-import beyondeyesight.model.ScheduleGatheringsRequest
+import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.gathering.DateSchedule
+import beyondeyesight.domain.model.gathering.ScheduleType
+import beyondeyesight.domain.model.gathering.WeeklySchedule
+import beyondeyesight.model.GatheringApproveType
+import beyondeyesight.model.GatheringCategory
+import beyondeyesight.model.GatheringStatus
+import beyondeyesight.model.GatheringSubCategory
+import beyondeyesight.model.OpenGatheringRequest
+import beyondeyesight.model.OpenGatheringResponse
+import beyondeyesight.model.ScheduleSeriesRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
+import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.util.*
 
@@ -30,7 +41,7 @@ class GatheringController(
         return ResponseEntity.noContent().build()
     }
 
-    override fun openGathering(openGatheringRequest: beyondeyesight.model.OpenGatheringRequest): beyondeyesight.model.OpenGatheringResponse {
+    override fun openGathering(openGatheringRequest: OpenGatheringRequest): OpenGatheringResponse {
         return gatheringApplicationService.open(
             hostUuid = openGatheringRequest.hostUuid,
             approveType = GatheringEntity.ApproveType.valueOf(openGatheringRequest.approveType.name),
@@ -53,7 +64,7 @@ class GatheringController(
             startDateTime = openGatheringRequest.startDateTime,
             duration = openGatheringRequest.duration.toDurationHours(),
             mapper = { gatheringEntity: GatheringEntity, hostUuid: UUID ->
-                beyondeyesight.model.OpenGatheringResponse(
+                OpenGatheringResponse(
                     uuid = gatheringEntity.uuid,
                     hostUuid = hostUuid,
                     minCapacity = gatheringEntity.minCapacity,
@@ -65,16 +76,16 @@ class GatheringController(
                     discountEnabled = gatheringEntity.discountEnabled,
                     offline = gatheringEntity.offline,
                     place = gatheringEntity.place,
-                    category = beyondeyesight.model.GatheringCategory.valueOf(
+                    category = GatheringCategory.valueOf(
                         gatheringEntity.category.name
                     ),
-                    subCategory = beyondeyesight.model.GatheringSubCategory.valueOf(
+                    subCategory = GatheringSubCategory.valueOf(
                         gatheringEntity.subCategory.name
                     ),
                     imageUrl = gatheringEntity.imageUrl,
-                    status = beyondeyesight.model.GatheringStatus.valueOf(gatheringEntity.status.name),
+                    status = GatheringStatus.valueOf(gatheringEntity.status.name),
                     introduction = gatheringEntity.introduction,
-                    approveType = beyondeyesight.model.GatheringApproveType.valueOf(
+                    approveType = GatheringApproveType.valueOf(
                         gatheringEntity.approveType.name
                     ),
                     startDateTime = gatheringEntity.startDateTime,
@@ -89,8 +100,70 @@ class GatheringController(
 
     }
 
-    override fun scheduleGatherings(scheduleGatheringsRequest: ScheduleGatheringsRequest) {
-        TODO("Not yet implemented")
+    override fun scheduleSeries(scheduleSeriesRequest: ScheduleSeriesRequest) {
+        gatheringApplicationService.schedule(
+            hostUuid = scheduleSeriesRequest.hostUuid,
+            approveType = GatheringEntity.ApproveType.entries.find { it.name == scheduleSeriesRequest.approveType.name } ?: throw InvalidValueException(
+                valueName = "approveType",
+                value = scheduleSeriesRequest.approveType,
+                reason = null
+            ),
+            minCapacity = scheduleSeriesRequest.minCapacity,
+            maxCapacity = scheduleSeriesRequest.maxCapacity,
+            genderRatioEnabled = scheduleSeriesRequest.genderRatioEnabled,
+            minAge = scheduleSeriesRequest.minAge,
+            maxAge = scheduleSeriesRequest.maxAge,
+            fee = scheduleSeriesRequest.fee,
+            discountEnabled = scheduleSeriesRequest.discountEnabled,
+            offline = scheduleSeriesRequest.offline,
+            place = scheduleSeriesRequest.place,
+            category = GatheringEntity.Category.entries.find { it.name == scheduleSeriesRequest.category.name } ?: throw InvalidValueException(,
+                valueName = "category",
+                value = scheduleSeriesRequest.category,
+                reason = null
+            ),
+            subCategory = GatheringEntity.SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name } ?: throw InvalidValueException(,
+                valueName = "subCategory",
+                value = scheduleSeriesRequest.subCategory,
+                reason = null
+            ),
+            imageUrl = scheduleSeriesRequest.imageUrl,
+            title = scheduleSeriesRequest.title,
+            introduction = scheduleSeriesRequest.introduction,
+            scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name } ?: throw InvalidValueException(,
+                valueName = "scheduleType",
+                value = scheduleSeriesRequest.scheduleType,
+                reason = null
+            ),
+            weeklySchedule = scheduleSeriesRequest.weeklySchedule?.let { weeklySchedule ->
+                WeeklySchedule(
+                    startDate = weeklySchedule.startDate,
+                    endDate = weeklySchedule.endDate,
+                    summaries = weeklySchedule.summaries.map { summary -> WeeklySchedule.WeeklyScheduleSummary(
+                        dayOfWeek = DayOfWeek.entries.find { it.name == summary.dayOfWeek.name } ?: throw InvalidValueException(,
+                            valueName = "dayOfWeek",
+                            value = summary.dayOfWeek,
+                            reason = null
+                        ),
+                        startTime = summary.startTime,
+                        duration = summary.duration.toDurationHours()
+                    ) }
+                )
+            } ,
+            dateSchedule = scheduleSeriesRequest.dateSchedule?.let { dateSchedule ->
+                DateSchedule(
+                    dateSchedule.summaries.map { summary ->
+                        DateSchedule.DateScheduleSummary(
+                            date = summary.date,
+                            startTime = summary.startTime,
+                            duration = summary.duration.toDurationHours()
+                        )
+                    }
+                )
+            } ,
+            maxMaleCount = scheduleSeriesRequest.maxMaleCount,
+            maxFemaleCount = scheduleSeriesRequest.maxFemaleCount
+        )
     }
 
     class JoinGatheringRequest(

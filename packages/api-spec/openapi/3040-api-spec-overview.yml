@@ -23,7 +23,7 @@ paths:
   /gatherings:
     $ref: './paths/gatherings.yml#/~1gatherings'
   /gatherings/schedules:
-    $ref: './paths/gatherings.yml#/~1gatherings~1schedules'
+    $ref: './paths/gatherings.yml#/~1series'
 
 components:
   schemas:
@@ -34,14 +34,14 @@ components:
       $ref: './components/schemas/gathering/openGathering/openGatheringRequest.yml#/OpenGatheringRequest'
     OpenGatheringResponse:
       $ref: './components/schemas/gathering/openGathering/openGatheringResponse.yml#/OpenGatheringResponse'
-    ScheduleGatheringsRequest:
-      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/ScheduleGatheringsRequest'
-    WeeklyScheduleGatheringsRequest:
-      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/WeeklyScheduleGatheringsRequest'
-    DateScheduleGatheringsRequest:
-      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/DateScheduleGatheringsRequest'
-    BaseScheduleGatheringsRequest:
-      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/BaseScheduleGatheringsRequest'
+    ScheduleSeriesRequest:
+      $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/ScheduleSeriesRequest'
+    WeeklyScheduleSeriesRequest:
+      $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/WeeklyScheduleSeriesRequest'
+    DateScheduleSeriesRequest:
+      $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/DateScheduleSeriesRequest'
+    BaseScheduleSeriesRequest:
+      $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/BaseScheduleSeriesRequest'
 
 #    # Users
 #    SignUpRequest:

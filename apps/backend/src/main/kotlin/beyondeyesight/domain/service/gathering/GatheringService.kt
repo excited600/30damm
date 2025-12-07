@@ -1,12 +1,21 @@
-package beyondeyesight.domain.service
+package beyondeyesight.domain.service.gathering
 
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
-import beyondeyesight.domain.model.GatheringEntity
 import beyondeyesight.domain.model.UserEntity
-import beyondeyesight.domain.repository.GatheringRepository
+import beyondeyesight.domain.model.gathering.DateSchedule
+import beyondeyesight.domain.model.gathering.GatheringEntity
+import beyondeyesight.domain.model.gathering.ScheduleType
+import beyondeyesight.domain.model.gathering.SeriesEntity
+import beyondeyesight.domain.model.gathering.SeriesScheduleEntity
+import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.repository.ParticipantRepository
 import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.domain.repository.gathering.GatheringRepository
+import beyondeyesight.domain.repository.gathering.SeriesRepository
+import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
+import beyondeyesight.domain.service.LockService
+import beyondeyesight.domain.service.ParticipantService
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -19,7 +28,13 @@ class GatheringService(
     private val participantRepository: ParticipantRepository,
     private val lockService: LockService,
     private val userRepository: UserRepository,
+    private val seriesRepository: SeriesRepository,
+    private val seriesScheduleRepository: SeriesScheduleRepository,
 ) {
+
+    fun scheduleSeries() {
+
+    }
 
     fun open(
         hostUuid: UUID,
@@ -56,7 +71,7 @@ class GatheringService(
             } else {
                 0 to 1
             }
-        val entity = GatheringEntity.open(
+        val entity = GatheringEntity.Companion.open(
             approveType = approveType,
             minCapacity = minCapacity,
             maxCapacity = maxCapacity,
@@ -79,7 +94,7 @@ class GatheringService(
             startDateTime = startDateTime,
             duration = duration
         )
-        return gatheringRepository.create(entity)
+        return gatheringRepository.save(entity)
     }
 
     private fun validate(
@@ -160,5 +175,62 @@ class GatheringService(
         } finally {
             lockService.unlock("gathering", gatheringUuid.toString(), token)
         }
+    }
+
+    fun schedule(
+        hostUuid: UUID,
+        approveType: GatheringEntity.ApproveType,
+        minCapacity: Int,
+        maxCapacity: Int,
+        genderRatioEnabled: Boolean,
+        minAge: Int,
+        maxAge: Int,
+        fee: Int,
+        discountEnabled: Boolean,
+        offline: Boolean,
+        place: String,
+        category: GatheringEntity.Category,
+        subCategory: GatheringEntity.SubCategory,
+        imageUrl: String,
+        title: String,
+        introduction: String,
+        scheduleType: ScheduleType,
+        weeklySchedule: WeeklySchedule?,
+        dateSchedule: DateSchedule?,
+        maxMaleCount: Int?,
+        maxFemaleCount: Int?
+    ) {
+
+        SeriesEntity(
+            uuid = UUID.randomUUID(),
+            approveType = approveType,
+            minCapacity = minCapacity,
+            maxCapacity = maxCapacity,
+            genderRatioEnabled = genderRatioEnabled,
+            minAge = minAge,
+            maxAge = maxAge,
+            maxMaleCount = maxMaleCount,
+            maxFemaleCount = maxFemaleCount,
+            fee = fee,
+            discountEnabled = discountEnabled,
+            offline = offline,
+            place = place,
+            category = category,
+            subCategory = subCategory,
+            imageUrl = imageUrl,
+            title = title,
+            introduction = introduction,
+        )
+
+        SeriesScheduleEntity(
+            scheduleType = TODO(),
+            dayOfWeek = TODO(),
+            scheduleStartDate = TODO(),
+            scheduleEndDate = TODO(),
+            date = TODO(),
+            time = TODO(),
+            duration = TODO(),
+            scheduleUuid = TODO()
+        )
     }
 }

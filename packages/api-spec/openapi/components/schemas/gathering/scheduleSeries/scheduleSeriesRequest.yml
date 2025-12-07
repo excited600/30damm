@@ -1,14 +1,14 @@
-ScheduleGatheringsRequest:
+ScheduleSeriesRequest:
   oneOf:
-    - $ref: '#/WeeklyScheduleGatheringsRequest'
-    - $ref: '#/DateScheduleGatheringsRequest'
+    - $ref: '#/WeeklyScheduleSeriesRequest'
+    - $ref: '#/DateScheduleSeriesRequest'
   discriminator:
     propertyName: scheduleType
     mapping:
-      WEEKLY: '#/WeeklyScheduleGatheringsRequest'
-      DATE: '#/DateScheduleGatheringsRequest'
+      WEEKLY: '#/WeeklyScheduleSeriesRequest'
+      DATE: '#/DateScheduleSeriesRequest'
 
-BaseScheduleGatheringsRequest:
+BaseScheduleSeriesRequest:
   type: object
   required:
     - hostUuid
@@ -81,9 +81,9 @@ BaseScheduleGatheringsRequest:
       type: string
       description: Introduction of the gathering
 
-WeeklyScheduleGatheringsRequest:
+WeeklyScheduleSeriesRequest:
   allOf:
-    - $ref: '#/BaseScheduleGatheringsRequest'
+    - $ref: '#/BaseScheduleSeriesRequest'
     - type: object
       required:
         - scheduleType
@@ -95,9 +95,10 @@ WeeklyScheduleGatheringsRequest:
         weeklySchedule:
           $ref: '#/Gathering_WeeklySchedule'
 
-DateScheduleGatheringsRequest:
+
+DateScheduleSeriesRequest:
   allOf:
-    - $ref: '#/BaseScheduleGatheringsRequest'
+    - $ref: '#/BaseScheduleSeriesRequest'
     - type: object
       required:
         - scheduleType
@@ -136,7 +137,6 @@ Gathering_WeeklyScheduleSummary:
   required:
     - dayOfWeek
     - startTime
-    - duration
   properties:
     dayOfWeek:
       $ref: '../shared.yml#/Gathering_DayOfWeek'

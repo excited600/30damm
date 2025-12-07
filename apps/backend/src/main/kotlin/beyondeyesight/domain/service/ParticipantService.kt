@@ -2,7 +2,7 @@ package beyondeyesight.domain.service
 
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.model.ParticipantEntity
-import beyondeyesight.domain.repository.GatheringRepository
+import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.ParticipantRepository
 import beyondeyesight.domain.repository.UserRepository
 import org.springframework.stereotype.Service

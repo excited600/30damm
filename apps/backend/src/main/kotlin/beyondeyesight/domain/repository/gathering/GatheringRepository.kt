@@ -1,11 +1,9 @@
-package beyondeyesight.domain.repository
+package beyondeyesight.domain.repository.gathering
 
-import beyondeyesight.domain.model.GatheringEntity
-import java.time.LocalDateTime
+import beyondeyesight.domain.model.gathering.GatheringEntity
 import java.util.UUID
 
 interface GatheringRepository {
-    fun create(gatheringEntity: GatheringEntity): GatheringEntity
 
     fun findByUuid(uuid: UUID): GatheringEntity?
 

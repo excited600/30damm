@@ -1,5 +1,6 @@
-package beyondeyesight.domain.model
+package beyondeyesight.domain.model.gathering
 
+import beyondeyesight.domain.model.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -133,7 +134,8 @@ class GatheringEntity(
 
     enum class ApproveType {
         FIRST_IN,
-        APPROVAL
+        APPROVAL;
+
     }
 
     enum class Category {
@@ -152,6 +154,6 @@ class GatheringEntity(
     }
 
     enum class Status {
-        OPEN, CLOSED, CANCELLED
+        OPEN, CLOSED, IN_PROGRESS, COMPLETED
     }
 }

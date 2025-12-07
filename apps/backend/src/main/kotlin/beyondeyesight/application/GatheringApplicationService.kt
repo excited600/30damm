@@ -1,10 +1,16 @@
 package beyondeyesight.application
 
-import beyondeyesight.domain.model.GatheringEntity
-import beyondeyesight.domain.service.GatheringService
+import beyondeyesight.config.toDurationHours
+import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.gathering.DateSchedule
+import beyondeyesight.domain.model.gathering.GatheringEntity
+import beyondeyesight.domain.model.gathering.ScheduleType
+import beyondeyesight.domain.model.gathering.WeeklySchedule
+import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.ParticipantService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
@@ -14,6 +20,101 @@ class GatheringApplicationService(
     private val gatheringService: GatheringService,
     private val participantService: ParticipantService,
 ) {
+    @Transactional
+    fun  schedule(
+        hostUuid: UUID,
+        approveType: GatheringEntity.ApproveType,
+        minCapacity: Int,
+        maxCapacity: Int,
+        genderRatioEnabled: Boolean,
+        minAge: Int,
+        maxAge: Int,
+        fee: Int,
+        discountEnabled: Boolean,
+        offline: Boolean,
+        place: String,
+        category: GatheringEntity.Category,
+        subCategory: GatheringEntity.SubCategory,
+        imageUrl: String,
+        title: String,
+        introduction: String,
+        scheduleType: ScheduleType,
+        weeklySchedule: WeeklySchedule?,
+        dateSchedule: DateSchedule?,
+        maxMaleCount: Int?,
+        maxFemaleCount: Int?,
+    ) {
+
+        gatheringService.schedule(
+            hostUuid = hostUuid,
+            approveType = GatheringEntity.ApproveType.entries.find { it.name == approveType.name } ?: throw InvalidValueException(
+                valueName = "approveType",
+                value = approveType,
+                reason = null
+            ),
+            minCapacity = minCapacity,
+            maxCapacity = maxCapacity,
+            genderRatioEnabled = genderRatioEnabled,
+            minAge = minAge,
+            maxAge = maxAge,
+            fee = fee,
+            discountEnabled = discountEnabled,
+            offline = offline,
+            place = place,
+            category = GatheringEntity.Category.entries.find { it.name == category.name } ?: throw InvalidValueException(
+                valueName = "category",
+                value = category,
+                reason = null
+            ),
+            subCategory = GatheringEntity.SubCategory.entries.find { it.name == subCategory.name } ?: throw InvalidValueException(
+                valueName = "subCategory",
+                value = subCategory,
+                reason = null
+            ),
+            imageUrl = imageUrl,
+            title = title,
+            introduction = introduction,
+            scheduleType = ScheduleType.entries.find { it.name == scheduleType.name } ?: throw InvalidValueException(
+                valueName = "scheduleType",
+                value = scheduleType,
+                reason = null
+            ),
+            weeklySchedule = weeklySchedule?.let { weeklySchedule ->
+                WeeklySchedule(
+                    startDate = weeklySchedule.startDate,
+                    endDate = weeklySchedule.endDate,
+                    summaries = weeklySchedule.summaries.map { summary -> WeeklySchedule.WeeklyScheduleSummary(
+                        dayOfWeek = DayOfWeek.entries.find { it.name == summary.dayOfWeek.name } ?: throw InvalidValueException(
+                            valueName = "dayOfWeek",
+                            value = summary.dayOfWeek,
+                            reason = null
+                        ),
+                        startTime = summary.startTime,
+                        duration = summary.duration
+                    ) }
+                )
+            } ,
+            dateSchedule = dateSchedule?.let { dateSchedule ->
+                DateSchedule(
+                    dateSchedule.summaries.map { summary ->
+                        DateSchedule.DateScheduleSummary(
+                            date = summary.date,
+                            startTime = summary.startTime,
+                            duration = summary.duration
+                        )
+                    }
+                )
+            } ,
+            maxMaleCount = maxMaleCount,
+            maxFemaleCount = maxFemaleCount
+            
+        )
+    }
+
+    /*
+    *
+    * */
+
     @Transactional
     fun <R> open(
         hostUuid: UUID,

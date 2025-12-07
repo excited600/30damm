@@ -1,6 +1,6 @@
-package beyondeyesight.infra.repository
+package beyondeyesight.infra.repository.gathering
 
-import beyondeyesight.domain.model.GatheringEntity
+import beyondeyesight.domain.model.gathering.GatheringEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
