@@ -9,6 +9,7 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.WeeklySchedule
+import beyondeyesight.model.DateScheduleSeriesRequest
 import beyondeyesight.model.GatheringApproveType
 import beyondeyesight.model.GatheringCategory
 import beyondeyesight.model.GatheringStatus
@@ -16,6 +17,7 @@ import beyondeyesight.model.GatheringSubCategory
 import beyondeyesight.model.OpenGatheringRequest
 import beyondeyesight.model.OpenGatheringResponse
 import beyondeyesight.model.ScheduleSeriesRequest
+import beyondeyesight.model.WeeklyScheduleSeriesRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
@@ -117,12 +119,12 @@ class GatheringController(
             discountEnabled = scheduleSeriesRequest.discountEnabled,
             offline = scheduleSeriesRequest.offline,
             place = scheduleSeriesRequest.place,
-            category = GatheringEntity.Category.entries.find { it.name == scheduleSeriesRequest.category.name } ?: throw InvalidValueException(,
+            category = GatheringEntity.Category.entries.find { it.name == scheduleSeriesRequest.category.name } ?: throw InvalidValueException(
                 valueName = "category",
                 value = scheduleSeriesRequest.category,
                 reason = null
             ),
-            subCategory = GatheringEntity.SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name } ?: throw InvalidValueException(,
+            subCategory = GatheringEntity.SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name } ?: throw InvalidValueException(
                 valueName = "subCategory",
                 value = scheduleSeriesRequest.subCategory,
                 reason = null
@@ -130,29 +132,32 @@ class GatheringController(
             imageUrl = scheduleSeriesRequest.imageUrl,
             title = scheduleSeriesRequest.title,
             introduction = scheduleSeriesRequest.introduction,
-            scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name } ?: throw InvalidValueException(,
+            scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name } ?: throw InvalidValueException(
                 valueName = "scheduleType",
                 value = scheduleSeriesRequest.scheduleType,
                 reason = null
             ),
-            weeklySchedule = scheduleSeriesRequest.weeklySchedule?.let { weeklySchedule ->
+            weeklySchedule = (scheduleSeriesRequest as? WeeklyScheduleSeriesRequest)?.let { request ->
                 WeeklySchedule(
-                    startDate = weeklySchedule.startDate,
-                    endDate = weeklySchedule.endDate,
-                    summaries = weeklySchedule.summaries.map { summary -> WeeklySchedule.WeeklyScheduleSummary(
-                        dayOfWeek = DayOfWeek.entries.find { it.name == summary.dayOfWeek.name } ?: throw InvalidValueException(,
-                            valueName = "dayOfWeek",
-                            value = summary.dayOfWeek,
-                            reason = null
-                        ),
-                        startTime = summary.startTime,
-                        duration = summary.duration.toDurationHours()
-                    ) }
+                    startDate = request.startDate,
+                    endDate = request.endDate,
+                    summaries = request.summaries.map { summary ->
+                        WeeklySchedule.WeeklyScheduleSummary(
+                            dayOfWeek = DayOfWeek.entries.find { it.name == summary.dayOfWeek.name }
+                                ?: throw InvalidValueException(
+                                    valueName = "dayOfWeek",
+                                    value = summary.dayOfWeek,
+                                    reason = null
+                                ),
+                            startTime = summary.startTime,
+                            duration = summary.duration.toDurationHours()
+                        )
+                    }
                 )
-            } ,
-            dateSchedule = scheduleSeriesRequest.dateSchedule?.let { dateSchedule ->
+            },
+            dateSchedule = (scheduleSeriesRequest as? DateScheduleSeriesRequest)?.let { request ->
                 DateSchedule(
-                    dateSchedule.summaries.map { summary ->
+                    request.summaries.map { summary ->
                         DateSchedule.DateScheduleSummary(
                             date = summary.date,
                             startTime = summary.startTime,
@@ -160,7 +165,7 @@ class GatheringController(
                         )
                     }
                 )
-            } ,
+            },
             maxMaleCount = scheduleSeriesRequest.maxMaleCount,
             maxFemaleCount = scheduleSeriesRequest.maxFemaleCount
         )

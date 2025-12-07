@@ -1,17 +1,21 @@
 package beyondeyesight.domain.model.gathering
 
 import beyondeyesight.domain.exception.DataIntegrityException
+import beyondeyesight.domain.model.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
 import jakarta.persistence.PostLoad
 import jakarta.persistence.Table
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.UUID
-import kotlin.time.Duration
 
 @Entity
 @Table(name = "series_schedules")
@@ -35,6 +39,10 @@ class SeriesScheduleEntity(
     @Column(nullable = false)
     val scheduleUuid: UUID?
 ) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private val seq: Long? = null
+
     init {
         validate()
     }

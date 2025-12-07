@@ -231,45 +231,9 @@ components:
           format: float
           description: Duration of the gathering in hours (can contain decimals)
     ScheduleSeriesRequest:
-      oneOf:
-        - $ref: '#/components/schemas/WeeklyScheduleSeriesRequest'
-        - $ref: '#/components/schemas/DateScheduleSeriesRequest'
-      discriminator:
-        propertyName: scheduleType
-        mapping:
-          WEEKLY: '#/components/schemas/WeeklyScheduleSeriesRequest'
-          DATE: '#/components/schemas/DateScheduleSeriesRequest'
-    WeeklyScheduleSeriesRequest:
-      allOf:
-        - $ref: '#/components/schemas/BaseScheduleSeriesRequest'
-        - type: object
-          required:
-            - scheduleType
-            - weeklySchedule
-          properties:
-            scheduleType:
-              type: string
-              enum:
-                - WEEKLY
-            weeklySchedule:
-              $ref: '#/components/schemas/Gathering_WeeklySchedule'
-    DateScheduleSeriesRequest:
-      allOf:
-        - $ref: '#/components/schemas/BaseScheduleSeriesRequest'
-        - type: object
-          required:
-            - scheduleType
-            - dateSchedule
-          properties:
-            scheduleType:
-              type: string
-              enum:
-                - DATE
-            dateSchedule:
-              $ref: '#/components/schemas/Gathering_DateSchedule'
-    BaseScheduleSeriesRequest:
       type: object
       required:
+        - scheduleType
         - hostUuid
         - approveType
         - minCapacity
@@ -287,6 +251,8 @@ components:
         - title
         - introduction
       properties:
+        scheduleType:
+          $ref: '#/components/schemas/Gathering_ScheduleType'
         hostUuid:
           type: string
           format: uuid
@@ -339,6 +305,45 @@ components:
         introduction:
           type: string
           description: Introduction of the gathering
+      discriminator:
+        propertyName: scheduleType
+        mapping:
+          WEEKLY: '#/components/schemas/WeeklyScheduleSeriesRequest'
+          DATE: '#/components/schemas/DateScheduleSeriesRequest'
+    WeeklyScheduleSeriesRequest:
+      allOf:
+        - $ref: '#/components/schemas/ScheduleSeriesRequest'
+        - type: object
+          required:
+            - startDate
+            - endDate
+            - summaries
+          properties:
+            startDate:
+              type: string
+              format: date
+              description: Start date for this day of week schedule
+            endDate:
+              type: string
+              format: date
+              description: End date for this day of week schedule
+            summaries:
+              type: array
+              description: List of Schedule summaries for this day of week schedule
+              items:
+                $ref: '#/components/schemas/Gathering_WeeklyScheduleSummary'
+    DateScheduleSeriesRequest:
+      allOf:
+        - $ref: '#/components/schemas/ScheduleSeriesRequest'
+        - type: object
+          required:
+            - summaries
+          properties:
+            summaries:
+              type: array
+              description: List of Date Schedule summaries
+              items:
+                $ref: '#/components/schemas/Gathering_DateScheduleSummary'
     Gathering_ApproveType:
       type: string
       enum:
@@ -397,26 +402,6 @@ components:
           type: number
           format: float
           description: Duration in hours (can contain decimals)
-    Gathering_WeeklySchedule:
-      type: object
-      required:
-        - startDate
-        - endDate
-        - summaries
-      properties:
-        startDate:
-          type: string
-          format: date
-          description: Start date for this day of week schedule
-        endDate:
-          type: string
-          format: date
-          description: End date for this day of week schedule
-        summaries:
-          type: array
-          description: List of Schedule summaries for this day of week schedule
-          items:
-            $ref: '#/components/schemas/Gathering_WeeklyScheduleSummary'
     Gathering_DateScheduleSummary:
       type: object
       required:
@@ -436,13 +421,9 @@ components:
           type: number
           format: float
           description: Duration in hours (can contain decimals)
-    Gathering_DateSchedule:
-      type: object
-      required:
-        - summaries
-      properties:
-        summaries:
-          type: array
-          description: List of Date Schedule summaries
-          items:
-            $ref: '#/components/schemas/Gathering_DateScheduleSummary'
+    Gathering_ScheduleType:
+      type: string
+      enum:
+        - WEEKLY
+        - DATE
+      description: Type of scheduling for the gatherings

@@ -22,7 +22,7 @@ paths:
   # Gatherings
   /gatherings:
     $ref: './paths/gatherings.yml#/~1gatherings'
-  /gatherings/schedules:
+  /series:
     $ref: './paths/gatherings.yml#/~1series'
 
 components:
@@ -40,8 +40,6 @@ components:
       $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/WeeklyScheduleSeriesRequest'
     DateScheduleSeriesRequest:
       $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/DateScheduleSeriesRequest'
-    BaseScheduleSeriesRequest:
-      $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/BaseScheduleSeriesRequest'
 
 #    # Users
 #    SignUpRequest:

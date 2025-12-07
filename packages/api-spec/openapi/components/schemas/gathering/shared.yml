@@ -52,3 +52,7 @@ Gathering_ScheduleType:
     - DATE
   description: Type of scheduling for the gatherings
 
+Series_ScheduleType:
+  type: string
+  enum: [WEEKLY, DATE]
+

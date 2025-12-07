@@ -37,12 +37,12 @@ paths:
       - Gatherings
   /gatherings/schedules:
     post:
-      operationId: scheduleGatherings
+      operationId: scheduleSeries
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ScheduleGatheringsRequest"
+              $ref: "#/components/schemas/ScheduleSeriesRequest"
         required: true
       responses:
         "201":
@@ -276,29 +276,12 @@ components:
       - totalGuests
       - uuid
       type: object
-    ScheduleGatheringsRequest:
+    ScheduleSeriesRequest:
       discriminator:
         mapping:
-          WEEKLY: "#/components/schemas/WeeklyScheduleGatheringsRequest"
-          DATE: "#/components/schemas/DateScheduleGatheringsRequest"
+          WEEKLY: "#/components/schemas/WeeklyScheduleSeriesRequest"
+          DATE: "#/components/schemas/DateScheduleSeriesRequest"
         propertyName: scheduleType
-      oneOf:
-      - $ref: "#/components/schemas/WeeklyScheduleGatheringsRequest"
-      - $ref: "#/components/schemas/DateScheduleGatheringsRequest"
-    WeeklyScheduleGatheringsRequest:
-      allOf:
-      - $ref: "#/components/schemas/BaseScheduleGatheringsRequest"
-      - properties:
-          scheduleType:
-            enum:
-            - WEEKLY
-            type: string
-          weeklySchedule:
-            $ref: "#/components/schemas/Gathering_WeeklySchedule"
-        required:
-        - scheduleType
-        - weeklySchedule
-        type: object
       example:
         maxMaleCount: 1
         approveType: FIRST_IN
@@ -311,16 +294,6 @@ components:
         offline: true
         genderRatioEnabled: true
         scheduleType: WEEKLY
-        weeklySchedule:
-          endDate: 2000-01-23
-          startDate: 2000-01-23
-          summaries:
-          - duration: 9.301444
-            dayOfWeek: SUNDAY
-            startTime: startTime
-          - duration: 9.301444
-            dayOfWeek: SUNDAY
-            startTime: startTime
         hostUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         maxAge: 2
         minAge: 5
@@ -329,22 +302,9 @@ components:
         place: place
         category: PARTY
         introduction: introduction
-    DateScheduleGatheringsRequest:
-      allOf:
-      - $ref: "#/components/schemas/BaseScheduleGatheringsRequest"
-      - properties:
-          scheduleType:
-            enum:
-            - DATE
-            type: string
-          dateSchedule:
-            $ref: "#/components/schemas/Gathering_DateSchedule"
-        required:
-        - dateSchedule
-        - scheduleType
-        type: object
-    BaseScheduleGatheringsRequest:
       properties:
+        scheduleType:
+          $ref: "#/components/schemas/Gathering_ScheduleType"
         hostUuid:
           description: UUID of the host. tmp property
           format: uuid
@@ -412,9 +372,44 @@ components:
       - minCapacity
       - offline
       - place
+      - scheduleType
       - subCategory
       - title
       type: object
+    WeeklyScheduleSeriesRequest:
+      allOf:
+      - $ref: "#/components/schemas/ScheduleSeriesRequest"
+      - properties:
+          startDate:
+            description: Start date for this day of week schedule
+            format: date
+            type: string
+          endDate:
+            description: End date for this day of week schedule
+            format: date
+            type: string
+          summaries:
+            description: List of Schedule summaries for this day of week schedule
+            items:
+              $ref: "#/components/schemas/Gathering_WeeklyScheduleSummary"
+            type: array
+        required:
+        - endDate
+        - startDate
+        - summaries
+        type: object
+    DateScheduleSeriesRequest:
+      allOf:
+      - $ref: "#/components/schemas/ScheduleSeriesRequest"
+      - properties:
+          summaries:
+            description: List of Date Schedule summaries
+            items:
+              $ref: "#/components/schemas/Gathering_DateScheduleSummary"
+            type: array
+        required:
+        - summaries
+        type: object
     Gathering_ApproveType:
       description: Ways how to approve guests to join the gathering
       enum:
@@ -458,10 +453,6 @@ components:
       - SATURDAY
       type: string
     Gathering_WeeklyScheduleSummary:
-      example:
-        duration: 9.301444
-        dayOfWeek: SUNDAY
-        startTime: startTime
       properties:
         dayOfWeek:
           $ref: "#/components/schemas/Gathering_DayOfWeek"
@@ -475,38 +466,7 @@ components:
           type: number
       required:
       - dayOfWeek
-      - duration
       - startTime
-      type: object
-    Gathering_WeeklySchedule:
-      example:
-        endDate: 2000-01-23
-        startDate: 2000-01-23
-        summaries:
-        - duration: 9.301444
-          dayOfWeek: SUNDAY
-          startTime: startTime
-        - duration: 9.301444
-          dayOfWeek: SUNDAY
-          startTime: startTime
-      properties:
-        startDate:
-          description: Start date for this day of week schedule
-          format: date
-          type: string
-        endDate:
-          description: End date for this day of week schedule
-          format: date
-          type: string
-        summaries:
-          description: List of Schedule summaries for this day of week schedule
-          items:
-            $ref: "#/components/schemas/Gathering_WeeklyScheduleSummary"
-          type: array
-      required:
-      - endDate
-      - startDate
-      - summaries
       type: object
     Gathering_DateScheduleSummary:
       properties:
@@ -527,13 +487,9 @@ components:
       - duration
       - startTime
       type: object
-    Gathering_DateSchedule:
-      properties:
-        summaries:
-          description: List of Date Schedule summaries
-          items:
-            $ref: "#/components/schemas/Gathering_DateScheduleSummary"
-          type: array
-      required:
-      - summaries
-      type: object
+    Gathering_ScheduleType:
+      description: Type of scheduling for the gatherings
+      enum:
+      - WEEKLY
+      - DATE
+      type: string

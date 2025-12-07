@@ -18,9 +18,10 @@ CREATE TABLE series (
     title TEXT NOT NULL,
     introduction TEXT NULL,
     click_count INTEGER NOT NULL DEFAULT 0
-)
+);
 
 CREATE TABLE series_schedules(
+    seq BIGSERIAL PRIMARY KEY,
     schedule_type TEXT NOT NULL CHECK (schedule_type IN ('WEEKLY', 'DATE')),
     day_of_week TEXT NULL CHECK (day_of_week IN ('MON','TUE','WED','THU','FRI','SAT','SUN')),
     schedule_start_date date NULL,
@@ -47,4 +48,4 @@ CREATE TABLE series_schedules(
                 date IS NOT NULL
             )
         )
-)
+);

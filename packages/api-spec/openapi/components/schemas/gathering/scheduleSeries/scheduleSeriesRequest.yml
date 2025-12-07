@@ -1,16 +1,7 @@
 ScheduleSeriesRequest:
-  oneOf:
-    - $ref: '#/WeeklyScheduleSeriesRequest'
-    - $ref: '#/DateScheduleSeriesRequest'
-  discriminator:
-    propertyName: scheduleType
-    mapping:
-      WEEKLY: '#/WeeklyScheduleSeriesRequest'
-      DATE: '#/DateScheduleSeriesRequest'
-
-BaseScheduleSeriesRequest:
   type: object
   required:
+    - scheduleType
     - hostUuid
     - approveType
     - minCapacity
@@ -28,6 +19,8 @@ BaseScheduleSeriesRequest:
     - title
     - introduction
   properties:
+    scheduleType:
+      $ref: '../shared.yml#/Gathering_ScheduleType'
     hostUuid:
       type: string
       format: uuid
@@ -80,57 +73,47 @@ BaseScheduleSeriesRequest:
     introduction:
       type: string
       description: Introduction of the gathering
+  discriminator:
+    propertyName: scheduleType
+    mapping:
+      WEEKLY: '#/WeeklyScheduleSeriesRequest'
+      DATE: '#/DateScheduleSeriesRequest'
 
 WeeklyScheduleSeriesRequest:
   allOf:
-    - $ref: '#/BaseScheduleSeriesRequest'
+    - $ref: '#/ScheduleSeriesRequest'
     - type: object
       required:
-        - scheduleType
-        - weeklySchedule
+        - startDate
+        - endDate
+        - summaries
       properties:
-        scheduleType:
+        startDate:
           type: string
-          enum: [WEEKLY]
-        weeklySchedule:
-          $ref: '#/Gathering_WeeklySchedule'
-
+          format: date
+          description: Start date for this day of week schedule
+        endDate:
+          type: string
+          format: date
+          description: End date for this day of week schedule
+        summaries:
+          type: array
+          description: List of Schedule summaries for this day of week schedule
+          items:
+            $ref: '#/Gathering_WeeklyScheduleSummary'
 
 DateScheduleSeriesRequest:
   allOf:
-    - $ref: '#/BaseScheduleSeriesRequest'
+    - $ref: '#/ScheduleSeriesRequest'
     - type: object
       required:
-        - scheduleType
-        - dateSchedule
+        - summaries
       properties:
-        scheduleType:
-          type: string
-          enum: [DATE]
-        dateSchedule:
-          $ref: '#/Gathering_DateSchedule'
-
-Gathering_WeeklySchedule:
-  type: object
-  required:
-    - startDate
-    - endDate
-    - summaries
-  properties:
-    startDate:
-      type: string
-      format: date
-      description: Start date for this day of week schedule
-    endDate:
-      type: string
-      format: date
-      description: End date for this day of week schedule
-    summaries:
-      type: array
-      description: List of Schedule summaries for this day of week schedule
-      items:
-        $ref: '#/Gathering_WeeklyScheduleSummary'
-
+        summaries:
+          type: array
+          description: List of Date Schedule summaries
+          items:
+            $ref: '#/Gathering_DateScheduleSummary'
 
 Gathering_WeeklyScheduleSummary:
   type: object
@@ -148,17 +131,6 @@ Gathering_WeeklyScheduleSummary:
       type: number
       format: float
       description: Duration in hours (can contain decimals)
-
-Gathering_DateSchedule:
-  type: object
-  required:
-    - summaries
-  properties:
-    summaries:
-      type: array
-      description: List of Date Schedule summaries
-      items:
-        $ref: '#/Gathering_DateScheduleSummary'
 
 Gathering_DateScheduleSummary:
   type: object
