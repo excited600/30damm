@@ -1,0 +1,181 @@
+ScheduleGatheringsRequest:
+  oneOf:
+    - $ref: '#/WeeklyScheduleGatheringsRequest'
+    - $ref: '#/DateScheduleGatheringsRequest'
+  discriminator:
+    propertyName: scheduleType
+    mapping:
+      WEEKLY: '#/WeeklyScheduleGatheringsRequest'
+      DATE: '#/DateScheduleGatheringsRequest'
+
+BaseScheduleGatheringsRequest:
+  type: object
+  required:
+    - hostUuid
+    - approveType
+    - minCapacity
+    - maxCapacity
+    - genderRatioEnabled
+    - minAge
+    - maxAge
+    - discountEnabled
+    - offline
+    - place
+    - fee
+    - category
+    - subCategory
+    - imageUrl
+    - title
+    - introduction
+  properties:
+    hostUuid:
+      type: string
+      format: uuid
+      description: UUID of the host. tmp property
+    approveType:
+      $ref: '../shared.yml#/Gathering_ApproveType'
+    minCapacity:
+      type: integer
+      description: Minimum capacity of the gathering
+    maxCapacity:
+      type: integer
+      description: Maximum capacity of the gathering
+    maxMaleCount:
+      type: integer
+      description: Maximum number of male guests
+    maxFemaleCount:
+      type: integer
+      description: Maximum number of female guests
+    genderRatioEnabled:
+      type: boolean
+      description: If host can set gender ratio for the gathering
+    minAge:
+      type: integer
+      description: Minimum age of guests
+    maxAge:
+      type: integer
+      description: Maximum age of guests
+    fee:
+      type: integer
+      description: Fee to join the gathering
+    discountEnabled:
+      type: boolean
+      description: If host can set discount strategy for the gathering
+    offline:
+      type: boolean
+      description: If the gathering is offline
+    place:
+      type: string
+      description: Place where the gathering will be held
+    category:
+      $ref: '../shared.yml#/Gathering_Category'
+    subCategory:
+      $ref: '../shared.yml#/Gathering_SubCategory'
+    imageUrl:
+      type: string
+      description: URL of the gathering image
+    title:
+      type: string
+      description: Title of the gathering
+    introduction:
+      type: string
+      description: Introduction of the gathering
+
+WeeklyScheduleGatheringsRequest:
+  allOf:
+    - $ref: '#/BaseScheduleGatheringsRequest'
+    - type: object
+      required:
+        - scheduleType
+        - weeklySchedule
+      properties:
+        scheduleType:
+          type: string
+          enum: [WEEKLY]
+        weeklySchedule:
+          $ref: '#/Gathering_WeeklySchedule'
+
+DateScheduleGatheringsRequest:
+  allOf:
+    - $ref: '#/BaseScheduleGatheringsRequest'
+    - type: object
+      required:
+        - scheduleType
+        - dateSchedule
+      properties:
+        scheduleType:
+          type: string
+          enum: [DATE]
+        dateSchedule:
+          $ref: '#/Gathering_DateSchedule'
+
+Gathering_WeeklySchedule:
+  type: object
+  required:
+    - startDate
+    - endDate
+    - summaries
+  properties:
+    startDate:
+      type: string
+      format: date
+      description: Start date for this day of week schedule
+    endDate:
+      type: string
+      format: date
+      description: End date for this day of week schedule
+    summaries:
+      type: array
+      description: List of Schedule summaries for this day of week schedule
+      items:
+        $ref: '#/Gathering_WeeklyScheduleSummary'
+
+
+Gathering_WeeklyScheduleSummary:
+  type: object
+  required:
+    - dayOfWeek
+    - startTime
+    - duration
+  properties:
+    dayOfWeek:
+      $ref: '../shared.yml#/Gathering_DayOfWeek'
+    startTime:
+      type: string
+      format: time
+      description: Start time of the gathering on the specified day of week
+    duration:
+      type: number
+      format: float
+      description: Duration in hours (can contain decimals)
+
+Gathering_DateSchedule:
+  type: object
+  required:
+    - summaries
+  properties:
+    summaries:
+      type: array
+      description: List of Date Schedule summaries
+      items:
+        $ref: '#/Gathering_DateScheduleSummary'
+
+Gathering_DateScheduleSummary:
+  type: object
+  required:
+    - date
+    - startTime
+    - duration
+  properties:
+    date:
+      type: string
+      format: date
+      description: Date of the gathering
+    startTime:
+      type: string
+      format: time
+      description: Start time of the gathering on the specified date
+    duration:
+      type: number
+      format: float
+      description: Duration in hours (can contain decimals)

@@ -36,7 +36,7 @@ class GatheringApplicationService(
         introduction: String,
         startDateTime: LocalDateTime,
         duration: Duration?,
-        mapper: (GatheringEntity) -> R
+        mapper: (GatheringEntity, UUID) -> R
     ): R {
         val gatheringEntity = gatheringService.open(
             hostUuid = hostUuid,
@@ -67,7 +67,7 @@ class GatheringApplicationService(
             isHost = true
         )
 
-        return mapper.invoke(gatheringEntity)
+        return mapper.invoke(gatheringEntity, hostUuid)
     }
 
     @Transactional

@@ -52,10 +52,10 @@ class GatheringController(
             introduction = openGatheringRequest.introduction,
             startDateTime = openGatheringRequest.startDateTime,
             duration = openGatheringRequest.duration.toDurationHours(),
-            mapper = { gatheringEntity ->
+            mapper = { gatheringEntity: GatheringEntity, hostUuid: UUID ->
                 beyondeyesight.model.OpenGatheringResponse(
                     uuid = gatheringEntity.uuid,
-                    hostUuid = UUID.randomUUID(), //TODO: 조인해서 가져와야함.
+                    hostUuid = hostUuid,
                     minCapacity = gatheringEntity.minCapacity,
                     maxCapacity = gatheringEntity.maxCapacity,
                     genderRatioEnabled = gatheringEntity.genderRatioEnabled,
