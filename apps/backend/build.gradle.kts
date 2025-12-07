@@ -136,6 +136,21 @@ tasks.register<Exec>("bundleOpenApi") {
     )
 }
 
+
+/*
+* redoc 이 참조할 스펙 문서를 복사합니다.
+* */
+tasks.register<Copy>("copyOpenApiSpec") {
+    dependsOn("openApiGenerate")
+    from("${buildDir}/generated/src/main/resources/openapi.yaml")
+    into("${projectDir}/src/main/resources/static/openapi")
+    rename { "openapi.yaml" }
+}
+
+tasks.named("processResources") {
+    dependsOn("copyOpenApiSpec")
+}
+
 tasks.compileKotlin {
     dependsOn(tasks.openApiGenerate)
 }

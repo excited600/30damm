@@ -61,7 +61,7 @@ paths:
       summary: 사용자 목록 조회
       description: 필터링 및 페이징을 지원하는 사용자 목록을 반환합니다.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/SizeParam'
@@ -177,7 +177,7 @@ paths:
       summary: 사용자 상세 조회
       description: 특정 사용자의 상세 정보를 반환합니다.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
         - name: include
@@ -188,10 +188,10 @@ paths:
             type: array
             items:
               type: string
-              enum: [posts, comments, followers]
+              enum: [ posts, comments, followers ]
           style: form
           explode: false
-          example: [posts, followers]
+          example: [ posts, followers ]
       responses:
         '200':
           description: 조회 성공
@@ -209,7 +209,7 @@ paths:
       summary: 사용자 정보 수정
       description: 사용자 정보를 전체 수정합니다.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       requestBody:
@@ -235,7 +235,7 @@ paths:
       summary: 사용자 정보 부분 수정
       description: 사용자 정보를 부분적으로 수정합니다.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       requestBody:
@@ -259,7 +259,7 @@ paths:
       summary: 사용자 삭제
       description: 사용자를 삭제(비활성화)합니다.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
         - name: hard
@@ -283,7 +283,7 @@ paths:
       summary: 프로필 이미지 업로드
       description: 사용자의 프로필 이미지를 업로드합니다.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       requestBody:
@@ -363,7 +363,7 @@ paths:
         - Post
       summary: 게시글 작성
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -568,7 +568,7 @@ components:
       properties:
         status:
           type: string
-          enum: [UP, DOWN, DEGRADED]
+          enum: [ UP, DOWN, DEGRADED ]
           example: "UP"
         timestamp:
           type: string
@@ -583,7 +583,7 @@ components:
       properties:
         status:
           type: string
-          enum: [UP, DOWN]
+          enum: [ UP, DOWN ]
         details:
           type: object
           additionalProperties: true
@@ -620,7 +620,7 @@ components:
       properties:
         language:
           type: string
-          enum: [ko, en, ja]
+          enum: [ ko, en, ja ]
           default: "ko"
         timezone:
           type: string
@@ -809,7 +809,7 @@ components:
           items:
             type: string
             maxLength: 20
-          example: ["spring", "kotlin", "tutorial"]
+          example: [ "spring", "kotlin", "tutorial" ]
         published:
           type: boolean
           default: false

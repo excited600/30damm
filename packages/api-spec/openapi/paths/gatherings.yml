@@ -17,6 +17,22 @@
           application/json:
             schema:
               $ref: '../3040-api-spec-overview.yml#/components/schemas/OpenGatheringResponse'
+/gatherings/schedules:
+  post:
+    operationId: scheduleGatherings
+    tags:
+      - Gatherings
+    summary: Schedule gatherings based on host setting
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../3040-api-spec-overview.yml#/components/schemas/ScheduleGatheringsRequest'
+    responses:
+      '201':
+        description: Gatherings scheduled successfully
+
 
 #  delete:
 #    operationId: closeGathering

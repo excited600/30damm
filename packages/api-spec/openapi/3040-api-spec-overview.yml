@@ -22,16 +22,24 @@ paths:
   # Gatherings
   /gatherings:
     $ref: './paths/gatherings.yml#/~1gatherings'
+  /gatherings/schedules:
+    $ref: './paths/gatherings.yml#/~1gatherings~1schedules'
 
 components:
   schemas:
     # Gatherings
-#    GetGatheringsResponse:
-#      $ref: './components/schemas/gatherings.yml#/GetGatheringsResponse'
+    #    GetGatheringsResponse:
+    #      $ref: './components/schemas/gatherings.yml#/GetGatheringsResponse'
     OpenGatheringRequest:
       $ref: './components/schemas/gatherings.yml#/OpenGatheringRequest'
     OpenGatheringResponse:
       $ref: './components/schemas/gatherings.yml#/OpenGatheringResponse'
+    ScheduleGatheringsRequest:
+      $ref: './components/schemas/gatherings.yml#/ScheduleGatheringsRequest'
+    WeeklyScheduleGatheringsRequest:
+      $ref: './components/schemas/gatherings.yml#/WeeklyScheduleGatheringsRequest'
+    DateScheduleGatheringsRequest:
+      $ref: './components/schemas/gatherings.yml#/DateScheduleGatheringsRequest'
 
 #    # Users
 #    SignUpRequest:

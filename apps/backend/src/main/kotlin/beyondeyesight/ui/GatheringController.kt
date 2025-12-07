@@ -5,10 +5,10 @@ import beyondeyesight.domain.model.GatheringEntity
 import beyondeyesight.api.GatheringsApiService
 import beyondeyesight.config.toDurationHours
 import beyondeyesight.config.toHoursFloat
+import beyondeyesight.model.ScheduleGatheringsRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
-import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
@@ -55,6 +55,7 @@ class GatheringController(
             mapper = { gatheringEntity ->
                 beyondeyesight.model.OpenGatheringResponse(
                     uuid = gatheringEntity.uuid,
+                    hostUuid = UUID.randomUUID(), //TODO: 조인해서 가져와야함.
                     minCapacity = gatheringEntity.minCapacity,
                     maxCapacity = gatheringEntity.maxCapacity,
                     genderRatioEnabled = gatheringEntity.genderRatioEnabled,
@@ -64,27 +65,32 @@ class GatheringController(
                     discountEnabled = gatheringEntity.discountEnabled,
                     offline = gatheringEntity.offline,
                     place = gatheringEntity.place,
-                    category = beyondeyesight.model.OpenGatheringResponse.Category.valueOf(
+                    category = beyondeyesight.model.GatheringCategory.valueOf(
                         gatheringEntity.category.name
                     ),
-                    subCategory = beyondeyesight.model.OpenGatheringResponse.SubCategory.valueOf(
+                    subCategory = beyondeyesight.model.GatheringSubCategory.valueOf(
                         gatheringEntity.subCategory.name
                     ),
                     imageUrl = gatheringEntity.imageUrl,
-                    status = beyondeyesight.model.OpenGatheringResponse.Status.valueOf(gatheringEntity.status.name),
+                    status = beyondeyesight.model.GatheringStatus.valueOf(gatheringEntity.status.name),
                     introduction = gatheringEntity.introduction,
-                    approveType = beyondeyesight.model.OpenGatheringResponse.ApproveType.valueOf(
+                    approveType = beyondeyesight.model.GatheringApproveType.valueOf(
                         gatheringEntity.approveType.name
                     ),
                     startDateTime = gatheringEntity.startDateTime,
                     duration = gatheringEntity.duration.toHoursFloat(),
                     clickCount = gatheringEntity.clickCount,
                     title = gatheringEntity.title,
+                    totalGuests = gatheringEntity.totalGuests
                 )
             }
         )
 
 
+    }
+
+    override fun scheduleGatherings(scheduleGatheringsRequest: ScheduleGatheringsRequest) {
+        TODO("Not yet implemented")
     }
 
     class JoinGatheringRequest(
@@ -100,7 +106,7 @@ class GatheringController(
         val place: String,
         val fee: Int,
         val maxCapacity: Int,
-        val totalAttendees: Int,
+        val totalGuests: Int,
         val status: GatheringEntity.Status,
         val startDateTime: LocalDateTime,
         val imageUrl: String,
@@ -117,7 +123,7 @@ class GatheringController(
                     place = entity.place,
                     fee = entity.fee,
                     maxCapacity = entity.maxCapacity,
-                    totalAttendees = entity.totalAttendees,
+                    totalGuests = entity.totalGuests,
                     status = entity.status,
                     startDateTime = entity.startDateTime,
                     imageUrl = entity.imageUrl,
