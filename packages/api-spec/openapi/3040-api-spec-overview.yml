@@ -31,17 +31,17 @@ components:
     #    GetGatheringsResponse:
     #      $ref: './components/schemas/gatherings.yml#/GetGatheringsResponse'
     OpenGatheringRequest:
-      $ref: './components/schemas/gatherings.yml#/OpenGatheringRequest'
+      $ref: './components/schemas/gathering/openGathering/openGatheringRequest.yml#/OpenGatheringRequest'
     OpenGatheringResponse:
-      $ref: './components/schemas/gatherings.yml#/OpenGatheringResponse'
+      $ref: './components/schemas/gathering/openGathering/openGatheringResponse.yml#/OpenGatheringResponse'
     ScheduleGatheringsRequest:
-      $ref: './components/schemas/gatherings.yml#/ScheduleGatheringsRequest'
+      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/ScheduleGatheringsRequest'
     WeeklyScheduleGatheringsRequest:
-      $ref: './components/schemas/gatherings.yml#/WeeklyScheduleGatheringsRequest'
+      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/WeeklyScheduleGatheringsRequest'
     DateScheduleGatheringsRequest:
-      $ref: './components/schemas/gatherings.yml#/DateScheduleGatheringsRequest'
+      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/DateScheduleGatheringsRequest'
     BaseScheduleGatheringsRequest:
-      $ref: './components/schemas/gatherings.yml#/BaseScheduleGatheringsRequest'
+      $ref: './components/schemas/gathering/scheduleGatherings/scheduleGatheringsRequest.yml#/BaseScheduleGatheringsRequest'
 
 #    # Users
 #    SignUpRequest:

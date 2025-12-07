@@ -1,0 +1,97 @@
+OpenGatheringResponse:
+  type: object
+  required:
+    - uuid
+    - hostUuid
+    - approveType
+    - minCapacity
+    - maxCapacity
+    - genderRatioEnabled
+    - minAge
+    - maxAge
+    - totalGuests
+    - fee
+    - discountEnabled
+    - offline
+    - place
+    - category
+    - subCategory
+    - status
+    - imageUrl
+    - title
+    - introduction
+    - clickCount
+    - startDateTime
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: UUID of the gathering
+    hostUuid:
+      type: string
+      format: uuid
+      description: UUID of the host. tmp property
+    approveType:
+      $ref: '../shared.yml#/Gathering_ApproveType'
+    minCapacity:
+      type: integer
+      description: Minimum capacity of the gathering
+    maxCapacity:
+      type: integer
+      description: Maximum capacity of the gathering
+    genderRatioEnabled:
+      type: boolean
+      description: If host can set gender ratio for the gathering
+    minAge:
+      type: integer
+      description: Minimum age of guests
+    maxAge:
+      type: integer
+      description: Maximum age of guests
+    maxMaleCount:
+      type: integer
+      description: Maximum number of male guests
+    maxFemaleCount:
+      type: integer
+      description: Maximum number of female guests
+    totalGuests:
+      type: integer
+      description: Total number of guests
+    fee:
+      type: integer
+      description: Fee to join the gathering
+    discountEnabled:
+      type: boolean
+      description: If host can set discount strategy for the gathering
+    offline:
+      type: boolean
+      description: If the gathering is offline
+    place:
+      type: string
+      description: Place where the gathering will be held
+    category:
+      $ref: '../shared.yml#/Gathering_Category'
+    subCategory:
+      $ref: '../shared.yml#/Gathering_SubCategory'
+    status:
+      $ref: '../shared.yml#/Gathering_Status'
+    imageUrl:
+      type: string
+      description: URL of the gathering image
+    title:
+      type: string
+      description: Title of the gathering
+    introduction:
+      type: string
+      description: Introduction of the gathering
+    clickCount:
+      type: integer
+      description: Number of clicks on the gathering
+    startDateTime:
+      type: string
+      format: date-time
+      description: Start date and time of the gathering
+    duration:
+      type: number
+      format: float
+      description: Duration of the gathering in hours (can contain decimals)
