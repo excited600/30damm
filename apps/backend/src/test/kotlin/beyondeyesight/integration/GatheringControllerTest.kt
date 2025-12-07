@@ -2,6 +2,9 @@ package beyondeyesight.integration
 
 import beyondeyesight.domain.model.UserEntity
 import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.model.GatheringApproveType
+import beyondeyesight.model.GatheringCategory
+import beyondeyesight.model.GatheringSubCategory
 import beyondeyesight.model.OpenGatheringRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +35,7 @@ class GatheringControllerTest: EndToEndTestBase() {
         val minFee = 1_000
         val request = OpenGatheringRequest(
             hostUuid = host.uuid,
-            approveType = OpenGatheringRequest.ApproveType.FIRST_IN,
+            approveType = GatheringApproveType.FIRST_IN,
             minCapacity = anyInt,
             maxCapacity = anyInt + 1,
             genderRatioEnabled = false,
@@ -42,8 +45,8 @@ class GatheringControllerTest: EndToEndTestBase() {
             discountEnabled = false,
             offline = true,
             place = anyString,
-            category = OpenGatheringRequest.Category.ACTIVITY,
-            subCategory = OpenGatheringRequest.SubCategory.HOME_PARTY,
+            category = GatheringCategory.ACTIVITY,
+            subCategory = GatheringSubCategory.HOME_PARTY,
             imageUrl = anyString,
             title = anyString,
             introduction = anyString,
