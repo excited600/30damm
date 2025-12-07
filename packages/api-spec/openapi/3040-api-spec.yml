@@ -240,86 +240,34 @@ components:
           WEEKLY: '#/components/schemas/WeeklyScheduleGatheringsRequest'
           DATE: '#/components/schemas/DateScheduleGatheringsRequest'
     WeeklyScheduleGatheringsRequest:
-      type: object
-      required:
-        - hostUuid
-        - approveType
-        - minCapacity
-        - maxCapacity
-        - genderRatioEnabled
-        - minAge
-        - maxAge
-        - discountEnabled
-        - offline
-        - place
-        - fee
-        - category
-        - subCategory
-        - imageUrl
-        - title
-        - introduction
-        - scheduleType
-        - weeklySchedule
-      properties:
-        hostUuid:
-          type: string
-          format: uuid
-          description: UUID of the host. tmp property
-        approveType:
-          $ref: '#/components/schemas/Gathering_ApproveType'
-        minCapacity:
-          type: integer
-          description: Minimum capacity of the gathering
-        maxCapacity:
-          type: integer
-          description: Maximum capacity of the gathering
-        maxMaleCount:
-          type: integer
-          description: Maximum number of male guests
-        maxFemaleCount:
-          type: integer
-          description: Maximum number of female guests
-        genderRatioEnabled:
-          type: boolean
-          description: If host can set gender ratio for the gathering
-        minAge:
-          type: integer
-          description: Minimum age of guests
-        maxAge:
-          type: integer
-          description: Maximum age of guests
-        fee:
-          type: integer
-          description: Fee to join the gathering
-        discountEnabled:
-          type: boolean
-          description: If host can set discount strategy for the gathering
-        offline:
-          type: boolean
-          description: If the gathering is offline
-        place:
-          type: string
-          description: Place where the gathering will be held
-        category:
-          $ref: '#/components/schemas/Gathering_Category'
-        subCategory:
-          $ref: '#/components/schemas/Gathering_SubCategory'
-        imageUrl:
-          type: string
-          description: URL of the gathering image
-        title:
-          type: string
-          description: Title of the gathering
-        introduction:
-          type: string
-          description: Introduction of the gathering
-        scheduleType:
-          type: string
-          enum:
-            - WEEKLY
-        weeklySchedule:
-          $ref: '#/components/schemas/Gathering_WeeklySchedule'
+      allOf:
+        - $ref: '#/components/schemas/BaseScheduleGatheringsRequest'
+        - type: object
+          required:
+            - scheduleType
+            - weeklySchedule
+          properties:
+            scheduleType:
+              type: string
+              enum:
+                - WEEKLY
+            weeklySchedule:
+              $ref: '#/components/schemas/Gathering_WeeklySchedule'
     DateScheduleGatheringsRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseScheduleGatheringsRequest'
+        - type: object
+          required:
+            - scheduleType
+            - dateSchedule
+          properties:
+            scheduleType:
+              type: string
+              enum:
+                - DATE
+            dateSchedule:
+              $ref: '#/components/schemas/Gathering_DateSchedule'
+    BaseScheduleGatheringsRequest:
       type: object
       required:
         - hostUuid
@@ -338,8 +286,6 @@ components:
         - imageUrl
         - title
         - introduction
-        - scheduleType
-        - dateSchedule
       properties:
         hostUuid:
           type: string
@@ -393,12 +339,6 @@ components:
         introduction:
           type: string
           description: Introduction of the gathering
-        scheduleType:
-          type: string
-          enum:
-            - DATE
-        dateSchedule:
-          $ref: '#/components/schemas/Gathering_DateSchedule'
     Gathering_ApproveType:
       type: string
       enum:

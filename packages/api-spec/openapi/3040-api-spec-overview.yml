@@ -40,6 +40,8 @@ components:
       $ref: './components/schemas/gatherings.yml#/WeeklyScheduleGatheringsRequest'
     DateScheduleGatheringsRequest:
       $ref: './components/schemas/gatherings.yml#/DateScheduleGatheringsRequest'
+    BaseScheduleGatheringsRequest:
+      $ref: './components/schemas/gatherings.yml#/BaseScheduleGatheringsRequest'
 
 #    # Users
 #    SignUpRequest:
