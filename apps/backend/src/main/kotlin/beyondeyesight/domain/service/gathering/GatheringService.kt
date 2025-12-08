@@ -65,12 +65,6 @@ class GatheringService(
             resourceId = hostUuid
         )
 
-        val (currentMaleCount, currentFemaleCount) =
-            if (host.gender == Gender.M) {
-                1 to 0
-            } else {
-                0 to 1
-            }
         val entity = GatheringEntity.Companion.open(
             hostUuid = host.uuid,
             approveType = approveType,
@@ -81,8 +75,6 @@ class GatheringService(
             maxAge = maxAge,
             maxMaleCount = maxMaleCount,
             maxFemaleCount = maxFemaleCount,
-            currentMaleCount = currentMaleCount,
-            currentFemaleCount = currentFemaleCount,
             fee = fee,
             discountEnabled = discountEnabled,
             offline = offline,

@@ -84,8 +84,6 @@ class GatheringEntity(
             maxAge: Int,
             maxMaleCount: Int?,
             maxFemaleCount: Int?,
-            currentMaleCount: Int,
-            currentFemaleCount: Int,
             fee: Int,
             discountEnabled: Boolean,
             offline: Boolean,
