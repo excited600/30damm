@@ -1,6 +1,7 @@
 package beyondeyesight.integration
 
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.User.UserEntity
 import beyondeyesight.model.GatheringApproveType
 import beyondeyesight.model.GatheringCategory
 import beyondeyesight.model.GatheringDayOfWeek
@@ -26,7 +27,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             email = "email",
             nickname = "nickname",
             age = 25,
-            gender = UserEntity.Gender.M,
+            gender = Gender.M,
             introduction = "intro",
             password = "password",
             phoneNumber = "01012345671",
@@ -103,7 +104,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             email = "email",
             nickname = "nickname",
             age = 25,
-            gender = UserEntity.Gender.M,
+            gender = Gender.M,
             introduction = "intro",
             password = "password",
             phoneNumber = "01012345671",
@@ -169,7 +170,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             email = "host@email.com",
             nickname = "host",
             age = 30,
-            gender = UserEntity.Gender.M,
+            gender = Gender.M,
             introduction = "host intro",
             password = "password",
             phoneNumber = "01012345671",
@@ -190,7 +191,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             email = "guest@email.com",
             nickname = "guest",
             age = 25,
-            gender = UserEntity.Gender.F,
+            gender = Gender.F,
             introduction = "guest intro",
             password = "password",
             phoneNumber = "01012345672",

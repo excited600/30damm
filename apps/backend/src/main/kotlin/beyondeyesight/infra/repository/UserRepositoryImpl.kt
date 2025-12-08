@@ -1,12 +1,12 @@
 package beyondeyesight.infra.repository
 
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.model.User.UserEntity
 import beyondeyesight.domain.repository.UserRepository
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-class UserRepositoryAdapter(
+class UserRepositoryImpl(
     private val userJpaRepository: UserJpaRepository,
 ): UserRepository {
     override fun save(userEntity: UserEntity): UserEntity {

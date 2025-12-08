@@ -35,6 +35,13 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin:3.0.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
+    // Kotlin JDSL 코어
+    implementation("com.linecorp.kotlin-jdsl:jpql-dsl:3.5.2")
+    implementation("com.linecorp.kotlin-jdsl:jpql-render:3.5.2")
+
+    // Spring Data JPA 연동
+    implementation("com.linecorp.kotlin-jdsl:spring-data-jpa-support:3.5.2")
+
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")

@@ -1,6 +1,7 @@
 package beyondeyesight.application
 
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.User.UserEntity
 import beyondeyesight.domain.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +15,7 @@ class UserApplicationService(
         email: String,
         nickname: String,
         age: Int,
-        gender: UserEntity.Gender,
+        gender: Gender,
         introduction: String,
         password: String,
         phoneNumber: String,

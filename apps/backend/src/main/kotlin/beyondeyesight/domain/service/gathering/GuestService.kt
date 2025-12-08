@@ -1,10 +1,10 @@
-package beyondeyesight.domain.service
+package beyondeyesight.domain.service.gathering
 
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.model.GuestEntity
-import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.GuestRepository
 import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.domain.repository.gathering.GatheringRepository
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -15,7 +15,7 @@ class GuestService(
     private val userRepository: UserRepository,
 ) {
     fun join(gatheringUuid: UUID, userUuid: UUID): GuestEntity {
-        gatheringRepository.findByUuid(gatheringUuid)?: throw ResourceNotFoundException(
+        val gatheringEntity = gatheringRepository.findByUuid(gatheringUuid) ?: throw ResourceNotFoundException(
             resourceName = "Gathering",
             resourceId = gatheringUuid
         )
@@ -23,8 +23,8 @@ class GuestService(
             resourceName = "User",
             resourceId = userUuid
         )
-        val guest = GuestEntity.join(
-            gatheringUuid = gatheringUuid,
+        val guest = GuestEntity.Companion.join(
+            gatheringUuid = gatheringEntity.uuid,
             userUuid = userUuid,
         )
         return guestRepository.save(guest)

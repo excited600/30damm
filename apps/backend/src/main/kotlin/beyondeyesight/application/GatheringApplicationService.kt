@@ -6,7 +6,7 @@ import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.service.gathering.GatheringService
-import beyondeyesight.domain.service.GuestService
+import beyondeyesight.domain.service.gathering.GuestService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek

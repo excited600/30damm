@@ -1,5 +1,6 @@
 package beyondeyesight.domain.model
 
+import beyondeyesight.domain.model.gathering.GatheringEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id

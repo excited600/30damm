@@ -36,7 +36,7 @@ class SeriesScheduleEntity(
     val duration: Duration?,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "series_uuid", nullable = false)
-    val series: SeriesEntity,
+    val seriesEntity: SeriesEntity,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

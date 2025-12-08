@@ -1,7 +1,8 @@
 package beyondeyesight.ui
 
 import beyondeyesight.application.UserApplicationService
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.User.UserEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -33,7 +34,7 @@ class UserController(
         val email: String,
         val nickname: String,
         val age: Int,
-        val gender: UserEntity.Gender,
+        val gender: Gender,
         val introduction: String,
         val password: String,
         val phoneNumber: String,
@@ -45,7 +46,7 @@ class UserController(
         val email: String,
         val nickname: String,
         val age: Int,
-        val gender: UserEntity.Gender,
+        val gender: Gender,
         val introduction: String,
         val phoneNumber: String,
         val phoneAuthenticated: Boolean,

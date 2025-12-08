@@ -1,6 +1,6 @@
 package beyondeyesight.domain.repository
 
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.model.User.UserEntity
 import java.util.UUID
 
 interface UserRepository {

@@ -1,9 +1,11 @@
 package beyondeyesight.domain.service.gathering
 
 import beyondeyesight.config.isThirtyMinuteInterval
+import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.exception.gathering.CannotJoinException
+import beyondeyesight.domain.model.User.Gender
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
@@ -16,7 +18,8 @@ import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.service.LockService
-import beyondeyesight.domain.service.GuestService
+import beyondeyesight.domain.service.PayService
+import beyondeyesight.domain.service.gathering.GuestService
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -31,12 +34,8 @@ class GatheringService(
     private val userRepository: UserRepository,
     private val seriesRepository: SeriesRepository,
     private val seriesScheduleRepository: SeriesScheduleRepository,
+    private val payService: PayService,
 ) {
-
-    fun scheduleSeries() {
-
-    }
-
     fun open(
         hostUuid: UUID,
         approveType: GatheringEntity.ApproveType,
@@ -67,8 +66,8 @@ class GatheringService(
         )
 
         val (currentMaleCount, currentFemaleCount) =
-            if (host.gender == UserEntity.Gender.M) {
-               1 to 0
+            if (host.gender == Gender.M) {
+                1 to 0
             } else {
                 0 to 1
             }
@@ -151,6 +150,10 @@ class GatheringService(
     }
 
     fun join(gatheringUuid: UUID, userUuid: UUID) {
+        userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException(
+            resourceName = "User",
+            resourceId = userUuid
+        )
         val token = lockService.lockWithRetry(
             resourceName = "gathering",
             resourceId = gatheringUuid.toString(),
@@ -161,13 +164,56 @@ class GatheringService(
 
         try {
             val gathering = gatheringRepository.findByUuid(gatheringUuid)
-                ?: throw IllegalArgumentException("Gathering not found with uuid: $gatheringUuid")
+                ?: throw ResourceNotFoundException(
+                    resourceName = "Gathering",
+                    resourceId = gatheringUuid
+                )
 
-            val currentCount = guestRepository.countByGatheringUuid(gatheringUuid)
+            val currentGuestCount = guestRepository.countByGathering(gathering.uuid)
 
-            if (currentCount + 1 > gathering.maxCapacity) {
-                throw IllegalStateException("Gathering is full. Current + 1: ${currentCount + 1} , Max: ${gathering.maxCapacity}")
+            if (currentGuestCount + 1 > gathering.maxCapacity) {
+                throw CannotJoinException.full(
+                    userUuid = userUuid,
+                    gatheringUuid = gathering.uuid,
+                )
             }
+
+            if (gathering.genderRatioEnabled) {
+                val currentMaleGuestCount = guestRepository.countByGatheringAndGender(gathering.uuid, Gender.M)
+                val maxMaleCount = gathering.maxMaleCount ?: throw DataIntegrityException(
+                    tableName = "gathering",
+                    resourceUuid = gathering.uuid,
+                    cause = "maxMaleCount must not be null when genderRatioEnabled is true"
+                )
+
+                if (currentMaleGuestCount + 1 > maxMaleCount) {
+                    throw CannotJoinException.full(
+                        userUuid = userUuid,
+                        gatheringUuid = gathering.uuid,
+                        gender = Gender.M
+                    )
+                }
+
+                val currentFemaleGuestCount = guestRepository.countByGatheringAndGender(
+                    gatheringUuid = gathering.uuid,
+                    gender = Gender.F
+                )
+                val maxFemaleCount = gathering.maxFemaleCount ?: throw DataIntegrityException(
+                    tableName = "gathering",
+                    resourceUuid = gathering.uuid,
+                    cause = "maxFemaleCount must not be null when genderRatioEnabled is true"
+                )
+
+                if (currentFemaleGuestCount + 1 > maxFemaleCount) {
+                    throw CannotJoinException.full(
+                        userUuid = userUuid,
+                        gatheringUuid = gathering.uuid,
+                        gender = Gender.F
+                    )
+                }
+            }
+
+            payService.pay()
 
             guestService.join(
                 gatheringUuid = gatheringUuid,
@@ -202,7 +248,7 @@ class GatheringService(
         maxMaleCount: Int?,
         maxFemaleCount: Int?
     ) {
-        userRepository.findByUuid(hostUuid)?: throw ResourceNotFoundException(
+        userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException(
             resourceName = "User",
             resourceId = hostUuid
         )
@@ -255,7 +301,7 @@ class GatheringService(
                     )
                 }
 
-                for(summary in weeklySchedule.summaries) {
+                for (summary in weeklySchedule.summaries) {
                     if (!summary.startTime.isThirtyMinuteInterval()) {
                         throw InvalidValueException(
                             valueName = "summary.startTime",
@@ -275,11 +321,12 @@ class GatheringService(
                             startDate = null,
                             startTime = summary.startTime,
                             duration = summary.duration,
-                            series = series
+                            seriesEntity = series
                         )
                     )
                 }
             }
+
             ScheduleType.DATE -> {
                 if (dateSchedule == null) {
                     throw InvalidValueException(
@@ -303,7 +350,7 @@ class GatheringService(
                     )
                 }
 
-                for(summary in dateSchedule.summaries) {
+                for (summary in dateSchedule.summaries) {
                     if (!summary.startTime.isThirtyMinuteInterval()) {
                         throw InvalidValueException(
                             valueName = "summary.startTime",
@@ -324,15 +371,13 @@ class GatheringService(
                             startDate = summary.startDate,
                             startTime = summary.startTime,
                             duration = summary.duration,
-                            series = series
+                            seriesEntity = series
                         )
                     )
                 }
 
             }
         }
-
-
 
 
     }

@@ -1,6 +1,7 @@
 package beyondeyesight.domain.service
 
-import beyondeyesight.domain.model.UserEntity
+import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.User.UserEntity
 import beyondeyesight.domain.repository.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -14,7 +15,7 @@ class UserService(
         email: String,
         nickname: String,
         age: Int,
-        gender: UserEntity.Gender,
+        gender: Gender,
         introduction: String,
         password: String,
         phoneNumber: String,

@@ -1,11 +1,12 @@
-package beyondeyesight.domain.model
+package beyondeyesight.domain.model.User
 
+import beyondeyesight.domain.model.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
-import java.util.*
+import java.util.UUID
 
 @Entity
 @Table(name = "users")
@@ -16,7 +17,7 @@ class UserEntity(
     @Column(nullable = false)
     var nickname: String,
     @Column(nullable = true)
-    var age: Int,
+    var age: Int, // TODO: 생년월일을 아예 가지고 있는게 나을듯.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val gender: Gender,
@@ -36,7 +37,7 @@ class UserEntity(
     @Enumerated(EnumType.STRING)
     val provider: Provider,
 
-) : BaseEntity(uuid = uuid) {
+    ) : BaseEntity(uuid = uuid) {
 
     companion object {
         fun signUp(
@@ -64,11 +65,6 @@ class UserEntity(
                 provider = Provider.THIRTY_FORTY,
             )
         }
-    }
-
-    enum class Gender {
-        M,
-        F;
     }
 
     enum class Provider {

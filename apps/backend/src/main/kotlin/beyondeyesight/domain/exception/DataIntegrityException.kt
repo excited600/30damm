@@ -9,4 +9,6 @@ class DataIntegrityException(
     message = message
 ) {
     constructor(tableName: String, cause: String) : this("$tableName has data integrity issue with reason: $cause")
+
+    constructor(tableName: String, resourceUuid: UUID, cause: String) : this("$tableName with id $resourceUuid has data integrity issue with reason: $cause")
 }
