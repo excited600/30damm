@@ -6,7 +6,7 @@ import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.service.gathering.GatheringService
-import beyondeyesight.domain.service.ParticipantService
+import beyondeyesight.domain.service.GuestService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -17,7 +17,7 @@ import java.util.UUID
 @Service
 class GatheringApplicationService(
     private val gatheringService: GatheringService,
-    private val participantService: ParticipantService,
+    private val guestService: GuestService,
 ) {
     @Transactional
     fun schedule(
@@ -163,12 +163,6 @@ class GatheringApplicationService(
             introduction = introduction,
             startDateTime = startDateTime,
             duration = duration
-        )
-
-        participantService.join(
-            gatheringUuid = gatheringEntity.uuid,
-            userUuid = hostUuid,
-            isHost = true
         )
 
         return mapper.invoke(gatheringEntity, hostUuid)

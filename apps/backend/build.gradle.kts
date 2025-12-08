@@ -118,10 +118,10 @@ tasks.register<Exec>("postgresStatus") {
 
 tasks.register<Exec>("testPostgresUp") {
     description = "테스트용 PostgreSQL 컨테이너 시작"
-    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml up -d")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml up -d postgres-test")
 }
 
-tasks.register<Exec>("testPostgreStop") {
+tasks.register<Exec>("testPostgresStop") {
     description = "테스트용 PostgreSQL 컨테이너 종료"
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml stop postgres-test")
 }
@@ -131,8 +131,40 @@ tasks.register<Exec>("testPostgresRemove") {
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml down -v postgres-test")
 }
 
-tasks.register<Exec>("testPostgresStatus") {
-    description = "테스트용 PostgreSQL 컨테이너 상태 확인"
+tasks.register<Exec>("testRedisUp") {
+    description = "테스트용 Redis 컨테이너 시작"
+    environment("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml up -d redis-test")
+}
+
+tasks.register<Exec>("testRedisStop") {
+    description = "테스트용 Redis 컨테이너 종료"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml stop redis-test")
+}
+
+tasks.register<Exec>("testRedisRemove") {
+    description = "테스트용 Redis 컨테이너 삭제 및 볼륨 제거"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml down -v redis-test")
+}
+
+tasks.register<Exec>("testContainersUp") {
+    description = "테스트용 컨테이너 전체 시작"
+    environment("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml up -d")
+}
+
+tasks.register<Exec>("testContainersStop") {
+    description = "테스트용 컨테이너 전체 종료"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml stop")
+}
+
+tasks.register<Exec>("testContainersRemove") {
+    description = "테스트용 컨테이너 전체 삭제 및 볼륨 제거"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml down -v")
+}
+
+tasks.register<Exec>("testContainersStatus") {
+    description = "테스트용 컨테이너 상태 확인"
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml ps")
 }
 

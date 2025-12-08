@@ -50,6 +50,31 @@ paths:
       summary: Schedule gatherings based on host setting
       tags:
       - Gatherings
+  /gatherings/{gatheringUuid}/guests:
+    post:
+      operationId: joinGathering
+      parameters:
+      - description: The UUID of the gathering to join
+        explode: false
+        in: path
+        name: gatheringUuid
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/joinGathering_request"
+        required: true
+      responses:
+        "201":
+          description: Joined gathering successfully
+      summary: Join the gathering as a guest
+      tags:
+      - Gatherings
 components:
   schemas:
     OpenGatheringRequest:
@@ -498,3 +523,12 @@ components:
       - WEEKLY
       - DATE
       type: string
+    joinGathering_request:
+      properties:
+        userUuid:
+          description: UUID of the user who wants to join the gathering
+          format: uuid
+          type: string
+      required:
+      - userUuid
+      type: object

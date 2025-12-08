@@ -35,12 +35,14 @@ class GatheringController(
         return ResponseEntity.noContent().build()
     }
 
-    fun join(
-        @PathVariable gatheringUuid: UUID,
-        @RequestBody request: JoinGatheringRequest
-    ): ResponseEntity<Unit> {
-        gatheringApplicationService.join(gatheringUuid, request.userUuid)
-        return ResponseEntity.noContent().build()
+    override fun joinGathering(
+        gatheringUuid: UUID,
+        joinGatheringRequest: beyondeyesight.model.JoinGatheringRequest
+    ) {
+        gatheringApplicationService.join(
+            gatheringUuid = gatheringUuid,
+            userUuid = joinGatheringRequest.userUuid
+        )
     }
 
     override fun openGathering(openGatheringRequest: OpenGatheringRequest): OpenGatheringResponse {

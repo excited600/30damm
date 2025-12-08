@@ -24,6 +24,8 @@ paths:
     $ref: './paths/gatherings.yml#/~1gatherings'
   /series:
     $ref: './paths/gatherings.yml#/~1series'
+  /gatherings/{gatheringUuid}/guests:
+    $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1guests'
 
 components:
   schemas:

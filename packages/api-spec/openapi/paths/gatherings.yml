@@ -1,3 +1,35 @@
+/gatherings/{gatheringUuid}/guests:
+  post:
+    operationId: joinGathering
+    tags:
+      - Gatherings
+    summary: Join the gathering as a guest
+    parameters:
+      - name: gatheringUuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The UUID of the gathering to join
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - userUuid
+            properties:
+              userUuid:
+                type: string
+                format: uuid
+                description: UUID of the user who wants to join the gathering
+    responses:
+      '201':
+        description: Joined gathering successfully
+
+
 /gatherings:
   post:
     operationId: openGathering

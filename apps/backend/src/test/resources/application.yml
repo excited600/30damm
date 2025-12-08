@@ -1,13 +1,15 @@
 spring:
   application:
     name: 3040-test
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   datasource:
     url: jdbc:postgresql://localhost:15432/3040
     username: test
     password: test
+  data:
+    redis:
+      host: localhost
+      port: 16379
+      password: test
   jpa:
     hibernate:
       ddl-auto: none

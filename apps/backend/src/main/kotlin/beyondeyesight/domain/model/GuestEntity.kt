@@ -6,37 +6,37 @@ import jakarta.persistence.Id
 import jakarta.persistence.IdClass
 import jakarta.persistence.Table
 import java.io.Serializable
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Entity
-@Table(name = "participants")
-@IdClass(ParticipantId::class)
-class ParticipantEntity(
+@Table(name = "guests")
+@IdClass(GuestId::class)
+class GuestEntity(
     @Id
     @Column(name = "gathering_uuid", nullable = false)
     val gatheringUuid: UUID,
     @Id
     @Column(name = "user_uuid", nullable = false)
     val userUuid: UUID,
-    @Column(name = "is_host", nullable = false)
-    val isHost: Boolean
+    @Column(name = "joined_at", nullable = false)
+    val joinedAt: LocalDateTime,
 ) {
     companion object {
         fun join(
             gatheringUuid: UUID,
             userUuid: UUID,
-            isHost: Boolean
-        ): ParticipantEntity {
-            return ParticipantEntity(
+        ): GuestEntity {
+            return GuestEntity(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
-                isHost = isHost
+                joinedAt = LocalDateTime.now()
             )
         }
     }
 }
 
-data class ParticipantId(
+data class GuestId(
     val gatheringUuid: UUID = UUID.randomUUID(),
     val userUuid: UUID = UUID.randomUUID()
 ) : Serializable

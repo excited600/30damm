@@ -57,10 +57,10 @@ CREATE TABLE gatherings (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE participants(
+CREATE TABLE Guests(
     gathering_uuid UUID NOT NULL,
     user_uuid UUID NOT NULL,
-    is_host BOOLEAN NOT NULL,
+    joined_at TIMESTAMP,
     PRIMARY KEY (gathering_uuid, user_uuid)
 );
 

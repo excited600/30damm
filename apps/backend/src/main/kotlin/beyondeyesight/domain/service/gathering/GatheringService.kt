@@ -10,13 +10,13 @@ import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.SeriesEntity
 import beyondeyesight.domain.model.gathering.SeriesScheduleEntity
 import beyondeyesight.domain.model.gathering.WeeklySchedule
-import beyondeyesight.domain.repository.ParticipantRepository
+import beyondeyesight.domain.repository.GuestRepository
 import beyondeyesight.domain.repository.UserRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.service.LockService
-import beyondeyesight.domain.service.ParticipantService
+import beyondeyesight.domain.service.GuestService
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -25,8 +25,8 @@ import java.util.UUID
 @Service
 class GatheringService(
     private val gatheringRepository: GatheringRepository,
-    private val participantService: ParticipantService,
-    private val participantRepository: ParticipantRepository,
+    private val guestService: GuestService,
+    private val guestRepository: GuestRepository,
     private val lockService: LockService,
     private val userRepository: UserRepository,
     private val seriesRepository: SeriesRepository,
@@ -163,16 +163,15 @@ class GatheringService(
             val gathering = gatheringRepository.findByUuid(gatheringUuid)
                 ?: throw IllegalArgumentException("Gathering not found with uuid: $gatheringUuid")
 
-            val currentCount = participantRepository.countByGatheringUuid(gatheringUuid)
+            val currentCount = guestRepository.countByGatheringUuid(gatheringUuid)
 
             if (currentCount + 1 > gathering.maxCapacity) {
                 throw IllegalStateException("Gathering is full. Current + 1: ${currentCount + 1} , Max: ${gathering.maxCapacity}")
             }
 
-            participantService.join(
+            guestService.join(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
-                isHost = false
             )
         } finally {
             lockService.unlock("gathering", gatheringUuid.toString(), token)
