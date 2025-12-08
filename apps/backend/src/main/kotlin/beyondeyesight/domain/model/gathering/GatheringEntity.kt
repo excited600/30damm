@@ -35,10 +35,6 @@ class GatheringEntity(
     val maxMaleCount: Int?,
     @Column(nullable = true)
     val maxFemaleCount: Int?,
-    @Column(nullable = true)
-    var currentMaleCount: Int?,
-    @Column(nullable = true)
-    var currentFemaleCount: Int?,
     @Column(nullable = false)
     val totalGuests: Int,
     @Column(nullable = false)
@@ -113,8 +109,6 @@ class GatheringEntity(
                 maxAge = maxAge,
                 maxMaleCount = maxMaleCount,
                 maxFemaleCount = maxFemaleCount,
-                currentMaleCount = currentMaleCount,
-                currentFemaleCount = currentFemaleCount,
                 totalGuests = INITIAL_TOTAL_GUESTS,
                 fee = fee,
                 discountEnabled = discountEnabled,

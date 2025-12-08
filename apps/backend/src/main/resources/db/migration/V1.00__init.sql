@@ -28,8 +28,6 @@ CREATE TABLE gatherings (
     max_age INTEGER NOT NULL,
     max_female_count INTEGER NULL,
     max_male_count INTEGER NULL,
-    current_female_count INTEGER NULL,
-    current_male_count INTEGER NULL,
     total_guests INTEGER NOT NULL,
     fee INTEGER NOT NULL,
     discount_enabled BOOLEAN NOT NULL,
