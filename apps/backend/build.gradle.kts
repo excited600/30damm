@@ -101,14 +101,14 @@ tasks.register<Exec>("postgresUp") {
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml up -d postgres")
 }
 
-tasks.register<Exec>("postgresDown") {
+tasks.register<Exec>("postgresStop") {
     description = "PostgreSQL 컨테이너 종료"
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml stop postgres")
 }
 
 tasks.register<Exec>("postgresRemove") {
-    description = "PostgreSQL 컨테이너 삭제"
-    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml rm -sf postgres")
+    description = "PostgreSQL 컨테이너 삭제 및 볼륨 제거"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml down -v postgres")
 }
 
 tasks.register<Exec>("postgresStatus") {
@@ -121,9 +121,14 @@ tasks.register<Exec>("testPostgresUp") {
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml up -d")
 }
 
-tasks.register<Exec>("testPostgresDown") {
+tasks.register<Exec>("testPostgreStop") {
     description = "테스트용 PostgreSQL 컨테이너 종료"
-    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml down")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml stop postgres-test")
+}
+
+tasks.register<Exec>("testPostgresRemove") {
+    description = "테스트용 PostgreSQL 컨테이너 삭제 및 볼륨 제거"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.test.yml down -v postgres-test")
 }
 
 tasks.register<Exec>("testPostgresStatus") {
