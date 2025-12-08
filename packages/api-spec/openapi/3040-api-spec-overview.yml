@@ -44,8 +44,6 @@ components:
       $ref: './components/schemas/gathering/scheduleSeries/scheduleSeriesRequest.yml#/DateScheduleSeriesRequest'
     Gathering:
       $ref: './components/schemas/gathering/gathering.yml#/Gathering'
-    ScrollFilteredGatheringsRequest:
-      $ref: './components/schemas/gathering/scrollFilteredGatherings/scrollFilteredGatheringsRequest.yml#/ScrollFilteredGatheringsRequest'
     ScrollFilteredGatheringsResponse:
       $ref: './components/schemas/gathering/scrollFilteredGatherings/scrollFilteredGatheringsResponse.yml#/ScrollFilteredGatheringsResponse'
 
