@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.test.Test
 
-class GatheringControllerTest: EndToEndTestBase() {
+class GatheringControllerTest : EndToEndTestBase() {
 
     @Test
     fun `Schedule Series`() {
@@ -49,12 +49,13 @@ class GatheringControllerTest: EndToEndTestBase() {
             endDate = LocalDate.now().plusDays(7),
             summaries = arrayListOf(
                 GatheringWeeklyScheduleSummary(
-                    dayOfWeek = GatheringDayOfWeek.MONDAY,
+                    startDayOfWeek = GatheringDayOfWeek.MONDAY,
                     startTime = LocalTime.of(1, 0),
                     duration = 2f
                 )
             ),
             scheduleType = GatheringScheduleType.WEEKLY,
+            gatheringDays = 7,
             hostUuid = host.uuid,
             approveType = GatheringApproveType.FIRST_IN,
             minCapacity = 1,
@@ -162,7 +163,6 @@ class GatheringControllerTest: EndToEndTestBase() {
 //            "SELECT COUNT(*) FROM gatherings",
 //        )
 //        val gathering = objectMapper.convertValue(map, GatheringEntity::class.java)
-
 
 
     }

@@ -18,6 +18,7 @@ ScheduleSeriesRequest:
     - imageUrl
     - title
     - introduction
+    - gatheringDays
   properties:
     scheduleType:
       $ref: '../shared.yml#/Gathering_ScheduleType'
@@ -73,6 +74,9 @@ ScheduleSeriesRequest:
     introduction:
       type: string
       description: Introduction of the gathering
+    gatheringDays:
+      type: integer
+      description: Number of days before the gathering will take place.
   discriminator:
     propertyName: scheduleType
     mapping:
@@ -118,10 +122,10 @@ DateScheduleSeriesRequest:
 Gathering_WeeklyScheduleSummary:
   type: object
   required:
-    - dayOfWeek
+    - startDayOfWeek
     - startTime
   properties:
-    dayOfWeek:
+    startDayOfWeek:
       $ref: '../shared.yml#/Gathering_DayOfWeek'
     startTime:
       type: string
@@ -135,14 +139,14 @@ Gathering_WeeklyScheduleSummary:
 Gathering_DateScheduleSummary:
   type: object
   required:
-    - date
+    - startDate
     - startTime
     - duration
   properties:
-    date:
+    startDate:
       type: string
       format: date
-      description: Date of the gathering
+      description: Start date of the gathering
     startTime:
       type: string
       format: time

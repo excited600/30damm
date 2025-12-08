@@ -11,7 +11,7 @@ class WeeklySchedule(
     val summaries: List<WeeklyScheduleSummary>
 ) {
     class WeeklyScheduleSummary(
-        val dayOfWeek: DayOfWeek,
+        val startDayOfWeek: DayOfWeek,
         val startTime: LocalTime,
         val duration: Duration?
     )

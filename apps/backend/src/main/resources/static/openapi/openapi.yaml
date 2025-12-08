@@ -289,6 +289,7 @@ components:
         fee: 7
         maxCapacity: 6
         title: title
+        gatheringDays: 9
         discountEnabled: true
         maxFemaleCount: 5
         offline: true
@@ -357,11 +358,15 @@ components:
         introduction:
           description: Introduction of the gathering
           type: string
+        gatheringDays:
+          description: Number of days before the gathering will take place.
+          type: integer
       required:
       - approveType
       - category
       - discountEnabled
       - fee
+      - gatheringDays
       - genderRatioEnabled
       - hostUuid
       - imageUrl
@@ -454,7 +459,7 @@ components:
       type: string
     Gathering_WeeklyScheduleSummary:
       properties:
-        dayOfWeek:
+        startDayOfWeek:
           $ref: "#/components/schemas/Gathering_DayOfWeek"
         startTime:
           description: Start time of the gathering on the specified day of week
@@ -465,13 +470,13 @@ components:
           format: float
           type: number
       required:
-      - dayOfWeek
+      - startDayOfWeek
       - startTime
       type: object
     Gathering_DateScheduleSummary:
       properties:
-        date:
-          description: Date of the gathering
+        startDate:
+          description: Start date of the gathering
           format: date
           type: string
         startTime:
@@ -483,8 +488,8 @@ components:
           format: float
           type: number
       required:
-      - date
       - duration
+      - startDate
       - startTime
       type: object
     Gathering_ScheduleType:

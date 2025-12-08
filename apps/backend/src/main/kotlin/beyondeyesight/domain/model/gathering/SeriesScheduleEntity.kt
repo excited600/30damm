@@ -17,15 +17,20 @@ class SeriesScheduleEntity(
     val scheduleType: ScheduleType,
     @Column(nullable = true)
     @Enumerated(EnumType.STRING)
-    val dayOfWeek: DayOfWeek?,
+    val openDayOfWeek: DayOfWeek?,
+    @Column(nullable = true)
+    @Enumerated(EnumType.STRING)
+    val startDayOfWeek: DayOfWeek?,
     @Column(nullable = true)
     val scheduleStartDate: LocalDate?,
     @Column(nullable = true)
     val scheduleEndDate: LocalDate?,
-    @Column(nullable = true)
-    val date: LocalDate?,
     @Column(nullable = false)
-    val time: LocalTime,
+    val openDate: LocalDate?,
+    @Column(nullable = true)
+    val startDate: LocalDate?,
+    @Column(nullable = false)
+    val startTime: LocalTime,
     @Column(nullable = true)
     @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     val duration: Duration?,
@@ -37,17 +42,16 @@ class SeriesScheduleEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val seq: Long? = null
 
-    init {
-        validate()
-    }
-
     // TODO: 테스트
     @PostLoad
     fun validate() {
         when (scheduleType) {
             ScheduleType.WEEKLY -> {
-                if (dayOfWeek == null) {
-                    throw DataIntegrityException("series_schedules", "dayOfWeek must not be null when series is scheduled weekly")
+                if (startDayOfWeek == null) {
+                    throw DataIntegrityException("series_schedules", "startDayOfWeek must not be null when series is scheduled weekly")
+                }
+                if (openDayOfWeek == null) {
+                    throw DataIntegrityException("series_schedules", "openDayOfWeek must not be null when series is scheduled weekly")
                 }
                 if (scheduleStartDate == null) {
                     throw DataIntegrityException("series_schedules", "scheduleStartDate must not be null when series is scheduled weekly")
@@ -56,17 +60,23 @@ class SeriesScheduleEntity(
                     throw DataIntegrityException("series_schedules", "scheduleEndDate must not be null when series is scheduled weekly")
                 }
 
+
                 if (scheduleStartDate!! > scheduleEndDate) {
                     throw DataIntegrityException("series_schedules", "scheduleStartDate must be before or equal to scheduleEndDate when series is scheduled weekly")
                 }
-
-                if (date != null) {
-                    throw DataIntegrityException("series_schedules", "date must be null when series is scheduled weekly")
+                if (startDate != null) {
+                    throw DataIntegrityException("series_schedules", "startDate must be null when series is scheduled weekly")
+                }
+                if (openDate != null) {
+                    throw DataIntegrityException("series_schedules", "openDate must be null when series is scheduled weekly")
                 }
             }
             ScheduleType.DATE -> {
-                if (dayOfWeek != null) {
-                    throw DataIntegrityException("series_schedules", "dayOfWeek must be null when series is scheduled date")
+                if (openDayOfWeek != null) {
+                    throw DataIntegrityException("series_schedules", "openDayOfWeek must be null when series is scheduled date")
+                }
+                if (startDayOfWeek != null) {
+                    throw DataIntegrityException("series_schedules", "startDayOfWeek must be null when series is scheduled date")
                 }
                 if (scheduleStartDate != null) {
                     throw DataIntegrityException("series_schedules", "scheduleStartDate must be null when series is scheduled date")
@@ -74,8 +84,11 @@ class SeriesScheduleEntity(
                 if (scheduleEndDate != null) {
                     throw DataIntegrityException("series_schedules", "scheduleEndDate must be null when series is scheduled date")
                 }
-                if (date == null) {
-                    throw DataIntegrityException("series_schedules", "date must not be null when series is scheduled date")
+                if (startDate == null) {
+                    throw DataIntegrityException("series_schedules", "startDate must not be null when series is scheduled date")
+                }
+                if (openDate == null) {
+                    throw DataIntegrityException("series_schedules", "openDate must not be null when series is scheduled date")
                 }
             }
         }

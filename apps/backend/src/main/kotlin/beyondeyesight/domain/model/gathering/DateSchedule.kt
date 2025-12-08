@@ -8,7 +8,7 @@ class DateSchedule(
     val summaries: List<DateScheduleSummary>
 ) {
     class DateScheduleSummary(
-        val date: LocalDate,
+        val startDate: LocalDate,
         val startTime: LocalTime,
         val duration: Duration?
     )

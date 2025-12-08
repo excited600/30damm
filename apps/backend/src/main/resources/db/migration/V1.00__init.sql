@@ -92,29 +92,35 @@ CREATE TABLE series (
 CREATE TABLE series_schedules(
     seq BIGSERIAL PRIMARY KEY,
     schedule_type TEXT NOT NULL CHECK (schedule_type IN ('WEEKLY', 'DATE')),
-    day_of_week TEXT NULL CHECK (day_of_week IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')),
+    open_day_of_week TEXT NULL CHECK (open_day_of_week IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')),
+    start_day_of_week TEXT NULL CHECK (start_day_of_week IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')),
     schedule_start_date date NULL,
     schedule_end_date date NULL,
-    date date NULL,
-    time time NOT NULL,
+    open_date date NULL,
+    start_date date NULL,
+    start_time time NOT NULL,
     duration INTERVAL NULL,
     series_uuid UUID NOT NULL,
 
     CONSTRAINT valid_weekly_schedule CHECK (
         schedule_type != 'WEEKLY' OR (
-            day_of_week IS NOT NULL AND
+            open_day_of_week IS NOT NULL AND
+            start_day_of_week IS NOT NULL AND
             schedule_start_date IS NOT NULL AND
             schedule_end_date IS NOT NULL AND
-            date IS NULL
+            start_date IS NULL AND
+            open_date IS NULL
         )
     ),
 
     CONSTRAINT valid_date_schedule CHECK (
         schedule_type != 'DATE' OR (
-            day_of_week IS NULL AND
+            open_day_of_week IS NULL AND
+            start_day_of_week IS NULL AND
             schedule_start_date IS NULL AND
             schedule_end_date IS NULL AND
-            date IS NOT NULL
+            start_date IS NOT NULL AND
+            open_date IS NOT NULL
         )
     )
 );

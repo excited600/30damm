@@ -199,6 +199,7 @@ class GatheringService(
         scheduleType: ScheduleType,
         weeklySchedule: WeeklySchedule?,
         dateSchedule: DateSchedule?,
+        gatheringDays: Int,
         maxMaleCount: Int?,
         maxFemaleCount: Int?
     ) {
@@ -263,14 +264,17 @@ class GatheringService(
                             reason = "startTime must be in 30-minute intervals"
                         )
                     }
+                    val openDayOfWeek = summary.startDayOfWeek.minus(gatheringDays.toLong())
                     seriesScheduleRepository.save(
                         SeriesScheduleEntity(
                             scheduleType = scheduleType,
-                            dayOfWeek = summary.dayOfWeek,
+                            openDayOfWeek = openDayOfWeek,
+                            startDayOfWeek = summary.startDayOfWeek,
                             scheduleStartDate = weeklySchedule.startDate,
                             scheduleEndDate = weeklySchedule.endDate,
-                            date = null,
-                            time = summary.startTime,
+                            openDate = null,
+                            startDate = null,
+                            startTime = summary.startTime,
                             duration = summary.duration,
                             series = series
                         )
@@ -308,14 +312,18 @@ class GatheringService(
                             reason = "startTime must be in 30-minute intervals"
                         )
                     }
+
+                    val openDate = summary.startDate.minusDays(gatheringDays.toLong())
                     seriesScheduleRepository.save(
                         SeriesScheduleEntity(
                             scheduleType = scheduleType,
-                            dayOfWeek = null,
+                            openDayOfWeek = null,
+                            startDayOfWeek = null,
                             scheduleStartDate = null,
                             scheduleEndDate = null,
-                            date = summary.date,
-                            time = summary.startTime,
+                            openDate = openDate,
+                            startDate = summary.startDate,
+                            startTime = summary.startTime,
                             duration = summary.duration,
                             series = series
                         )

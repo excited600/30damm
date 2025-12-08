@@ -98,8 +98,6 @@ class GatheringController(
                 )
             }
         )
-
-
     }
 
     override fun scheduleSeries(scheduleSeriesRequest: ScheduleSeriesRequest) {
@@ -143,10 +141,10 @@ class GatheringController(
                     endDate = request.endDate,
                     summaries = request.summaries.map { summary ->
                         WeeklySchedule.WeeklyScheduleSummary(
-                            dayOfWeek = DayOfWeek.entries.find { it.name == summary.dayOfWeek.name }
+                            startDayOfWeek = DayOfWeek.entries.find { it.name == summary.startDayOfWeek.name }
                                 ?: throw InvalidValueException(
                                     valueName = "dayOfWeek",
-                                    value = summary.dayOfWeek,
+                                    value = summary.startDayOfWeek,
                                     reason = null
                                 ),
                             startTime = summary.startTime,
@@ -159,13 +157,14 @@ class GatheringController(
                 DateSchedule(
                     request.summaries.map { summary ->
                         DateSchedule.DateScheduleSummary(
-                            date = summary.date,
+                            startDate = summary.startDate,
                             startTime = summary.startTime,
                             duration = summary.duration.toDurationHours()
                         )
                     }
                 )
             },
+            gatheringDays = scheduleSeriesRequest.gatheringDays,
             maxMaleCount = scheduleSeriesRequest.maxMaleCount,
             maxFemaleCount = scheduleSeriesRequest.maxFemaleCount
         )
