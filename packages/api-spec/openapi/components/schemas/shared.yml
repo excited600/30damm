@@ -56,3 +56,15 @@ Series_ScheduleType:
   type: string
   enum: [WEEKLY, DATE]
 
+ScrollPage:
+  type: object
+  required:
+    - hasNext
+  properties:
+    cursor:
+      type: string
+      nullable: true
+      description: Cursor for the next page
+    hasNext:
+      type: boolean
+      description: Indicates if there is a next page

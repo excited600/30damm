@@ -21,13 +21,13 @@ ScheduleSeriesRequest:
     - gatheringDays
   properties:
     scheduleType:
-      $ref: '../shared.yml#/Gathering_ScheduleType'
+      $ref: '../../shared.yml#/Gathering_ScheduleType'
     hostUuid:
       type: string
       format: uuid
       description: UUID of the host. tmp property
     approveType:
-      $ref: '../shared.yml#/Gathering_ApproveType'
+      $ref: '../../shared.yml#/Gathering_ApproveType'
     minCapacity:
       type: integer
       description: Minimum capacity of the gathering
@@ -62,9 +62,9 @@ ScheduleSeriesRequest:
       type: string
       description: Place where the gathering will be held
     category:
-      $ref: '../shared.yml#/Gathering_Category'
+      $ref: '../../shared.yml#/Gathering_Category'
     subCategory:
-      $ref: '../shared.yml#/Gathering_SubCategory'
+      $ref: '../../shared.yml#/Gathering_SubCategory'
     imageUrl:
       type: string
       description: URL of the gathering image
@@ -126,7 +126,7 @@ Gathering_WeeklyScheduleSummary:
     - startTime
   properties:
     startDayOfWeek:
-      $ref: '../shared.yml#/Gathering_DayOfWeek'
+      $ref: '../../shared.yml#/Gathering_DayOfWeek'
     startTime:
       type: string
       format: time

@@ -1,0 +1,12 @@
+ScrollFilteredGatheringsResponse:
+  allOf:
+    - $ref: '../../shared.yml#/ScrollPage'
+    - type: object
+      required:
+        - gatherings
+      properties:
+        gatherings:
+          type: array
+          description: List of gatherings
+          items:
+            $ref: '../gathering.yml#/Gathering'

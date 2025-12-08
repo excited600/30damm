@@ -1,6 +1,7 @@
-OpenGatheringRequest:
+Gathering:
   type: object
   required:
+    - uuid
     - hostUuid
     - approveType
     - minCapacity
@@ -8,35 +9,36 @@ OpenGatheringRequest:
     - genderRatioEnabled
     - minAge
     - maxAge
+    - totalGuests
     - fee
     - discountEnabled
     - offline
     - place
     - category
     - subCategory
+    - status
     - imageUrl
     - title
     - introduction
+    - clickCount
     - startDateTime
   properties:
+    uuid:
+      type: string
+      format: uuid
+      description: UUID of the gathering
     hostUuid:
       type: string
       format: uuid
       description: UUID of the host. tmp property
     approveType:
-      $ref: '../../shared.yml#/Gathering_ApproveType'
+      $ref: '../shared.yml#/Gathering_ApproveType'
     minCapacity:
       type: integer
       description: Minimum capacity of the gathering
     maxCapacity:
       type: integer
       description: Maximum capacity of the gathering
-    maxMaleCount:
-      type: integer
-      description: Maximum number of male guests
-    maxFemaleCount:
-      type: integer
-      description: Maximum number of female guests
     genderRatioEnabled:
       type: boolean
       description: If host can set gender ratio for the gathering
@@ -46,6 +48,15 @@ OpenGatheringRequest:
     maxAge:
       type: integer
       description: Maximum age of guests
+    maxMaleCount:
+      type: integer
+      description: Maximum number of male guests
+    maxFemaleCount:
+      type: integer
+      description: Maximum number of female guests
+    totalGuests:
+      type: integer
+      description: Total number of guests
     fee:
       type: integer
       description: Fee to join the gathering
@@ -59,9 +70,11 @@ OpenGatheringRequest:
       type: string
       description: Place where the gathering will be held
     category:
-      $ref: '../../shared.yml#/Gathering_Category'
+      $ref: '../shared.yml#/Gathering_Category'
     subCategory:
-      $ref: '../../shared.yml#/Gathering_SubCategory'
+      $ref: '../shared.yml#/Gathering_SubCategory'
+    status:
+      $ref: '../shared.yml#/Gathering_Status'
     imageUrl:
       type: string
       description: URL of the gathering image
@@ -71,6 +84,9 @@ OpenGatheringRequest:
     introduction:
       type: string
       description: Introduction of the gathering
+    clickCount:
+      type: integer
+      description: Number of clicks on the gathering
     startDateTime:
       type: string
       format: date-time

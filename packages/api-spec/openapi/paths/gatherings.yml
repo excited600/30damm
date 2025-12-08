@@ -30,7 +30,117 @@
         description: Joined gathering successfully
 
 
+
 /gatherings:
+  get:
+    operationId: scrollFilteredGatherings
+    tags:
+      - Gatherings
+    summary: Scroll filtered gatherings with cursor-based pagination
+    parameters:
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Cursor for the page. Omit for the first page.
+      - name: size
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+        description: Number of gatherings to retrieve per page
+      - name: categories
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '../components/schemas/shared.yml#/Gathering_Category'
+        description: Filter gatherings by categories
+      - name: guestCount
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by current guest count
+      - name: dayOfWeek
+        in: query
+        required: false
+        schema:
+          $ref: '../components/schemas/shared.yml#/Gathering_DayOfWeek'
+        description: Filter gatherings by day of week
+      - name: startDate
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+        description: Filter gatherings that start on or after this date
+      - name: endDate
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+        description: Filter gatherings that end on or before this date
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Filter gatherings by location
+      - name: startAge
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by minimum age
+      - name: endAge
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by maximum age
+      - name: genderRatioEnabled
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: Filter gatherings by whether gender ratio is enabled
+      - name: minCapacity
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by minimum capacity
+      - name: maxCapacity
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by maximum capacity
+      - name: minFee
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by minimum fee
+      - name: maxFee
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter gatherings by maximum fee
+    responses:
+      '200':
+        description: Gatherings retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/gathering/scrollFilteredGatherings/scrollFilteredGatheringsResponse.yml#/ScrollFilteredGatheringsResponse'
   post:
     operationId: openGathering
     tags:
@@ -64,6 +174,8 @@
     responses:
       '201':
         description: Gatherings scheduled successfully
+
+
 
 
 #  delete:

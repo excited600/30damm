@@ -32,7 +32,7 @@ OpenGatheringResponse:
       format: uuid
       description: UUID of the host. tmp property
     approveType:
-      $ref: '../shared.yml#/Gathering_ApproveType'
+      $ref: '../../shared.yml#/Gathering_ApproveType'
     minCapacity:
       type: integer
       description: Minimum capacity of the gathering
@@ -70,11 +70,11 @@ OpenGatheringResponse:
       type: string
       description: Place where the gathering will be held
     category:
-      $ref: '../shared.yml#/Gathering_Category'
+      $ref: '../../shared.yml#/Gathering_Category'
     subCategory:
-      $ref: '../shared.yml#/Gathering_SubCategory'
+      $ref: '../../shared.yml#/Gathering_SubCategory'
     status:
-      $ref: '../shared.yml#/Gathering_Status'
+      $ref: '../../shared.yml#/Gathering_Status'
     imageUrl:
       type: string
       description: URL of the gathering image
