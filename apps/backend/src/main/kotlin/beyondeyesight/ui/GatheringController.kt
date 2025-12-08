@@ -12,16 +12,19 @@ import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.model.DateScheduleSeriesRequest
 import beyondeyesight.model.GatheringApproveType
 import beyondeyesight.model.GatheringCategory
+import beyondeyesight.model.GatheringDayOfWeek
 import beyondeyesight.model.GatheringStatus
 import beyondeyesight.model.GatheringSubCategory
 import beyondeyesight.model.OpenGatheringRequest
 import beyondeyesight.model.OpenGatheringResponse
 import beyondeyesight.model.ScheduleSeriesRequest
+import beyondeyesight.model.ScrollFilteredGatheringsResponse
 import beyondeyesight.model.WeeklyScheduleSeriesRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -31,6 +34,7 @@ class GatheringController(
 ) : GatheringsApiService {
 
     fun close(@PathVariable uuid: UUID): ResponseEntity<Unit> {
+        // TODO: 환불 로직
         gatheringApplicationService.close(uuid)
         return ResponseEntity.noContent().build()
     }
@@ -172,64 +176,24 @@ class GatheringController(
         )
     }
 
-    class JoinGatheringRequest(
-        val userUuid: UUID
-    )
-
-    data class GatheringDto(
-        val uuid: UUID,
-        val title: String,
-        val introduction: String,
-        val category: GatheringEntity.Category,
-        val subCategory: String,
-        val place: String,
-        val fee: Int,
-        val maxCapacity: Int,
-        val totalGuests: Int,
-        val status: GatheringEntity.Status,
-        val startDateTime: LocalDateTime,
-        val imageUrl: String,
-        val createdAt: LocalDateTime
-    ) {
-        companion object {
-            fun from(entity: GatheringEntity): GatheringDto {
-                return GatheringDto(
-                    uuid = entity.uuid,
-                    title = entity.title,
-                    introduction = entity.introduction,
-                    category = entity.category,
-                    subCategory = entity.subCategory.name,
-                    place = entity.place,
-                    fee = entity.fee,
-                    maxCapacity = entity.maxCapacity,
-                    totalGuests = entity.totalGuests,
-                    status = entity.status,
-                    startDateTime = entity.startDateTime,
-                    imageUrl = entity.imageUrl,
-                    createdAt = entity.createdAt
-                )
-            }
-        }
-    }
-
-    data class GetGatheringsResponse(
-        val gatherings: List<GatheringDto>,
-        val hasNext: Boolean,
-        val nextCursor: LocalDateTime?
-    ) {
-        companion object {
-            fun from(
-                entities: List<GatheringEntity>,
-                hasNext: Boolean,
-                nextCursor: LocalDateTime?
-            ): GetGatheringsResponse {
-                return GetGatheringsResponse(
-                    gatherings = entities.map { GatheringDto.from(it) },
-                    hasNext = hasNext,
-                    nextCursor = nextCursor
-                )
-            }
-        }
+    override fun scrollFilteredGatherings(
+        size: Int,
+        cursor: String?,
+        categories: List<GatheringCategory>?,
+        guestCount: Int?,
+        dayOfWeek: GatheringDayOfWeek?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        location: String?,
+        startAge: Int?,
+        endAge: Int?,
+        genderRatioEnabled: Boolean?,
+        minCapacity: Int?,
+        maxCapacity: Int?,
+        minFee: Int?,
+        maxFee: Int?
+    ): ScrollFilteredGatheringsResponse {
+        TODO("Not yet implemented")
     }
 }
 
