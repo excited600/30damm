@@ -1,6 +1,7 @@
 package beyondeyesight.application
 
 import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
@@ -32,7 +33,7 @@ class GatheringApplicationService(
         discountEnabled: Boolean,
         offline: Boolean,
         place: String,
-        category: GatheringEntity.Category,
+        category: Category,
         subCategory: GatheringEntity.SubCategory,
         imageUrl: String,
         title: String,
@@ -62,7 +63,7 @@ class GatheringApplicationService(
             discountEnabled = discountEnabled,
             offline = offline,
             place = place,
-            category = GatheringEntity.Category.entries.find { it.name == category.name }
+            category = Category.entries.find { it.name == category.name }
                 ?: throw InvalidValueException(
                     valueName = "category",
                     value = category,
@@ -133,7 +134,7 @@ class GatheringApplicationService(
         discountEnabled: Boolean,
         offline: Boolean,
         place: String,
-        category: GatheringEntity.Category,
+        category: Category,
         subCategory: GatheringEntity.SubCategory,
         imageUrl: String,
         title: String,

@@ -41,7 +41,7 @@ class SeriesEntity(
     val place: String,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val category: GatheringEntity.Category,
+    val category: Category,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val subCategory: GatheringEntity.SubCategory,

@@ -6,6 +6,7 @@ import beyondeyesight.api.GatheringsApiService
 import beyondeyesight.config.toDurationHours
 import beyondeyesight.config.toHoursFloat
 import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.WeeklySchedule
@@ -64,7 +65,7 @@ class GatheringController(
             discountEnabled = openGatheringRequest.discountEnabled,
             offline = openGatheringRequest.offline,
             place = openGatheringRequest.place,
-            category = GatheringEntity.Category.valueOf(openGatheringRequest.category.name),
+            category = Category.valueOf(openGatheringRequest.category.name),
             subCategory = GatheringEntity.SubCategory.valueOf(openGatheringRequest.subCategory.name),
             imageUrl = openGatheringRequest.imageUrl,
             title = openGatheringRequest.title,
@@ -123,7 +124,7 @@ class GatheringController(
             discountEnabled = scheduleSeriesRequest.discountEnabled,
             offline = scheduleSeriesRequest.offline,
             place = scheduleSeriesRequest.place,
-            category = GatheringEntity.Category.entries.find { it.name == scheduleSeriesRequest.category.name } ?: throw InvalidValueException(
+            category = Category.entries.find { it.name == scheduleSeriesRequest.category.name } ?: throw InvalidValueException(
                 valueName = "category",
                 value = scheduleSeriesRequest.category,
                 reason = null

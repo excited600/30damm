@@ -6,6 +6,7 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
@@ -50,7 +51,7 @@ class GatheringService(
         discountEnabled: Boolean,
         offline: Boolean,
         place: String,
-        category: GatheringEntity.Category,
+        category: Category,
         subCategory: GatheringEntity.SubCategory,
         imageUrl: String,
         title: String,
@@ -228,7 +229,7 @@ class GatheringService(
         discountEnabled: Boolean,
         offline: Boolean,
         place: String,
-        category: GatheringEntity.Category,
+        category: Category,
         subCategory: GatheringEntity.SubCategory,
         imageUrl: String,
         title: String,

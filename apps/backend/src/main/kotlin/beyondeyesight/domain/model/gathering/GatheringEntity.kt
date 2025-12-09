@@ -134,17 +134,6 @@ class GatheringEntity(
 
     }
 
-    enum class Category {
-        PARTY,
-        FOOD_DRINK,
-        STUDY,
-        INVEST,
-        LANGUAGE,
-        ACTIVITY,
-        CULTURE,
-        LOVE
-    }
-
     enum class SubCategory {
         HOME_PARTY,
     }
