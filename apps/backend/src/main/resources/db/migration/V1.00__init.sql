@@ -52,6 +52,7 @@ CREATE TABLE gatherings (
     start_date_time TIMESTAMP NOT NULL,
     duration INTERVAL NULL,
     day_of_week TEXT NOT NULL CHECK (day_of_week IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')),
+    score INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

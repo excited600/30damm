@@ -72,6 +72,8 @@ class GatheringEntity(
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val dayOfWeek: DayOfWeek,
+    @Column(nullable = false)
+    val score: Int,
 ): BaseEntity(uuid = uuid) {
 
     fun close() {
@@ -126,12 +128,14 @@ class GatheringEntity(
                 clickCount = INITIAL_CLICK_COUNT,
                 startDateTime = startDateTime,
                 duration = duration,
-                dayOfWeek = startDateTime.dayOfWeek
+                dayOfWeek = startDateTime.dayOfWeek,
+                score = INITIAL_SCORE //TODO: 초기에도 계산해서 넣는 방식으로 수정하기.
             )
         }
 
         const val INITIAL_TOTAL_GUESTS = 1
         const val INITIAL_CLICK_COUNT = 0
+        const val INITIAL_SCORE = 0
     }
 
     enum class ApproveType {
