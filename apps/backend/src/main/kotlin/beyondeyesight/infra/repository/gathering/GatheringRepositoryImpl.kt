@@ -55,7 +55,10 @@ class GatheringRepositoryImpl(
                     },
                     * buildFilterPredicates(filter).toTypedArray()
                 )
-                .orderBy(path(GatheringEntity::uuid).desc())
+                .orderBy(
+                    path(GatheringEntity::score).desc(),
+                    path(GatheringEntity::uuid).desc()
+                )
         }.content.filterNotNull()
 
         val hasNext = results.size > size
