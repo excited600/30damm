@@ -1,7 +1,10 @@
 package beyondeyesight.service
 
+import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
+import beyondeyesight.domain.exception.gathering.CannotJoinException
+import beyondeyesight.domain.model.User.Gender
 import beyondeyesight.domain.model.User.UserEntity
 import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
@@ -25,7 +28,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -238,6 +243,170 @@ class GatheringServiceTest {
                     gathering.score == GatheringEntity.INITIAL_SCORE
         })
         assertEquals(savedGatheringEntity, result)
+    }
+
+    @Test
+    fun joinSucceed_withoutGenderRatio() {
+        // given
+        val gatheringUuid = UUID.randomUUID()
+        val userUuid = UUID.randomUUID()
+        val userEntity: UserEntity = mock()
+        val gatheringEntity: GatheringEntity = mock()
+        val lockToken = "lock-token"
+
+        whenever(userRepository.findByUuid(userUuid)).thenReturn(userEntity)
+        whenever(lockService.lockWithRetry(
+            eq("gathering"),
+            eq(gatheringUuid.toString()),
+            any(),
+            any(),
+            any()
+        )).thenReturn(lockToken)
+        whenever(gatheringRepository.findByUuid(gatheringUuid)).thenReturn(gatheringEntity)
+        whenever(gatheringEntity.uuid).thenReturn(gatheringUuid)
+        whenever(gatheringEntity.maxCapacity).thenReturn(10)
+        whenever(gatheringEntity.genderRatioEnabled).thenReturn(false)
+        whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(5L)
+
+        // when
+        gatheringService.join(gatheringUuid, userUuid)
+
+        // then
+        verify(userRepository).findByUuid(userUuid)
+        verify(lockService).lockWithRetry(
+            eq("gathering"),
+            eq(gatheringUuid.toString()),
+            any(),
+            any(),
+            any()
+        )
+        verify(gatheringRepository).findByUuid(gatheringUuid)
+        verify(guestRepository).countByGathering(gatheringUuid)
+        verify(payService).pay()
+        verify(guestService).join(gatheringUuid, userUuid)
+        verify(lockService).unlock("gathering", gatheringUuid.toString(), lockToken)
+    }
+
+    @Test
+    fun joinSucceed_withGenderRatio() {
+        // given
+        val gatheringUuid = UUID.randomUUID()
+        val userUuid = UUID.randomUUID()
+        val userEntity: UserEntity = mock()
+        val gatheringEntity: GatheringEntity = mock()
+        val lockToken = "lock-token"
+
+        whenever(userRepository.findByUuid(userUuid)).thenReturn(userEntity)
+        whenever(lockService.lockWithRetry(
+            eq("gathering"),
+            eq(gatheringUuid.toString()),
+            any(),
+            any(),
+            any()
+        )).thenReturn(lockToken)
+        whenever(gatheringRepository.findByUuid(gatheringUuid)).thenReturn(gatheringEntity)
+        whenever(gatheringEntity.uuid).thenReturn(gatheringUuid)
+        whenever(gatheringEntity.maxCapacity).thenReturn(10)
+        whenever(gatheringEntity.genderRatioEnabled).thenReturn(true)
+        whenever(gatheringEntity.maxMaleCount).thenReturn(5)
+        whenever(gatheringEntity.maxFemaleCount).thenReturn(5)
+        whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(4L)
+        whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.M)).thenReturn(2L)
+        whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(2L)
+
+        // when
+        gatheringService.join(gatheringUuid, userUuid)
+
+        // then
+        verify(userRepository).findByUuid(userUuid)
+        verify(gatheringRepository).findByUuid(gatheringUuid)
+        verify(guestRepository).countByGathering(gatheringUuid)
+        verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.M)
+        verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.F)
+        verify(payService).pay()
+        verify(guestService).join(gatheringUuid, userUuid)
+        verify(lockService).unlock("gathering", gatheringUuid.toString(), lockToken)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("joinFailCases")
+    fun joinFail(testCase: JoinFailCase) {
+        // given
+        val gatheringUuid = UUID.randomUUID()
+        val userUuid = UUID.randomUUID()
+        val userEntity: UserEntity = mock()
+        val gatheringEntity: GatheringEntity = mock()
+        val lockToken = "lock-token"
+
+        if (testCase.userExists) {
+            whenever(userRepository.findByUuid(userUuid)).thenReturn(userEntity)
+        } else {
+            whenever(userRepository.findByUuid(userUuid)).thenReturn(null)
+        }
+
+        if (testCase.lockAcquired) {
+            whenever(lockService.lockWithRetry(
+                eq("gathering"),
+                eq(gatheringUuid.toString()),
+                any(),
+                any(),
+                any()
+            )).thenReturn(lockToken)
+        } else {
+            whenever(lockService.lockWithRetry(
+                eq("gathering"),
+                eq(gatheringUuid.toString()),
+                any(),
+                any(),
+                any()
+            )).thenReturn(null)
+        }
+
+        if (testCase.gatheringExists) {
+            whenever(gatheringRepository.findByUuid(gatheringUuid)).thenReturn(gatheringEntity)
+            whenever(gatheringEntity.uuid).thenReturn(gatheringUuid)
+            whenever(gatheringEntity.maxCapacity).thenReturn(testCase.maxCapacity)
+            whenever(gatheringEntity.genderRatioEnabled).thenReturn(testCase.genderRatioEnabled)
+            whenever(gatheringEntity.maxMaleCount).thenReturn(testCase.maxMaleCount)
+            whenever(gatheringEntity.maxFemaleCount).thenReturn(testCase.maxFemaleCount)
+            whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(testCase.currentGuestCount.toLong())
+            whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.M)).thenReturn(testCase.currentMaleCount.toLong())
+            whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(testCase.currentFemaleCount.toLong())
+        } else {
+            whenever(gatheringRepository.findByUuid(gatheringUuid)).thenReturn(null)
+        }
+
+        // when & then
+        val exception = assertThrows<Exception> {
+            gatheringService.join(gatheringUuid, userUuid)
+        }
+
+        assertEquals(testCase.expectedExceptionType, exception::class.java)
+
+        // verify unlock is called if lock was acquired
+        if (testCase.lockAcquired && testCase.userExists) {
+            verify(lockService).unlock("gathering", gatheringUuid.toString(), lockToken)
+        }
+
+        // verify guestService.join is never called on failure
+        verify(guestService, never()).join(any(), any())
+    }
+
+    data class JoinFailCase(
+        val name: String,
+        val userExists: Boolean,
+        val lockAcquired: Boolean,
+        val gatheringExists: Boolean,
+        val maxCapacity: Int,
+        val currentGuestCount: Int,
+        val genderRatioEnabled: Boolean,
+        val maxMaleCount: Int?,
+        val maxFemaleCount: Int?,
+        val currentMaleCount: Int,
+        val currentFemaleCount: Int,
+        val expectedExceptionType: Class<out Exception>
+    ) {
+        override fun toString(): String = name
     }
 
     @Test
@@ -526,6 +695,137 @@ class GatheringServiceTest {
                 maxFemaleCount = null,
                 fee = 10001,
                 expectedExceptionType = InvalidValueException::class.java
+            )
+        )
+
+        @JvmStatic
+        fun joinFailCases(): Stream<JoinFailCase> = Stream.of(
+            // 1. User not found
+            JoinFailCase(
+                name = "User not found",
+                userExists = false,
+                lockAcquired = false,
+                gatheringExists = false,
+                maxCapacity = 10,
+                currentGuestCount = 0,
+                genderRatioEnabled = false,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                currentMaleCount = 0,
+                currentFemaleCount = 0,
+                expectedExceptionType = ResourceNotFoundException::class.java
+            ),
+
+            // 2. Lock 획득 실패
+            JoinFailCase(
+                name = "Failed to acquire lock",
+                userExists = true,
+                lockAcquired = false,
+                gatheringExists = false,
+                maxCapacity = 10,
+                currentGuestCount = 0,
+                genderRatioEnabled = false,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                currentMaleCount = 0,
+                currentFemaleCount = 0,
+                expectedExceptionType = IllegalStateException::class.java
+            ),
+
+            // 3. Gathering not found
+            JoinFailCase(
+                name = "Gathering not found",
+                userExists = true,
+                lockAcquired = true,
+                gatheringExists = false,
+                maxCapacity = 10,
+                currentGuestCount = 0,
+                genderRatioEnabled = false,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                currentMaleCount = 0,
+                currentFemaleCount = 0,
+                expectedExceptionType = ResourceNotFoundException::class.java
+            ),
+
+            // 4. 총 인원 초과 (currentGuestCount + 1 > maxCapacity)
+            JoinFailCase(
+                name = "Gathering is full (total capacity exceeded)",
+                userExists = true,
+                lockAcquired = true,
+                gatheringExists = true,
+                maxCapacity = 10,
+                currentGuestCount = 10,
+                genderRatioEnabled = false,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                currentMaleCount = 0,
+                currentFemaleCount = 0,
+                expectedExceptionType = CannotJoinException::class.java
+            ),
+
+            // 5. genderRatioEnabled = true & maxMaleCount가 null (DataIntegrityException)
+            JoinFailCase(
+                name = "DataIntegrity: maxMaleCount is null when genderRatioEnabled",
+                userExists = true,
+                lockAcquired = true,
+                gatheringExists = true,
+                maxCapacity = 10,
+                currentGuestCount = 4,
+                genderRatioEnabled = true,
+                maxMaleCount = null,
+                maxFemaleCount = 5,
+                currentMaleCount = 2,
+                currentFemaleCount = 2,
+                expectedExceptionType = DataIntegrityException::class.java
+            ),
+
+            // 6. genderRatioEnabled = true & 남성 인원 초과
+            JoinFailCase(
+                name = "Male capacity exceeded",
+                userExists = true,
+                lockAcquired = true,
+                gatheringExists = true,
+                maxCapacity = 10,
+                currentGuestCount = 7,
+                genderRatioEnabled = true,
+                maxMaleCount = 5,
+                maxFemaleCount = 5,
+                currentMaleCount = 5,
+                currentFemaleCount = 2,
+                expectedExceptionType = CannotJoinException::class.java
+            ),
+
+            // 7. genderRatioEnabled = true & maxFemaleCount가 null (DataIntegrityException)
+            JoinFailCase(
+                name = "DataIntegrity: maxFemaleCount is null when genderRatioEnabled",
+                userExists = true,
+                lockAcquired = true,
+                gatheringExists = true,
+                maxCapacity = 10,
+                currentGuestCount = 4,
+                genderRatioEnabled = true,
+                maxMaleCount = 5,
+                maxFemaleCount = null,
+                currentMaleCount = 2,
+                currentFemaleCount = 2,
+                expectedExceptionType = DataIntegrityException::class.java
+            ),
+
+            // 8. genderRatioEnabled = true & 여성 인원 초과
+            JoinFailCase(
+                name = "Female capacity exceeded",
+                userExists = true,
+                lockAcquired = true,
+                gatheringExists = true,
+                maxCapacity = 10,
+                currentGuestCount = 7,
+                genderRatioEnabled = true,
+                maxMaleCount = 5,
+                maxFemaleCount = 5,
+                currentMaleCount = 2,
+                currentFemaleCount = 5,
+                expectedExceptionType = CannotJoinException::class.java
             )
         )
     }
