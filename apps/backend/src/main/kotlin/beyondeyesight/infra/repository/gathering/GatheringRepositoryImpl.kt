@@ -2,6 +2,7 @@ package beyondeyesight.infra.repository.gathering
 
 import beyondeyesight.domain.model.GuestEntity
 import beyondeyesight.domain.model.ScrollResult
+import beyondeyesight.domain.model.gathering.GatheringCursor
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.GatheringFilter
 import beyondeyesight.domain.repository.gathering.GatheringRepository
@@ -35,7 +36,7 @@ class GatheringRepositoryImpl(
     }
 
     override fun scroll(
-        cursor: UUID?,
+        cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
     ): ScrollResult<GatheringEntity> {
@@ -44,9 +45,15 @@ class GatheringRepositoryImpl(
                 .from(entity(GatheringEntity::class))
                 .whereAnd(
                     cursor?.let {
-                        path(GatheringEntity::uuid).lessThan(it)
+                        or(
+                            path(GatheringEntity::score).lessThan(it.score),
+                            and(
+                                path(GatheringEntity::score).eq(it.score),
+                                path(GatheringEntity::uuid).lessThan(it.uuid)
+                            )
+                        )
                     },
-                    *buildFilterPredicates(filter).toTypedArray()
+                    * buildFilterPredicates(filter).toTypedArray()
                 )
                 .orderBy(path(GatheringEntity::uuid).desc())
         }.content.filterNotNull()

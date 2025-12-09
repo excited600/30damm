@@ -1,6 +1,7 @@
 package beyondeyesight.domain.repository.gathering
 
 import beyondeyesight.domain.model.ScrollResult
+import beyondeyesight.domain.model.gathering.GatheringCursor
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.GatheringFilter
 import java.util.UUID
@@ -16,7 +17,7 @@ interface GatheringRepository {
     fun save(gatheringEntity: GatheringEntity): GatheringEntity
 
     fun scroll(
-        cursor: UUID?,
+        cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
     ): ScrollResult<GatheringEntity>
