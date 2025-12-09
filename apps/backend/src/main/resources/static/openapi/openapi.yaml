@@ -814,10 +814,11 @@ components:
     Gathering_Status:
       description: Status of the gathering
       enum:
+      - OPEN_PENDING
       - OPEN
       - CLOSED
       - IN_PROGRESS
-      - COMPLETED
+      - FINISHED
       type: string
     Gathering_WeeklyScheduleSummary:
       properties:

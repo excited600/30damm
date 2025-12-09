@@ -645,11 +645,10 @@ components:
     Gathering_Status:
       type: string
       enum:
-        - OPEN_PENDING
         - OPEN
         - CLOSED
         - IN_PROGRESS
-        - COMPLETED
+        - FINISHED
       description: Status of the gathering
     Gathering_WeeklyScheduleSummary:
       type: object
