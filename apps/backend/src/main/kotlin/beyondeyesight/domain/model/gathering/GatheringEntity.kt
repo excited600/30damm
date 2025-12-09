@@ -10,6 +10,7 @@ import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.Duration
 import java.time.LocalDateTime
+import beyondeyesight.config.uuidV7
 import java.util.UUID
 
 @Entity
@@ -97,7 +98,7 @@ class GatheringEntity(
             duration: Duration?,
         ): GatheringEntity {
             return GatheringEntity(
-                uuid = UUID.randomUUID(),
+                uuid = uuidV7(),
                 hostUuid = hostUuid,
                 approveType = approveType,
                 minCapacity = minCapacity,

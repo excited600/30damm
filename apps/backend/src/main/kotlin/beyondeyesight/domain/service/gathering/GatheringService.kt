@@ -1,18 +1,13 @@
 package beyondeyesight.domain.service.gathering
 
 import beyondeyesight.config.isThirtyMinuteInterval
+import beyondeyesight.config.uuidV7
 import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.gathering.Category
-import beyondeyesight.domain.model.gathering.DateSchedule
-import beyondeyesight.domain.model.gathering.GatheringEntity
-import beyondeyesight.domain.model.gathering.ScheduleType
-import beyondeyesight.domain.model.gathering.SeriesEntity
-import beyondeyesight.domain.model.gathering.SeriesScheduleEntity
-import beyondeyesight.domain.model.gathering.WeeklySchedule
+import beyondeyesight.domain.model.gathering.*
 import beyondeyesight.domain.repository.GuestRepository
 import beyondeyesight.domain.repository.UserRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
@@ -20,11 +15,10 @@ import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.service.LockService
 import beyondeyesight.domain.service.PayService
-import beyondeyesight.domain.service.gathering.GuestService
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Service
 class GatheringService(
@@ -248,7 +242,7 @@ class GatheringService(
 
         val series = seriesRepository.save(
             SeriesEntity(
-                uuid = UUID.randomUUID(),
+                uuid = uuidV7(),
                 hostUuid = hostUuid,
                 approveType = approveType,
                 minCapacity = minCapacity,

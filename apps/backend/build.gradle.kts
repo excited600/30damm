@@ -34,6 +34,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("tools.jackson.module:jackson-module-kotlin:3.0.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+    implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
 
     // Kotlin JDSL 코어
     implementation("com.linecorp.kotlin-jdsl:jpql-dsl:3.5.2")
@@ -121,6 +122,43 @@ tasks.register<Exec>("postgresRemove") {
 tasks.register<Exec>("postgresStatus") {
     description = "PostgreSQL 컨테이너 상태 확인"
     commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml ps postgres")
+}
+
+tasks.register<Exec>("redisUp") {
+    description = "Redis 컨테이너 시작"
+    environment("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml up -d redis")
+}
+
+tasks.register<Exec>("redisStop") {
+    description = "Redis 컨테이너 종료"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml stop redis")
+}
+
+tasks.register<Exec>("redisRemove") {
+    description = "Redis 컨테이너 삭제 및 볼륨 제거"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml down -v redis")
+}
+
+tasks.register<Exec>("containersUp") {
+    description = "컨테이너 전체 시작"
+    environment("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml up -d")
+}
+
+tasks.register<Exec>("containersStop") {
+    description = "컨테이너 전체 종료"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml stop")
+}
+
+tasks.register<Exec>("containersRemove") {
+    description = "컨테이너 전체 삭제 및 볼륨 제거"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml down -v")
+}
+
+tasks.register<Exec>("containersStatus") {
+    description = "컨테이너 상태 확인"
+    commandLine("sh", "-c", "/usr/local/bin/docker compose -f docker-compose.yml ps")
 }
 
 tasks.register<Exec>("testPostgresUp") {

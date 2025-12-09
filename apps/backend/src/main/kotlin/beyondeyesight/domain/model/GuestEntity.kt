@@ -8,6 +8,7 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.Table
 import java.io.Serializable
 import java.time.LocalDateTime
+import beyondeyesight.config.uuidV7
 import java.util.UUID
 
 @Entity
@@ -38,6 +39,6 @@ class GuestEntity(
 }
 
 data class GuestId(
-    val gatheringUuid: UUID = UUID.randomUUID(),
-    val userUuid: UUID = UUID.randomUUID()
+    val gatheringUuid: UUID = uuidV7(),
+    val userUuid: UUID = uuidV7()
 ) : Serializable

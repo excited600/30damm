@@ -6,6 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
+import beyondeyesight.config.uuidV7
 import java.util.UUID
 
 @Entity
@@ -51,7 +52,7 @@ class UserEntity(
             phoneAuthenticated: Boolean,
         ): UserEntity {
             return UserEntity(
-                uuid = UUID.randomUUID(),
+                uuid = uuidV7(),
                 email = email,
                 nickname = nickname,
                 age = age,
