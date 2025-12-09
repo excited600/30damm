@@ -30,7 +30,7 @@ Gathering_Status:
     - OPEN
     - CLOSED
     - IN_PROGRESS
-    - COMPLETED
+    - FINISHED
   description: Status of the gathering
 
 Gathering_DayOfWeek:

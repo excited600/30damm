@@ -645,6 +645,7 @@ components:
     Gathering_Status:
       type: string
       enum:
+        - OPEN_PENDING
         - OPEN
         - CLOSED
         - IN_PROGRESS

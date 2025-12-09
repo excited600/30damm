@@ -12,6 +12,7 @@ import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.SeriesEntity
 import beyondeyesight.domain.model.gathering.SeriesScheduleEntity
+import beyondeyesight.domain.model.gathering.Status
 import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.repository.GuestRepository
@@ -237,7 +238,7 @@ class GatheringServiceTest {
                     gathering.startDateTime == startDateTime &&
                     gathering.duration == Duration.ofHours(2) &&
                     gathering.dayOfWeek == startDateTime.dayOfWeek &&
-                    gathering.status == GatheringEntity.Status.OPEN &&
+                    gathering.status == Status.OPEN &&
                     gathering.clickCount == GatheringEntity.INITIAL_CLICK_COUNT &&
                     gathering.totalGuests == GatheringEntity.INITIAL_TOTAL_GUESTS &&
                     gathering.score == 0

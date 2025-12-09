@@ -5,6 +5,7 @@ import beyondeyesight.domain.model.ScrollResult
 import beyondeyesight.domain.model.gathering.GatheringCursor
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.GatheringFilter
+import beyondeyesight.domain.model.gathering.Status
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import com.linecorp.kotlinjdsl.dsl.jpql.Jpql
 import com.linecorp.kotlinjdsl.querymodel.jpql.predicate.Predicate
@@ -52,6 +53,10 @@ class GatheringRepositoryImpl(
                             )
                         )
                     },
+                    or(
+                        path(GatheringEntity::status).eq(Status.OPEN),
+                        path(GatheringEntity::status).eq(Status.IN_PROGRESS)
+                    ),
                     * buildFilterPredicates(filter).toTypedArray()
                 )
                 .orderBy(

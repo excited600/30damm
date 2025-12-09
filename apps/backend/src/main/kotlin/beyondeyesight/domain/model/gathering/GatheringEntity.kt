@@ -143,8 +143,4 @@ class GatheringEntity(
         APPROVAL;
 
     }
-
-    enum class Status {
-        OPEN, CLOSED, IN_PROGRESS, COMPLETED
-    }
 }
