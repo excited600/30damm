@@ -245,8 +245,9 @@ class GatheringServiceTest {
         assertEquals(savedGatheringEntity, result)
     }
 
-    @Test
-    fun joinSucceed_withoutGenderRatio() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("joinSuccessCases")
+    fun joinSucceed(testCase: JoinSuccessCase) {
         // given
         val gatheringUuid = UUID.randomUUID()
         val userUuid = UUID.randomUUID()
@@ -264,9 +265,13 @@ class GatheringServiceTest {
         )).thenReturn(lockToken)
         whenever(gatheringRepository.findByUuid(gatheringUuid)).thenReturn(gatheringEntity)
         whenever(gatheringEntity.uuid).thenReturn(gatheringUuid)
-        whenever(gatheringEntity.maxCapacity).thenReturn(10)
-        whenever(gatheringEntity.genderRatioEnabled).thenReturn(false)
-        whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(5L)
+        whenever(gatheringEntity.maxCapacity).thenReturn(testCase.maxCapacity)
+        whenever(gatheringEntity.genderRatioEnabled).thenReturn(testCase.genderRatioEnabled)
+        whenever(gatheringEntity.maxMaleCount).thenReturn(testCase.maxMaleCount)
+        whenever(gatheringEntity.maxFemaleCount).thenReturn(testCase.maxFemaleCount)
+        whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(testCase.currentGuestCount.toLong())
+        whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.M)).thenReturn(testCase.currentMaleCount.toLong())
+        whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(testCase.currentFemaleCount.toLong())
 
         // when
         gatheringService.join(gatheringUuid, userUuid)
@@ -282,50 +287,28 @@ class GatheringServiceTest {
         )
         verify(gatheringRepository).findByUuid(gatheringUuid)
         verify(guestRepository).countByGathering(gatheringUuid)
+
+        if (testCase.genderRatioEnabled) {
+            verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.M)
+            verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.F)
+        }
+
         verify(payService).pay()
         verify(guestService).join(gatheringUuid, userUuid)
         verify(lockService).unlock("gathering", gatheringUuid.toString(), lockToken)
     }
 
-    @Test
-    fun joinSucceed_withGenderRatio() {
-        // given
-        val gatheringUuid = UUID.randomUUID()
-        val userUuid = UUID.randomUUID()
-        val userEntity: UserEntity = mock()
-        val gatheringEntity: GatheringEntity = mock()
-        val lockToken = "lock-token"
-
-        whenever(userRepository.findByUuid(userUuid)).thenReturn(userEntity)
-        whenever(lockService.lockWithRetry(
-            eq("gathering"),
-            eq(gatheringUuid.toString()),
-            any(),
-            any(),
-            any()
-        )).thenReturn(lockToken)
-        whenever(gatheringRepository.findByUuid(gatheringUuid)).thenReturn(gatheringEntity)
-        whenever(gatheringEntity.uuid).thenReturn(gatheringUuid)
-        whenever(gatheringEntity.maxCapacity).thenReturn(10)
-        whenever(gatheringEntity.genderRatioEnabled).thenReturn(true)
-        whenever(gatheringEntity.maxMaleCount).thenReturn(5)
-        whenever(gatheringEntity.maxFemaleCount).thenReturn(5)
-        whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(4L)
-        whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.M)).thenReturn(2L)
-        whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(2L)
-
-        // when
-        gatheringService.join(gatheringUuid, userUuid)
-
-        // then
-        verify(userRepository).findByUuid(userUuid)
-        verify(gatheringRepository).findByUuid(gatheringUuid)
-        verify(guestRepository).countByGathering(gatheringUuid)
-        verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.M)
-        verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.F)
-        verify(payService).pay()
-        verify(guestService).join(gatheringUuid, userUuid)
-        verify(lockService).unlock("gathering", gatheringUuid.toString(), lockToken)
+    data class JoinSuccessCase(
+        val name: String,
+        val maxCapacity: Int,
+        val currentGuestCount: Int,
+        val genderRatioEnabled: Boolean,
+        val maxMaleCount: Int?,
+        val maxFemaleCount: Int?,
+        val currentMaleCount: Int,
+        val currentFemaleCount: Int
+    ) {
+        override fun toString(): String = name
     }
 
     @ParameterizedTest(name = "{0}")
@@ -695,6 +678,69 @@ class GatheringServiceTest {
                 maxFemaleCount = null,
                 fee = 10001,
                 expectedExceptionType = InvalidValueException::class.java
+            )
+        )
+
+        @JvmStatic
+        fun joinSuccessCases(): Stream<JoinSuccessCase> = Stream.of(
+            // 1. 성별 비율 미적용
+            JoinSuccessCase(
+                name = "Without gender ratio",
+                maxCapacity = 10,
+                currentGuestCount = 5,
+                genderRatioEnabled = false,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                currentMaleCount = 0,
+                currentFemaleCount = 0
+            ),
+
+            // 2. 성별 비율 적용
+            JoinSuccessCase(
+                name = "With gender ratio",
+                maxCapacity = 10,
+                currentGuestCount = 4,
+                genderRatioEnabled = true,
+                maxMaleCount = 5,
+                maxFemaleCount = 5,
+                currentMaleCount = 2,
+                currentFemaleCount = 2
+            ),
+
+            // 3. 최대 인원 직전 (경계값)
+            JoinSuccessCase(
+                name = "At max capacity boundary",
+                maxCapacity = 10,
+                currentGuestCount = 9,
+                genderRatioEnabled = false,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                currentMaleCount = 0,
+                currentFemaleCount = 0
+            ),
+
+            // 4. 남성 최대 인원 직전 (경계값)
+            JoinSuccessCase(
+                name = "At male capacity boundary",
+                maxCapacity = 10,
+                currentGuestCount = 6,
+                genderRatioEnabled = true,
+                maxMaleCount = 5,
+                maxFemaleCount = 5,
+                currentMaleCount = 4,
+                currentFemaleCount = 2
+            ),
+
+            // 5. 여성 최대 인원 직전 (경계값)
+            JoinSuccessCase(
+                name = "At female capacity boundary",
+                maxCapacity = 10,
+                currentGuestCount = 6,
+                genderRatioEnabled = true,
+                maxMaleCount = 5,
+                maxFemaleCount = 5,
+                currentMaleCount = 2,
+                currentFemaleCount = 4
             )
         )
 
