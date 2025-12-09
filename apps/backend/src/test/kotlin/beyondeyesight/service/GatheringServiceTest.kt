@@ -32,6 +32,7 @@ import org.mockito.kotlin.whenever
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 import java.util.stream.Stream
@@ -116,6 +117,73 @@ class GatheringServiceTest {
         override fun toString(): String = name
     }
 
+
+    @Test
+    fun openSucceed() {
+        // given
+        val hostUuid = UUID.randomUUID()
+        val userEntity: UserEntity = mock()
+        val savedGatheringEntity: GatheringEntity = mock()
+
+        val startDateTime = LocalDateTime.of(2025, 1, 15, 14, 30)
+
+        whenever(userEntity.uuid).thenReturn(hostUuid)
+        whenever(userRepository.findByUuid(hostUuid)).thenReturn(userEntity)
+        whenever(gatheringRepository.save(any<GatheringEntity>())).thenReturn(savedGatheringEntity)
+
+        // when
+        val result = gatheringService.open(
+            hostUuid = hostUuid,
+            approveType = GatheringEntity.ApproveType.FIRST_IN,
+            minCapacity = 2,
+            maxCapacity = 10,
+            genderRatioEnabled = false,
+            minAge = 30,
+            maxAge = 40,
+            maxMaleCount = null,
+            maxFemaleCount = null,
+            fee = 10000,
+            discountEnabled = false,
+            offline = true,
+            place = "서울 강남구",
+            category = Category.PARTY,
+            subCategory = SubCategory.HOME_PARTY,
+            imageUrl = "https://example.com/image.jpg",
+            title = "테스트 모임",
+            introduction = "테스트 모임 소개",
+            startDateTime = startDateTime,
+            duration = Duration.ofHours(2)
+        )
+
+        // then
+        verify(userRepository).findByUuid(hostUuid)
+        verify(gatheringRepository).save(argThat<GatheringEntity> { gathering ->
+            gathering.hostUuid == hostUuid &&
+                    gathering.approveType == GatheringEntity.ApproveType.FIRST_IN &&
+                    gathering.minCapacity == 2 &&
+                    gathering.maxCapacity == 10 &&
+                    gathering.genderRatioEnabled == false &&
+                    gathering.minAge == 30 &&
+                    gathering.maxAge == 40 &&
+                    gathering.fee == 10000 &&
+                    gathering.discountEnabled == false &&
+                    gathering.offline == true &&
+                    gathering.place == "서울 강남구" &&
+                    gathering.category == Category.PARTY &&
+                    gathering.subCategory == SubCategory.HOME_PARTY &&
+                    gathering.imageUrl == "https://example.com/image.jpg" &&
+                    gathering.title == "테스트 모임" &&
+                    gathering.introduction == "테스트 모임 소개" &&
+                    gathering.startDateTime == startDateTime &&
+                    gathering.duration == Duration.ofHours(2) &&
+                    gathering.dayOfWeek == startDateTime.dayOfWeek &&
+                    gathering.status == GatheringEntity.Status.OPEN &&
+                    gathering.clickCount == GatheringEntity.INITIAL_CLICK_COUNT &&
+                    gathering.totalGuests == GatheringEntity.INITIAL_TOTAL_GUESTS &&
+                    gathering.score == GatheringEntity.INITIAL_SCORE
+        })
+        assertEquals(savedGatheringEntity, result)
+    }
 
     @Test
     fun scheduleSucceed() {
