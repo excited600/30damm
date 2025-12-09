@@ -4,6 +4,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 class GatheringFilter(
+    val statuses: List<Status>,
     val categories: List<Category>?,
     val guestCount: Int?,
     val dayOfWeek: DayOfWeek?,

@@ -53,10 +53,6 @@ class GatheringRepositoryImpl(
                             )
                         )
                     },
-                    or(
-                        path(GatheringEntity::status).eq(Status.OPEN),
-                        path(GatheringEntity::status).eq(Status.IN_PROGRESS)
-                    ),
                     * buildFilterPredicates(filter).toTypedArray()
                 )
                 .orderBy(
@@ -81,13 +77,16 @@ class GatheringRepositoryImpl(
     }
 
     private fun Jpql.buildFilterPredicates(
-        filter: GatheringFilter?
+        filter: GatheringFilter
     ): List<Predicate?> {
         return listOf(
-            filter?.categories?.takeIf { it.isNotEmpty() }?.let {
+            filter.statuses.takeIf { it.isNotEmpty() }?.let {
+                path(GatheringEntity::status).`in`(it.map { status -> Status.valueOf(status.name) })
+            },
+            filter.categories?.takeIf { it.isNotEmpty() }?.let {
                 path(GatheringEntity::category).`in`(it)
             },
-            filter?.guestCount?.let { minGuestCount ->
+            filter.guestCount?.let { minGuestCount ->
                 val guestCountSubquery = select(count(entity(GuestEntity::class)))
                     .from(entity(GuestEntity::class))
                     .where(path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)))
@@ -95,38 +94,38 @@ class GatheringRepositoryImpl(
 
                 guestCountSubquery.greaterThanOrEqualTo(minGuestCount.toLong())
             },
-            filter?.dayOfWeek?.let {
+            filter.dayOfWeek?.let {
                 path(GatheringEntity::dayOfWeek).eq(it)
             },
-            filter?.startDate?.let {
+            filter.startDate?.let {
                 path(GatheringEntity::startDateTime).greaterThanOrEqualTo(it.atStartOfDay())
             },
-            filter?.endDate?.let {
+            filter.endDate?.let {
                 path(GatheringEntity::startDateTime).lessThanOrEqualTo(it.atTime(LocalTime.MAX))
             },
             // TODO: 지도 api 쓰고 어떻게 저장되는지 보고... LIKE는 인덱스 안탈듯?
-            filter?.location?.let {
+            filter.location?.let {
                 path(GatheringEntity::place).like("%$it%")
             },
-            filter?.startAge?.let {
+            filter.startAge?.let {
                 path(GatheringEntity::minAge).greaterThanOrEqualTo(it)
             },
-            filter?.endAge?.let {
+            filter.endAge?.let {
                 path(GatheringEntity::maxAge).lessThanOrEqualTo(it)
             },
-            filter?.genderRatioEnabled?.let {
+            filter.genderRatioEnabled?.let {
                 path(GatheringEntity::genderRatioEnabled).eq(it)
             },
-            filter?.minCapacity?.let {
+            filter.minCapacity?.let {
                 path(GatheringEntity::minCapacity).greaterThanOrEqualTo(it)
             },
-            filter?.maxCapacity?.let {
+            filter.maxCapacity?.let {
                 path(GatheringEntity::maxCapacity).lessThanOrEqualTo(it)
             },
-            filter?.minFee?.let {
+            filter.minFee?.let {
                 path(GatheringEntity::fee).greaterThanOrEqualTo(it)
             },
-            filter?.maxFee?.let {
+            filter.maxFee?.let {
                 path(GatheringEntity::fee).lessThanOrEqualTo(it)
             }
         )

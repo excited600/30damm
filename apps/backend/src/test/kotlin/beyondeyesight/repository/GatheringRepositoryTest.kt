@@ -5,6 +5,7 @@ import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.GatheringCursor
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.GatheringFilter
+import beyondeyesight.domain.model.gathering.Status
 import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.infra.repository.gathering.GatheringRepositoryImpl
@@ -212,6 +213,7 @@ class GatheringRepositoryTest {
             minFee: Int? = null,
             maxFee: Int? = null
         ) = GatheringFilter(
+            statuses = listOf(Status.OPEN, Status.IN_PROGRESS),
             categories = categories,
             guestCount = guestCount,
             dayOfWeek = dayOfWeek,
@@ -857,6 +859,7 @@ class GatheringRepositoryTest {
                     )
                 },
                 filter = GatheringFilter(
+                    statuses = listOf(Status.OPEN, Status.IN_PROGRESS),
                     categories = listOf(Category.PARTY),
                     guestCount = null,
                     dayOfWeek = DayOfWeek.MONDAY,
