@@ -117,6 +117,61 @@ class GatheringServiceTest {
         override fun toString(): String = name
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("openFailCases")
+    fun openFail(testCase: OpenFailCase) {
+        // given
+        val hostUuid = UUID.randomUUID()
+        val userEntity: UserEntity = mock()
+
+        if (testCase.userExists) {
+            whenever(userEntity.uuid).thenReturn(hostUuid)
+            whenever(userRepository.findByUuid(hostUuid)).thenReturn(userEntity)
+        } else {
+            whenever(userRepository.findByUuid(hostUuid)).thenReturn(null)
+        }
+
+        // when & then
+        val exception = assertThrows<Exception> {
+            gatheringService.open(
+                hostUuid = hostUuid,
+                approveType = GatheringEntity.ApproveType.FIRST_IN,
+                minCapacity = 2,
+                maxCapacity = 10,
+                genderRatioEnabled = false,
+                minAge = testCase.minAge,
+                maxAge = testCase.maxAge,
+                maxMaleCount = testCase.maxMaleCount,
+                maxFemaleCount = testCase.maxFemaleCount,
+                fee = testCase.fee,
+                discountEnabled = false,
+                offline = true,
+                place = "서울 강남구",
+                category = Category.PARTY,
+                subCategory = SubCategory.HOME_PARTY,
+                imageUrl = "https://example.com/image.jpg",
+                title = "테스트 모임",
+                introduction = "테스트 모임 소개",
+                startDateTime = LocalDateTime.of(2025, 1, 15, 14, 30),
+                duration = Duration.ofHours(2)
+            )
+        }
+
+        assertEquals(testCase.expectedExceptionType, exception::class.java)
+    }
+
+    data class OpenFailCase(
+        val name: String,
+        val userExists: Boolean,
+        val minAge: Int,
+        val maxAge: Int,
+        val maxMaleCount: Int?,
+        val maxFemaleCount: Int?,
+        val fee: Int,
+        val expectedExceptionType: Class<out Exception>
+    ) {
+        override fun toString(): String = name
+    }
 
     @Test
     fun openSucceed() {
@@ -383,6 +438,93 @@ class GatheringServiceTest {
                         )
                     )
                 ),
+                expectedExceptionType = InvalidValueException::class.java
+            )
+        )
+
+        @JvmStatic
+        fun openFailCases(): Stream<OpenFailCase> = Stream.of(
+            // 1. User not found
+            OpenFailCase(
+                name = "User not found",
+                userExists = false,
+                minAge = 30,
+                maxAge = 40,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                fee = 10000,
+                expectedExceptionType = ResourceNotFoundException::class.java
+            ),
+
+            // 2. minAge < 1
+            OpenFailCase(
+                name = "minAge is less than 1",
+                userExists = true,
+                minAge = 0,
+                maxAge = 40,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                fee = 10000,
+                expectedExceptionType = InvalidValueException::class.java
+            ),
+
+            // 4. maxAge < minAge
+            OpenFailCase(
+                name = "maxAge is less than minAge",
+                userExists = true,
+                minAge = 30,
+                maxAge = 29,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                fee = 10000,
+                expectedExceptionType = InvalidValueException::class.java
+            ),
+
+            // 5. maxMaleCount < 0
+            OpenFailCase(
+                name = "maxMaleCount is negative",
+                userExists = true,
+                minAge = 30,
+                maxAge = 40,
+                maxMaleCount = -1,
+                maxFemaleCount = null,
+                fee = 10000,
+                expectedExceptionType = InvalidValueException::class.java
+            ),
+
+            // 6. maxFemaleCount < 0
+            OpenFailCase(
+                name = "maxFemaleCount is negative",
+                userExists = true,
+                minAge = 30,
+                maxAge = 40,
+                maxMaleCount = null,
+                maxFemaleCount = -1,
+                fee = 10000,
+                expectedExceptionType = InvalidValueException::class.java
+            ),
+
+            // 7. fee % 1000 != 0 (500원)
+            OpenFailCase(
+                name = "fee is not multiple of 1000 (500)",
+                userExists = true,
+                minAge = 30,
+                maxAge = 40,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                fee = 500,
+                expectedExceptionType = InvalidValueException::class.java
+            ),
+
+            // 8. fee % 1000 != 0 (10001원)
+            OpenFailCase(
+                name = "fee is not multiple of 1000 (10001)",
+                userExists = true,
+                minAge = 30,
+                maxAge = 40,
+                maxMaleCount = null,
+                maxFemaleCount = null,
+                fee = 10001,
                 expectedExceptionType = InvalidValueException::class.java
             )
         )
