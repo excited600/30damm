@@ -5,6 +5,7 @@ import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
+import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.gathering.GuestService
@@ -34,7 +35,7 @@ class GatheringApplicationService(
         offline: Boolean,
         place: String,
         category: Category,
-        subCategory: GatheringEntity.SubCategory,
+        subCategory: SubCategory,
         imageUrl: String,
         title: String,
         introduction: String,
@@ -69,7 +70,7 @@ class GatheringApplicationService(
                     value = category,
                     reason = null
                 ),
-            subCategory = GatheringEntity.SubCategory.entries.find { it.name == subCategory.name }
+            subCategory = SubCategory.entries.find { it.name == subCategory.name }
                 ?: throw InvalidValueException(
                     valueName = "subCategory",
                     value = subCategory,
@@ -135,7 +136,7 @@ class GatheringApplicationService(
         offline: Boolean,
         place: String,
         category: Category,
-        subCategory: GatheringEntity.SubCategory,
+        subCategory: SubCategory,
         imageUrl: String,
         title: String,
         introduction: String,

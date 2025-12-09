@@ -1,9 +1,7 @@
 package beyondeyesight.domain.model
 
-import java.util.UUID
-
-data class ScrollResult<T>(
-    val items: List<T>,
-    val cursor: UUID?,
+data class ScrollResult<I, C>(
+    val items: List<I>,
+    val cursor: C?,
     val hasNext: Boolean
 )

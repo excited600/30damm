@@ -1,8 +1,10 @@
-package beyondeyesight.integration
+package beyondeyesight.e2e
 
 import beyondeyesight.TestConfig
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -14,6 +16,7 @@ import tools.jackson.databind.ObjectMapper
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestConfig::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class EndToEndTestBase {
 
     @LocalServerPort
@@ -36,14 +39,23 @@ abstract class EndToEndTestBase {
             .build()
     }
 
+    @BeforeAll
+    fun initialClean() {
+        cleanDatabase()
+    }
+
     @AfterEach
     fun cleanUp() {
+        cleanDatabase()
+    }
+
+    private fun cleanDatabase() {
         val tables = jdbcTemplate.queryForList(
             """
-            SELECT tablename FROM pg_tables 
-            WHERE schemaname = 'public' 
-            AND tablename != 'flyway_schema_history'
-            """,
+                SELECT tablename FROM pg_tables 
+                WHERE schemaname = 'public' 
+                AND tablename != 'flyway_schema_history'
+                """,
             String::class.java
         )
 

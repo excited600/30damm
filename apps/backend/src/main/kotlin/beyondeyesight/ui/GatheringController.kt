@@ -9,6 +9,7 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.ScheduleType
+import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.model.DateScheduleSeriesRequest
 import beyondeyesight.model.GatheringApproveType
@@ -66,7 +67,7 @@ class GatheringController(
             offline = openGatheringRequest.offline,
             place = openGatheringRequest.place,
             category = Category.valueOf(openGatheringRequest.category.name),
-            subCategory = GatheringEntity.SubCategory.valueOf(openGatheringRequest.subCategory.name),
+            subCategory = SubCategory.valueOf(openGatheringRequest.subCategory.name),
             imageUrl = openGatheringRequest.imageUrl,
             title = openGatheringRequest.title,
             introduction = openGatheringRequest.introduction,
@@ -129,7 +130,7 @@ class GatheringController(
                 value = scheduleSeriesRequest.category,
                 reason = null
             ),
-            subCategory = GatheringEntity.SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name } ?: throw InvalidValueException(
+            subCategory = SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name } ?: throw InvalidValueException(
                 valueName = "subCategory",
                 value = scheduleSeriesRequest.subCategory,
                 reason = null

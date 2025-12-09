@@ -20,5 +20,5 @@ interface GatheringRepository {
         cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
-    ): ScrollResult<GatheringEntity>
+    ): ScrollResult<GatheringEntity, GatheringCursor>
 }

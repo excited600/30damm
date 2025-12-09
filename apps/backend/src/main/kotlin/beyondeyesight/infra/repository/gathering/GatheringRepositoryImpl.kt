@@ -9,7 +9,6 @@ import beyondeyesight.domain.repository.gathering.GatheringRepository
 import com.linecorp.kotlinjdsl.dsl.jpql.Jpql
 import com.linecorp.kotlinjdsl.querymodel.jpql.predicate.Predicate
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.query.JpqlQueryBuilder.literal
 import org.springframework.stereotype.Repository
 import java.time.LocalTime
 import java.util.*
@@ -39,7 +38,7 @@ class GatheringRepositoryImpl(
         cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
-    ): ScrollResult<GatheringEntity> {
+    ): ScrollResult<GatheringEntity, GatheringCursor> {
         val results = gatheringJpaRepository.findPage(pageable = Pageable.ofSize(size + 1)) {
             select(entity(GatheringEntity::class))
                 .from(entity(GatheringEntity::class))
@@ -66,7 +65,12 @@ class GatheringRepositoryImpl(
 
         return ScrollResult(
             items = items,
-            cursor = items.lastOrNull()?.uuid,
+            cursor = items.lastOrNull()?.let {
+                GatheringCursor(
+                    score = it.score,
+                    uuid = it.uuid
+                )
+            },
             hasNext = hasNext
         )
     }

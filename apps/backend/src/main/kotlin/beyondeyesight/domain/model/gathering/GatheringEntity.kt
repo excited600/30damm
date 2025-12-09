@@ -144,10 +144,6 @@ class GatheringEntity(
 
     }
 
-    enum class SubCategory {
-        HOME_PARTY,
-    }
-
     enum class Status {
         OPEN, CLOSED, IN_PROGRESS, COMPLETED
     }

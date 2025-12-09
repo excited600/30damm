@@ -1,7 +1,6 @@
-package beyondeyesight.integration
+package beyondeyesight.e2e
 
 import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.User.UserEntity
 import beyondeyesight.model.GatheringApproveType
 import beyondeyesight.model.GatheringCategory
 import beyondeyesight.model.GatheringDayOfWeek

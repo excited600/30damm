@@ -44,7 +44,7 @@ class SeriesEntity(
     val category: Category,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val subCategory: GatheringEntity.SubCategory,
+    val subCategory: SubCategory,
     @Column(nullable = false)
     val imageUrl: String,
     @Column(nullable = false)
