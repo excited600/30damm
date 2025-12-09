@@ -48,7 +48,7 @@ class GatheringRepositoryImpl(
                             path(GatheringEntity::score).lessThan(it.score),
                             and(
                                 path(GatheringEntity::score).eq(it.score),
-                                path(GatheringEntity::uuid).lessThan(it.uuid)
+                                path(GatheringEntity::uuid).greaterThan(it.uuid)
                             )
                         )
                     },

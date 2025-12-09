@@ -158,38 +158,42 @@ class GatheringRepositoryTest {
     fun scrollWithSameScoreCursor() {
         // given: gatherings with same score (use unique high score to isolate from other tests)
         val uniqueScore = 9999
-        createGathering(score = uniqueScore)
-        createGathering(score = uniqueScore)
-        createGathering(score = uniqueScore)
+        val g1 = createGathering(score = uniqueScore)
+        val g2 = createGathering(score = uniqueScore)
+        val g3 = createGathering(score = uniqueScore)
         flushAndClear()
 
-        // when: first page - get all 3 items to verify ordering
-        val allResults = gatheringRepository.scroll(
-            cursor = null,
-            size = 10,
-            filter = emptyFilter()
-        )
+        // expected order: score DESC, uuid ASC
+        val expectedOrder = listOf(g1, g2, g3).sortedBy { it.uuid }
 
-        // then: all items with same score should be ordered by uuid ASC
-        val sameScoreItems = allResults.items.filter { it.score == uniqueScore }
-        assertThat(sameScoreItems).hasSize(3)
-
-        // verify ordering: for same score, uuid should be ascending
-        for (i in 0 until sameScoreItems.size - 1) {
-            assertThat(sameScoreItems[i].uuid).isLessThan(sameScoreItems[i + 1].uuid)
-        }
-
-        // when: paginated first page
+        // when: first page
         val firstPage = gatheringRepository.scroll(
             cursor = null,
             size = 2,
             filter = emptyFilter()
         )
 
-        // then: verify first page returns correct items and cursor
-        assertThat(firstPage.items.filter { it.score == uniqueScore }).hasSize(2)
+        // then: first page should have first 2 items in expected order
+        val firstPageItems = firstPage.items.filter { it.score == uniqueScore }
+        assertThat(firstPageItems).hasSize(2)
+        assertThat(firstPageItems.map { it.uuid })
+            .containsExactly(expectedOrder[0].uuid, expectedOrder[1].uuid)
         assertThat(firstPage.hasNext).isTrue()
         assertThat(firstPage.cursor).isNotNull
+
+        // when: second page using cursor from first page
+        val secondPage = gatheringRepository.scroll(
+            cursor = firstPage.cursor,
+            size = 2,
+            filter = emptyFilter()
+        )
+
+        // then: second page should have the remaining item
+        val secondPageItems = secondPage.items.filter { it.score == uniqueScore }
+        assertThat(secondPageItems).hasSize(1)
+        assertThat(secondPageItems.map { it.uuid })
+            .containsExactly(expectedOrder[2].uuid)
+        assertThat(secondPage.hasNext).isFalse()
     }
 
     companion object {
