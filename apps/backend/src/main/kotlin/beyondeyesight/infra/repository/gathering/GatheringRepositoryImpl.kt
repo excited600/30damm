@@ -56,7 +56,7 @@ class GatheringRepositoryImpl(
                 )
                 .orderBy(
                     path(GatheringEntity::score).desc(),
-                    path(GatheringEntity::uuid).desc()
+                    path(GatheringEntity::uuid).asc()
                 )
         }.content.filterNotNull()
 

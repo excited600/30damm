@@ -101,6 +101,7 @@ class GatheringEntity(
             title: String,
             introduction: String,
             startDateTime: LocalDateTime,
+            score: Int,
             duration: Duration?,
         ): GatheringEntity {
             return GatheringEntity(
@@ -129,13 +130,12 @@ class GatheringEntity(
                 startDateTime = startDateTime,
                 duration = duration,
                 dayOfWeek = startDateTime.dayOfWeek,
-                score = INITIAL_SCORE //TODO: 초기에도 계산해서 넣는 방식으로 수정하기.
+                score = score
             )
         }
 
         const val INITIAL_TOTAL_GUESTS = 1
         const val INITIAL_CLICK_COUNT = 0
-        const val INITIAL_SCORE = 0
     }
 
     enum class ApproveType {

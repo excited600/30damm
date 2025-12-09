@@ -240,7 +240,7 @@ class GatheringServiceTest {
                     gathering.status == GatheringEntity.Status.OPEN &&
                     gathering.clickCount == GatheringEntity.INITIAL_CLICK_COUNT &&
                     gathering.totalGuests == GatheringEntity.INITIAL_TOTAL_GUESTS &&
-                    gathering.score == GatheringEntity.INITIAL_SCORE
+                    gathering.score == 0
         })
         assertEquals(savedGatheringEntity, result)
     }

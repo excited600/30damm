@@ -60,7 +60,7 @@ class GatheringService(
             resourceId = hostUuid
         )
 
-        val entity = GatheringEntity.Companion.open(
+        val entity = GatheringEntity.open(
             hostUuid = host.uuid,
             approveType = approveType,
             minCapacity = minCapacity,
@@ -80,6 +80,7 @@ class GatheringService(
             title = title,
             introduction = introduction,
             startDateTime = startDateTime,
+            score = 0,
             duration = duration
         )
         return gatheringRepository.save(entity)
