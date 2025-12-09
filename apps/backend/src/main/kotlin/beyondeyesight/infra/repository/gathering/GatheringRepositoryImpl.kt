@@ -76,9 +76,8 @@ class GatheringRepositoryImpl(
 
                 guestCountSubquery.greaterThanOrEqualTo(minGuestCount.toLong())
             },
-            //TODO: GAthering에 요일정보 추가 및 리팩토링
             filter?.dayOfWeek?.let {
-                function(Int::class, "EXTRACT", literal("DOW FROM"), path(GatheringEntity::startDateTime)).eq(it.value)
+                path(GatheringEntity::dayOfWeek).eq(it)
             },
             filter?.startDate?.let {
                 path(GatheringEntity::startDateTime).greaterThanOrEqualTo(it.atStartOfDay())

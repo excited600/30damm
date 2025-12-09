@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
 import beyondeyesight.config.uuidV7
@@ -68,6 +69,9 @@ class GatheringEntity(
     @Column(columnDefinition = "interval", nullable = true)
     @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     val duration: Duration?,
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val dayOfWeek: DayOfWeek,
 ): BaseEntity(uuid = uuid) {
 
     fun close() {
@@ -121,7 +125,8 @@ class GatheringEntity(
                 introduction = introduction,
                 clickCount = INITIAL_CLICK_COUNT,
                 startDateTime = startDateTime,
-                duration = duration
+                duration = duration,
+                dayOfWeek = startDateTime.dayOfWeek
             )
         }
 
