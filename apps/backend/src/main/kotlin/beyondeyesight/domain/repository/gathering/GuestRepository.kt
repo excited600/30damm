@@ -1,8 +1,7 @@
-package beyondeyesight.domain.repository
+package beyondeyesight.domain.repository.gathering
 
 import beyondeyesight.domain.model.GuestEntity
-import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.gathering.GatheringEntity
+import beyondeyesight.domain.model.user.Gender
 import java.util.UUID
 
 interface GuestRepository {

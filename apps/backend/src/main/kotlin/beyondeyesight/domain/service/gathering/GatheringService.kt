@@ -6,15 +6,15 @@ import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
-import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.gathering.*
-import beyondeyesight.domain.repository.GuestRepository
-import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.domain.repository.gathering.GuestRepository
+import beyondeyesight.domain.repository.user.UserRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.service.LockService
-import beyondeyesight.domain.service.PayService
+import beyondeyesight.domain.service.payment.PaymentGateway
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -29,7 +29,7 @@ class GatheringService(
     private val userRepository: UserRepository,
     private val seriesRepository: SeriesRepository,
     private val seriesScheduleRepository: SeriesScheduleRepository,
-    private val payService: PayService,
+    private val paymentGateway: PaymentGateway,
 ) {
     fun open(
         hostUuid: UUID,
@@ -200,8 +200,6 @@ class GatheringService(
                     )
                 }
             }
-
-            payService.pay()
 
             guestService.join(
                 gatheringUuid = gatheringUuid,

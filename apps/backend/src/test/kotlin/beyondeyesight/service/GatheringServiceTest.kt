@@ -4,8 +4,8 @@ import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
-import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.User.UserEntity
+import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
 import beyondeyesight.domain.model.gathering.GatheringEntity
@@ -15,13 +15,13 @@ import beyondeyesight.domain.model.gathering.SeriesScheduleEntity
 import beyondeyesight.domain.model.gathering.Status
 import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.model.gathering.WeeklySchedule
-import beyondeyesight.domain.repository.GuestRepository
-import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.domain.repository.gathering.GuestRepository
+import beyondeyesight.domain.repository.user.UserRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.service.LockService
-import beyondeyesight.domain.service.PayService
+import beyondeyesight.domain.service.payment.PaymentGateway
 import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.gathering.GuestService
 import org.junit.jupiter.api.assertThrows
@@ -53,7 +53,7 @@ class GatheringServiceTest {
     private val userRepository: UserRepository = mock()
     private val seriesRepository: SeriesRepository = mock()
     private val seriesScheduleRepository: SeriesScheduleRepository = mock()
-    private val payService: PayService = mock()
+    private val paymentGateway: PaymentGateway = mock()
 
     val gatheringService = GatheringService(
         gatheringRepository = gatheringRepository,
@@ -63,7 +63,7 @@ class GatheringServiceTest {
         userRepository = userRepository,
         seriesRepository = seriesRepository,
         seriesScheduleRepository = seriesScheduleRepository,
-        payService = payService,
+        paymentGateway = paymentGateway,
     )
 
     @ParameterizedTest(name = "{0}")
@@ -294,7 +294,6 @@ class GatheringServiceTest {
             verify(guestRepository).countByGatheringAndGender(gatheringUuid, Gender.F)
         }
 
-        verify(payService).pay()
         verify(guestService).join(gatheringUuid, userUuid)
         verify(lockService).unlock("gathering", gatheringUuid.toString(), lockToken)
     }

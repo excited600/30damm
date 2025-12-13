@@ -35,6 +35,7 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin:3.0.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
     implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // Kotlin JDSL 코어
     implementation("com.linecorp.kotlin-jdsl:jpql-dsl:3.5.2")
@@ -47,7 +48,7 @@ dependencies {
 
     testImplementation("org.mockito:mockito-core:5.14.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

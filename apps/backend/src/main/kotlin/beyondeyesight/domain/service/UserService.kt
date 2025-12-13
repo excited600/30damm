@@ -1,8 +1,8 @@
 package beyondeyesight.domain.service
 
-import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.User.UserEntity
-import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.model.user.UserEntity
+import beyondeyesight.domain.repository.user.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 

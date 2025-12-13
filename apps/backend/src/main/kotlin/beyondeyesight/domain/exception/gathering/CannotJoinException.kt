@@ -1,7 +1,7 @@
 package beyondeyesight.domain.exception.gathering
 
 import beyondeyesight.domain.exception.ClientException
-import beyondeyesight.domain.model.User.Gender
+import beyondeyesight.domain.model.user.Gender
 import java.util.UUID
 
 class CannotJoinException(

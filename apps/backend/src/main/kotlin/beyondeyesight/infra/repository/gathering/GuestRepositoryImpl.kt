@@ -1,9 +1,9 @@
 package beyondeyesight.infra.repository.gathering
 
 import beyondeyesight.domain.model.GuestEntity
-import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.User.UserEntity
-import beyondeyesight.domain.repository.GuestRepository
+import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.model.user.UserEntity
+import beyondeyesight.domain.repository.gathering.GuestRepository
 import org.springframework.stereotype.Repository
 import java.util.UUID
 

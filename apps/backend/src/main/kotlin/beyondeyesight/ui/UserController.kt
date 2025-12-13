@@ -1,8 +1,8 @@
 package beyondeyesight.ui
 
 import beyondeyesight.application.UserApplicationService
-import beyondeyesight.domain.model.User.Gender
-import beyondeyesight.domain.model.User.UserEntity
+import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.model.user.UserEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping

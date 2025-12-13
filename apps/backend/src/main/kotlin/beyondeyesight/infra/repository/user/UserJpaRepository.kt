@@ -1,6 +1,6 @@
-package beyondeyesight.infra.repository
+package beyondeyesight.infra.repository.user
 
-import beyondeyesight.domain.model.User.UserEntity
+import beyondeyesight.domain.model.user.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 

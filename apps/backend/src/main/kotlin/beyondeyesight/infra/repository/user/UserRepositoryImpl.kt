@@ -1,7 +1,7 @@
-package beyondeyesight.infra.repository
+package beyondeyesight.infra.repository.user
 
-import beyondeyesight.domain.model.User.UserEntity
-import beyondeyesight.domain.repository.UserRepository
+import beyondeyesight.domain.model.user.UserEntity
+import beyondeyesight.domain.repository.user.UserRepository
 import org.springframework.stereotype.Repository
 import java.util.UUID
 

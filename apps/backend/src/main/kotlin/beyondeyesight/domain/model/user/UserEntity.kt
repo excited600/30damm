@@ -1,4 +1,4 @@
-package beyondeyesight.domain.model.User
+package beyondeyesight.domain.model.user
 
 import beyondeyesight.domain.model.BaseEntity
 import jakarta.persistence.Column
