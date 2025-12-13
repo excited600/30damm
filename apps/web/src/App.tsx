@@ -1,9 +1,9 @@
-function App() {
-  return (
-    <div>
-      <h1>Hello React</h1>
-    </div>
-  )
-}
+import PaymentButton from "./PaymentButton.tsx";
 
-export default App
+export default function App() {
+    return (
+        <div>
+            <PaymentButton></PaymentButton>
+        </div>
+    );
+}

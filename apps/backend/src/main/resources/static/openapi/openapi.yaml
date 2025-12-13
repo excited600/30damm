@@ -814,7 +814,6 @@ components:
     Gathering_Status:
       description: Status of the gathering
       enum:
-      - OPEN_PENDING
       - OPEN
       - CLOSED
       - IN_PROGRESS

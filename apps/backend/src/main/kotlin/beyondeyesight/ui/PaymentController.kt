@@ -26,7 +26,8 @@ class PaymentController(
      */
     @PostMapping("/prepare")
     suspend fun preparePayment(
-        @RequestBody request: PreparePaymentApiRequest
+        @RequestBody request:
+        PreparePaymentApiRequest
     ): ResponseEntity<PreparePaymentApiResponse> {
         val result = paymentApplicationService.preparePayment(
             paymentId = request.paymentId,
@@ -153,7 +154,6 @@ data class PreparePaymentApiRequest(
     val productName: String,
 
     val amount: Int,
-    val orderName: String,
 
     val buyerEmail: String,
     val buyerName: String,

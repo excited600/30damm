@@ -24,7 +24,9 @@ spring:
 
 portone:
   api-secret: Na5vnSd3bSdBtded0DGBWxQbVD8u6oSMHzvvhr7ohSTNm8PyLvSFn4qQlYA2Fq9cVRnBgrf4N6JHGcs7
+  store-id: store-c47dce95-6209-4f04-87f1-78914a40214a
   base-url: https://api.portone.io
+  channel-key: channel-key-8704e9d0-feb4-4cdd-96a6-34e8238a726f
 
 springdoc:
   api-docs:
