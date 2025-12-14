@@ -1,11 +1,15 @@
 package beyondeyesight.ui
 
+import beyondeyesight.api.PaymentsApiService
 import beyondeyesight.application.PaymentApplicationService
-import beyondeyesight.domain.model.payment.*
-import beyondeyesight.domain.service.payment.PaymentVerificationService
+import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.payment.ProductType
+import beyondeyesight.domain.model.payment.Webhook
+import beyondeyesight.domain.model.payment.WebhookData
+import beyondeyesight.model.PreparePaymentRequest
+import beyondeyesight.model.PreparePaymentResponse
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -13,45 +17,38 @@ import java.util.*
 @RestController
 @RequestMapping("/payments")
 class PaymentController(
-    private val paymentVerificationService: PaymentVerificationService,
     private val paymentApplicationService: PaymentApplicationService,
-) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-
-    @PostMapping("/prepare")
-    fun preparePayment(
-        @RequestBody request:
-        PreparePaymentApiRequest
-    ): ResponseEntity<PreparePaymentApiResponse> {
-        val result = paymentApplicationService.preparePayment(
-            paymentId = request.paymentId,
-            productType = request.productType,
-            productUuid = request.productUuid,
-            amount = request.amount,
-            productName = request.productName,
-            buyerEmail = request.buyerEmail,
-            buyerName = request.buyerName,
-            buyerPhone = request.buyerPhone
-        )
-
-        return ResponseEntity.ok(
-            PreparePaymentApiResponse(
-                paymentId = result.paymentId,
-                storeId = result.storeId,
-                channelKey = result.channelKey,
-            )
+) : PaymentsApiService {
+    override fun preparePayment(
+        paymentId: String,
+        preparePaymentRequest: PreparePaymentRequest
+    ): PreparePaymentResponse {
+        return paymentApplicationService.preparePayment(
+            paymentId = paymentId,
+            productType = ProductType.entries.find { it.name == preparePaymentRequest.productType.name }
+                ?: throw InvalidValueException(
+                    valueName = "productType",
+                    value = preparePaymentRequest.productType,
+                    reason = "알 수 없는 상품 타입"
+                ),
+            productUuid = preparePaymentRequest.productUuid,
+            amount = preparePaymentRequest.amount,
+            productName = preparePaymentRequest.productName,
+            buyerEmail = preparePaymentRequest.buyerEmail,
+            buyerName = preparePaymentRequest.buyerName,
+            buyerPhone = preparePaymentRequest.buyerPhone,
+            mapper = { paymentId: String, storeId: String, channelKey: String ->
+                PreparePaymentResponse(
+                    paymentId = paymentId,
+                    storeId = storeId,
+                    channelKey = channelKey
+                )
+            }
         )
     }
 
-    /**
-     * 결제 검증 - 프론트에서 결제 완료 후 호출
-     */
-    @PostMapping("/verify")
-    fun verifyPayment(
-        @RequestBody request: VerifyPaymentRequest
-    ): ResponseEntity<Unit> {
-        val result = paymentApplicationService.verifyPayment(request.paymentId)
-        return ResponseEntity.ok(Unit);
+    override fun verifyPayment(paymentId: String) {
+        paymentApplicationService.verifyPayment(paymentId)
     }
 
     /**
@@ -92,32 +89,9 @@ class PaymentController(
 
         return ResponseEntity.ok("OK")
     }
+
+
 }
-
-// Request/Response DTOs
-data class PreparePaymentApiRequest(
-    val paymentId: String,
-
-    val productType: ProductType,
-    val productUuid: UUID,
-    val productName: String,
-
-    val amount: Int,
-
-    val buyerEmail: String,
-    val buyerName: String,
-    val buyerPhone: String
-)
-
-data class PreparePaymentApiResponse(
-    val paymentId: String,
-    val storeId: String,
-    val channelKey: String,
-)
-
-data class VerifyPaymentRequest(
-    val paymentId: String
-)
 
 data class CancelPaymentRequest(
     val reason: String,

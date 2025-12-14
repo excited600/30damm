@@ -45,6 +45,12 @@ Gathering_DayOfWeek:
     - SATURDAY
   description: Day of the week
 
+ProductType:
+  type: string
+  enum:
+    - GATHERING
+  description: Type of the product
+
 Gathering_ScheduleType:
   type: string
   enum:

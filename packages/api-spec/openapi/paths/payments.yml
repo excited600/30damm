@@ -1,0 +1,43 @@
+/payments/{paymentId}/prepare:
+  post:
+    operationId: preparePayment
+    tags:
+      - Payments
+    summary: Prepare a payment for a gathering
+    parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier for the payment
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/payment/preparePayment/preparePaymentRequest.yml#/PreparePaymentRequest'
+    responses:
+      '200':
+        description: Payment prepared successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/payment/preparePayment/preparePaymentResponse.yml#/PreparePaymentResponse'
+
+/payments/{paymentId}/verify:
+  post:
+    operationId: verifyPayment
+    tags:
+      - Payments
+    summary: Verify a payment
+    parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier for the payment
+    responses:
+      '200':
+        description: Payment verified successfully

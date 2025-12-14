@@ -1,0 +1,33 @@
+PreparePaymentRequest:
+  type: object
+  required:
+    - productType
+    - productUuid
+    - productName
+    - amount
+    - buyerEmail
+    - buyerName
+    - buyerPhone
+  properties:
+    productType:
+      $ref: '../../shared.yml#/ProductType'
+    productUuid:
+      type: string
+      format: uuid
+      description: UUID of the product being purchased
+    productName:
+      type: string
+      description: Name of the product being purchased
+    amount:
+      type: integer
+      description: Total amount for the payment in Won(KRW)
+    buyerEmail:
+      type: string
+      format: email
+      description: Email address of the buyer
+    buyerName:
+      type: string
+      description: Name of the buyer
+    buyerPhone:
+      type: string
+      description: Phone number of the buyer

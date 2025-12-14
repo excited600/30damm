@@ -3,6 +3,7 @@ package beyondeyesight.application
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Webhook
+import beyondeyesight.domain.service.payment.PaymentGateway
 import beyondeyesight.domain.service.payment.PaymentStateService
 import beyondeyesight.domain.service.payment.PaymentVerificationService
 import org.slf4j.LoggerFactory
@@ -14,6 +15,7 @@ import java.util.UUID
 class PaymentApplicationService(
     private val paymentVerificationService: PaymentVerificationService,
     private val paymentStateService: PaymentStateService,
+    private val paymentGateway: PaymentGateway
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -41,7 +43,11 @@ class PaymentApplicationService(
                     // 포트원 콘솔에서 직접 취소한 경우
                     logger.info("취소 웹훅 수신: paymentId=${webhook.data?.paymentId}")
                     cancelPayment(
-                        paymentId = webhook.data?.paymentId?: throw InvalidValueException("paymentId", Unit, "취소 웹훅에 paymentId 누락"),
+                        paymentId = webhook.data?.paymentId ?: throw InvalidValueException(
+                            "paymentId",
+                            Unit,
+                            "취소 웹훅에 paymentId 누락"
+                        ),
                         reason = "이거 웹훅 요청 어떻게 오는지 보고, 그에 맞춰서 대응", //TODO
                         amount = webhook.data.totalAmount
                     )
@@ -70,7 +76,7 @@ class PaymentApplicationService(
     }
 
     @Transactional
-    fun preparePayment(
+    fun <R> preparePayment(
         paymentId: String,
         productType: ProductType,
         productUuid: UUID,
@@ -78,9 +84,10 @@ class PaymentApplicationService(
         productName: String,
         buyerEmail: String,
         buyerName: String,
-        buyerPhone: String
-    ): PaymentStateService.PreparePaymentResponse {
-        return paymentStateService.preparePayment(
+        buyerPhone: String,
+        mapper: (String, String, String) -> R
+    ): R {
+        paymentStateService.preparePayment(
             paymentId = paymentId,
             productType = productType,
             productUuid = productUuid,
@@ -90,10 +97,14 @@ class PaymentApplicationService(
             buyerName = buyerName,
             buyerPhone = buyerPhone
         )
+
+        val paymentConfig = paymentGateway.getPaymentClientConfig()
+
+        return mapper.invoke(paymentId, paymentConfig.storeId, paymentConfig.channelKey)
     }
 
     @Transactional
-    fun verifyPayment(paymentId: String){
+    fun verifyPayment(paymentId: String) {
         paymentVerificationService.verifyPayment(paymentId)
     }
 

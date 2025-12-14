@@ -93,7 +93,7 @@ class PaymentStateService(
         buyerEmail: String,
         buyerName: String,
         buyerPhone: String,
-    ): PreparePaymentResponse {
+    ) {
         if (paymentRepository.existsByPaymentId(paymentId)) {
             throw InvalidValueException(
                 valueName = "paymentId",
@@ -121,13 +121,7 @@ class PaymentStateService(
             logger.warn("Pre Register by PaymentGateway failed. paymentId: $paymentId, amount: $amount, ${e.message}")
         }
 
-        logger.info("Payment is prepared. paymentId=$paymentId, productType=${paymentEntity.productType} productUuid=${paymentEntity.productUuid}, amount=${paymentEntity.amount}")
-
-        return PreparePaymentResponse(
-            paymentId = paymentId,
-            storeId = paymentGateway.getPaymentClientConfig().storeId,
-            channelKey = paymentGateway.getPaymentClientConfig().channelKey,
-        )
+        logger.info("[3040] Payment 준비 완료. paymentId=$paymentId, productType=${paymentEntity.productType} productUuid=${paymentEntity.productUuid}, amount=${paymentEntity.amount}")
     }
 
     data class PreparePaymentResponse(
