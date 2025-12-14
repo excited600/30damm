@@ -80,7 +80,7 @@ class PaymentEntity(
 ): BaseEntity(uuid) {
 
     companion object {
-        fun pending(
+        fun ready(
             paymentId: String,
             productType: ProductType,
             productUuid: UUID,
@@ -96,7 +96,7 @@ class PaymentEntity(
                 productType = productType,
                 productUuid = productUuid,
                 amount = amount,
-                status = Status.PENDING,
+                status = Status.READY,
                 productName = productName,
                 buyerEmail = buyerEmail,
                 buyerName = buyerName,

@@ -125,6 +125,26 @@ CREATE TABLE series_schedules(
     )
 );
 
+CREATE TABLE payments (
+    uuid UUID PRIMARY KEY,
+    payment_id VARCHAR(100) NOT NULL UNIQUE,
+    product_type VARCHAR(255) NOT NULL,
+    product_uuid UUID NOT NULL,
+    amount INTEGER NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status in ('PENDING', 'READY', 'VIRTUAL_ACCOUNT_ISSUED', 'PAID', 'FAILED', 'CANCELLED', 'PARTIAL_CANCELLED')),
+    product_name VARCHAR(200) NOT NULL,
+    buyer_email VARCHAR(100),
+    buyer_name VARCHAR(50),
+    buyer_phone VARCHAR(20),
+    transaction_id VARCHAR(100),
+    cancelled_amount INTEGER NOT NULL DEFAULT 0,
+    paid_at TIMESTAMP,
+    cancelled_at TIMESTAMP,
+    fail_reason VARCHAR(500),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 --CREATE TABLE user_keywords (
 --    uuid UUID PRIMARY KEY,
 --    user_uuid UUID NOT NULL,

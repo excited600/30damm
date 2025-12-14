@@ -25,7 +25,7 @@ class PaymentController(
      * 결제 준비 - 프론트에서 결제창 띄우기 전 호출
      */
     @PostMapping("/prepare")
-    suspend fun preparePayment(
+    fun preparePayment(
         @RequestBody request:
         PreparePaymentApiRequest
     ): ResponseEntity<PreparePaymentApiResponse> {
@@ -57,7 +57,7 @@ class PaymentController(
      * 결제 검증 - 프론트에서 결제 완료 후 호출
      */
     @PostMapping("/verify")
-    suspend fun verifyPayment(
+    fun verifyPayment(
         @RequestBody request: VerifyPaymentRequest
     ): ResponseEntity<PaymentApiResponse> {
 
@@ -78,7 +78,7 @@ class PaymentController(
      * 결제 취소
      */
     @PostMapping("/{paymentId}/cancel")
-    suspend fun cancelPayment(
+    fun cancelPayment(
         paymentId: String,
         @RequestBody request: CancelPaymentRequest
     ): ResponseEntity<PaymentApiResponse> {
@@ -124,7 +124,7 @@ class PaymentController(
     }
 
     @PostMapping("/webhook")
-    suspend fun handleWebhook(
+    fun handleWebhook(
         @RequestBody webhook: PortOneWebhook,
         @RequestHeader("x-portone-signature") signature: String?
     ): ResponseEntity<String> {

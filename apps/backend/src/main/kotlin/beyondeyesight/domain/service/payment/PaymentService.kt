@@ -1,10 +1,8 @@
 package beyondeyesight.domain.service.payment
 
-import beyondeyesight.config.uuidV7
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.payment.PaymentFailException
 import beyondeyesight.domain.model.payment.Currency
-import beyondeyesight.domain.model.payment.PaymentCancelResult
 import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.PaymentVerifyResult
 import beyondeyesight.domain.model.payment.ProductType
@@ -24,7 +22,7 @@ class PaymentService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun preparePayment(
+    fun preparePayment(
         paymentId: String,
         productType: ProductType,
         productUuid: UUID,
@@ -43,7 +41,7 @@ class PaymentService(
         }
 
         val paymentEntity = paymentRepository.save(
-            PaymentEntity.pending(
+            PaymentEntity.ready(
                 paymentId = paymentId,
                 productUuid = productUuid,
                 amount = amount,
@@ -73,17 +71,18 @@ class PaymentService(
         )
     }
 
-    suspend fun failPayment(paymentId: String) {
+    fun failPayment(paymentId: String) {
 
     }
 
-    suspend fun verifyPayment(paymentId: String): VerifyPaymentResponse {
+    fun verifyPayment(paymentId: String): VerifyPaymentResponse {
         logger.info("Payment Verification started. paymentId=$paymentId")
 
         // 비관적 락으로 조회 (동시 요청 대비) // TODO: 락테이블로 바꾸기. 어떤 동시성 문제인지 정확히 알기
         val payment = paymentRepository.findByPaymentIdForUpdate(paymentId)
             ?: run {
                 logger.error("Payment not found: paymentId=$paymentId")
+                //todo: throw
                 return VerifyPaymentResponse(
                     success = false,
                     message = "Payment not found",
@@ -92,7 +91,7 @@ class PaymentService(
             }
 
         // 이미 처리된 결제인지 확인
-        if (payment.status != Status.PENDING) {
+        if (payment.status != Status.READY) {
             logger.warn("Already processed: paymentId=$paymentId, status=${payment.status}")
             return if (payment.status == Status.PAID) {
                 VerifyPaymentResponse(
@@ -146,7 +145,17 @@ class PaymentService(
         val status = Status.entries.find { it.name == paymentDto.status }
         return status?.let {
             when (it) {
-                Status.READY, Status.VIRTUAL_ACCOUNT_ISSUED -> {
+                Status.READY -> {
+                    val reason = "결제 되지 않음"
+                    payment.fail(reason)
+                    logger.warn("검증 실패: paymentId=$paymentId, reason=$reason")
+                    VerifyPaymentResponse(
+                        success = false,
+                        message = "Payment not executed: $reason",
+                        payment = null
+                    )
+                }
+                Status.VIRTUAL_ACCOUNT_ISSUED -> {
                     // 가상계좌 발급됨 - 입금 대기 상태
                     logger.info("가상계좌 발급 완료, 입금 대기: paymentId=$paymentId")
                     VerifyPaymentResponse(
@@ -205,7 +214,8 @@ class PaymentService(
                         payment = null
                     )
                 }
-                else -> {
+
+                Status.PENDING -> {
                     logger.warn("Not Expected status: status=${paymentDto.status}, paymentId=$paymentId")
                     VerifyPaymentResponse(
                         success = false,
@@ -226,7 +236,7 @@ class PaymentService(
 
 
 
-    suspend fun cancelPayment(
+    fun cancelPayment(
         paymentId: String,
         reason: String,
         amount: Int? = null  // null이면 전액 취소

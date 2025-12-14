@@ -6,15 +6,15 @@ import beyondeyesight.domain.model.payment.PaymentClientConfig
 import beyondeyesight.domain.model.payment.PaymentDto
 
 interface PaymentGateway {
-    suspend fun getPayment(paymentId: String): PaymentDto
+    fun getPayment(paymentId: String): PaymentDto
 
-    suspend fun cancelPayment(
+    fun cancelPayment(
         paymentId: String,
         reason: String,
         amount: Int? = null  // null이면 전액 취소
     ): PaymentCancelResponse
 
-    suspend fun preRegisterPayment(
+    fun preRegisterPayment(
         paymentId: String,
         totalAmount: Int,
         currency: Currency,

@@ -10,8 +10,6 @@ import beyondeyesight.domain.service.payment.PaymentGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitBodyOrNull
 
 
 @Service
@@ -21,14 +19,15 @@ class PortoneV2PaymentGateway(
 ): PaymentGateway {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    override suspend fun getPayment(paymentId: String): PaymentDto {
+    override fun getPayment(paymentId: String): PaymentDto {
         logger.debug("포트원 결제 조회: paymentId=$paymentId")
 
         try {
             val response = portOneWebClient.get()
                 .uri("/payments/{paymentId}", paymentId)
                 .retrieve()
-                .awaitBody<PaymentDto>()
+                .bodyToMono(PaymentDto::class.java)
+                .block() ?: throw PaymentFailException("Payment response is null")
 
             logger.info("결제 조회 성공: paymentId=$paymentId, status=${response.status}")
             return response
@@ -39,7 +38,7 @@ class PortoneV2PaymentGateway(
         }
     }
 
-    override suspend fun cancelPayment(
+    override fun cancelPayment(
         paymentId: String,
         reason: String,
         amount: Int?
@@ -54,7 +53,8 @@ class PortoneV2PaymentGateway(
                 .uri("/payments/{paymentId}/cancel", paymentId)
                 .bodyValue(requestBody)
                 .retrieve()
-                .awaitBody<PaymentCancelResponse>()
+                .bodyToMono(PaymentCancelResponse::class.java)
+                .block() ?: throw PaymentFailException("Cancel response is null")
 
             logger.info("결제 취소 성공: paymentId=$paymentId, cancelledAmount=${response.cancellation?.totalAmount}")
             return response
@@ -65,7 +65,7 @@ class PortoneV2PaymentGateway(
         }
     }
 
-    override suspend fun preRegisterPayment(paymentId: String, totalAmount: Int, currency: Currency) {
+    override fun preRegisterPayment(paymentId: String, totalAmount: Int, currency: Currency) {
         logger.debug("결제 사전 등록: paymentId=$paymentId, amount=$totalAmount")
 
         try {
@@ -79,7 +79,8 @@ class PortoneV2PaymentGateway(
                     )
                 )
                 .retrieve()
-                .awaitBodyOrNull<Any>()
+                .bodyToMono(Any::class.java)
+                .block()
 
             logger.info("결제 사전 등록 완료: paymentId=$paymentId")
 

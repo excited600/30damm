@@ -7,6 +7,7 @@ import beyondeyesight.domain.service.payment.PaymentService
 import beyondeyesight.domain.service.payment.PaymentService.VerifyPaymentResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -15,7 +16,8 @@ class PaymentApplicationService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleWebhook(webhook: Webhook) {
+    @Transactional
+    fun handleWebhook(webhook: Webhook) {
         logger.info(
             "웹훅 수신: type=${webhook.type}, paymentId=${webhook.data?.paymentId}, " +
                     "status=${webhook.data?.status}"
@@ -66,7 +68,8 @@ class PaymentApplicationService(
         }
     }
 
-    suspend fun preparePayment(
+    @Transactional
+    fun preparePayment(
         paymentId: String,
         productType: ProductType,
         productUuid: UUID,
@@ -88,11 +91,13 @@ class PaymentApplicationService(
         )
     }
 
-    suspend fun verifyPayment(paymentId: String): VerifyPaymentResponse {
+    @Transactional
+    fun verifyPayment(paymentId: String): VerifyPaymentResponse {
         return paymentService.verifyPayment(paymentId)
     }
 
-    suspend fun cancelPayment(paymentId: String, reason: String, amount: Int?): PaymentService.CancelPaymentResponse {
+    @Transactional
+    fun cancelPayment(paymentId: String, reason: String, amount: Int?): PaymentService.CancelPaymentResponse {
         return paymentService.cancelPayment(paymentId, reason, amount)
     }
 

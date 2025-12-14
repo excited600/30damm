@@ -93,11 +93,11 @@ function PaymentButton() {
 
     const handlePayment = async () => {
         const { PortOne } = window;
-        const paymentId = `payment_${Date.now()}`;
+        const paymentId = `GW5_payment_${Date.now()}`;
         const productType = "GATHERING"
         const productUuid ="62252cce-ecc4-468f-b422-4cdd0e5bac98";
         const productName = '상품명';
-        const amount = 1000;
+        const amount = 500;
         const buyerEmail = "wom2277@naver.com";
         const buyerName = "임근원";
         const buyerPhone = "010-1234-5678"
@@ -129,6 +129,9 @@ function PaymentButton() {
                     phoneNumber: buyerPhone,
                 },
             });
+
+            console.log("response");
+            console.log(response);
 
             if (response.code) {
                 // 에러 발생
