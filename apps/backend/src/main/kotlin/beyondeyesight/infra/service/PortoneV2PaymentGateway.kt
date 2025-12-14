@@ -5,7 +5,7 @@ import beyondeyesight.domain.exception.payment.PaymentFailException
 import beyondeyesight.domain.model.payment.Currency
 import beyondeyesight.domain.model.payment.PaymentCancelResponse
 import beyondeyesight.domain.model.payment.PaymentClientConfig
-import beyondeyesight.domain.model.payment.PaymentDto
+import beyondeyesight.domain.model.payment.PaymentFailed
 import beyondeyesight.domain.service.payment.PaymentGateway
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -19,14 +19,14 @@ class PortoneV2PaymentGateway(
 ): PaymentGateway {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    override fun getPayment(paymentId: String): PaymentDto {
+    override fun getPayment(paymentId: String): PaymentFailed {
         logger.debug("포트원 결제 조회: paymentId=$paymentId")
 
         try {
             val response = portOneWebClient.get()
                 .uri("/payments/{paymentId}", paymentId)
                 .retrieve()
-                .bodyToMono(PaymentDto::class.java)
+                .bodyToMono(PaymentFailed::class.java)
                 .block() ?: throw PaymentFailException("Payment response is null")
 
             logger.info("결제 조회 성공: paymentId=$paymentId, status=${response.status}")
@@ -86,7 +86,6 @@ class PortoneV2PaymentGateway(
 
         } catch (e: Exception) {
             logger.warn("결제 사전 등록 실패 (계속 진행): paymentId=$paymentId, error=${e.message}")
-            // 사전 등록 실패해도 결제는 계속 진행 가능
         }
     }
 

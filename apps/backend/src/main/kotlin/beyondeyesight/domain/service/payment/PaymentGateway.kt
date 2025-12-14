@@ -3,10 +3,10 @@ package beyondeyesight.domain.service.payment
 import beyondeyesight.domain.model.payment.Currency
 import beyondeyesight.domain.model.payment.PaymentCancelResponse
 import beyondeyesight.domain.model.payment.PaymentClientConfig
-import beyondeyesight.domain.model.payment.PaymentDto
+import beyondeyesight.domain.model.payment.PaymentFailed
 
 interface PaymentGateway {
-    fun getPayment(paymentId: String): PaymentDto
+    fun getPayment(paymentId: String): PaymentFailed
 
     fun cancelPayment(
         paymentId: String,

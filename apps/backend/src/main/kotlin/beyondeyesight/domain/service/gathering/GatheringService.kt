@@ -55,9 +55,9 @@ class GatheringService(
     ): GatheringEntity {
         validate(minAge, maxAge, maxMaleCount, maxFemaleCount, fee)
 
-        val host = userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException(
+        val host = userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
-            resourceId = hostUuid
+            resourceUuid = hostUuid
         )
 
         val entity = GatheringEntity.open(
@@ -138,9 +138,9 @@ class GatheringService(
     }
 
     fun join(gatheringUuid: UUID, userUuid: UUID) {
-        userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException(
+        userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
-            resourceId = userUuid
+            resourceUuid = userUuid
         )
         val token = lockService.lockWithRetry(
             resourceName = "gathering",
@@ -152,9 +152,9 @@ class GatheringService(
 
         try {
             val gathering = gatheringRepository.findByUuid(gatheringUuid)
-                ?: throw ResourceNotFoundException(
+                ?: throw ResourceNotFoundException.byUuid(
                     resourceName = "Gathering",
-                    resourceId = gatheringUuid
+                    resourceUuid = gatheringUuid
                 )
 
             val currentGuestCount = guestRepository.countByGathering(gathering.uuid)
@@ -234,9 +234,9 @@ class GatheringService(
         maxMaleCount: Int?,
         maxFemaleCount: Int?
     ) {
-        userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException(
+        userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
-            resourceId = hostUuid
+            resourceUuid = hostUuid
         )
 
         val series = seriesRepository.save(

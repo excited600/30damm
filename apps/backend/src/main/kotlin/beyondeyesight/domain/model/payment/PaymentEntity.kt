@@ -2,7 +2,6 @@ package beyondeyesight.domain.model.payment
 
 import beyondeyesight.config.uuidV7
 import beyondeyesight.domain.exception.InvalidValueException
-import beyondeyesight.domain.exception.payment.PaymentStatusException
 import beyondeyesight.domain.model.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -73,11 +72,16 @@ class PaymentEntity(
     var paidAt: LocalDateTime?,
 
     @Column(nullable = true)
+    var failedAt: LocalDateTime?,
+
+    @Column(nullable = true)
     var cancelledAt: LocalDateTime?,
 
     @Column(length = 500)
+    var cancelReason: String?,
+    @Column(length = 500)
     var failReason: String?,
-): BaseEntity(uuid) {
+) : BaseEntity(uuid) {
 
     companion object {
         fun ready(
@@ -105,47 +109,95 @@ class PaymentEntity(
                 cancelledAmount = 0,
                 paidAt = null,
                 cancelledAt = null,
+                failedAt = null,
+                cancelReason = null,
                 failReason = null
             )
 
         }
     }
 
-    fun pay(transactionId: String, paidAt: LocalDateTime) {
-        if (status != Status.PENDING) {
-            throw PaymentStatusException.cannotPay(status)
-        }
-        this.transactionId = transactionId
+    fun pay(paidAt: LocalDateTime) {
         this.status = Status.PAID
         this.paidAt = paidAt
     }
 
-    fun fail(reason: String) {
-        check(status == Status.PENDING) {
-            "PENDING 상태에서만 실패 처리 가능합니다. 현재 상태: $status"
-        }
+    fun synchronize(payment: Payment) {
+        when (payment) {
+            is PaymentCancelled -> {
+                this.cancel(
+                    cancelAmount = payment.amount.cancelled,
+                    cancelledAt = payment.cancelledAt,
+                    reason = null
+                )
+            }
 
-        if (status != Status.PENDING) {
-            throw PaymentStatusException.cannotFail(status)
+            is PaymentFailed -> {
+                this.fail(
+                    reason = payment.failure.reason,
+                    failedAt = payment.failedAt
+                )
+            }
+
+            is PaymentPaid -> {
+                this.pay(payment.paidAt)
+            }
+
+            is PaymentPartialCancelled -> {
+                this.cancelPartially(
+                    cancelAmount = payment.amount.cancelled,
+                    cancelledAt = payment.cancelledAt,
+                    reason = null
+                )
+            }
+
+            is PaymentPayPending -> {
+                this.payPending()
+            }
+
+            is PaymentReady -> {
+                this.ready()
+            }
+
+            is PaymentVirtualAccountIssued -> {
+                this.virtualAccountIssued()
+            }
         }
+    }
+
+    fun ready() {
+        this.status = Status.READY
+    }
+
+    fun virtualAccountIssued() {
+        this.status = Status.VIRTUAL_ACCOUNT_ISSUED
+    }
+
+    fun payPending() {
+        this.status = Status.PAY_PENDING
+    }
+
+    fun fail(reason: String, failedAt: LocalDateTime) {
         this.status = Status.FAILED
+        this.failedAt = failedAt
         this.failReason = reason
     }
 
-    fun cancel(cancelledAt: LocalDateTime) {
-        if (status != Status.PAID) {
-            throw PaymentStatusException.cannotCancel(status)
+    fun cancel(cancelAmount: Int, cancelledAt: LocalDateTime, reason: String?) {
+        if (cancelAmount <= 0) {
+            throw InvalidValueException(
+                valueName = "cancelAmount",
+                value = cancelAmount,
+                reason = "cancel amount must be greater than 0"
+            )
         }
         this.status = Status.CANCELLED
-        this.cancelledAmount = this.amount
+        this.cancelledAmount = cancelAmount
         this.cancelledAt = cancelledAt
+        this.cancelReason = reason
     }
 
-    fun cancelPartially(cancelAmount: Int, cancelledAt: LocalDateTime) {
-        if (status != Status.PAID) {
-            throw PaymentStatusException.cannotCancelPartially(status)
-        }
-
+    fun cancelPartially(cancelAmount: Int, cancelledAt: LocalDateTime, reason: String?) {
         if (cancelAmount <= 0) {
             throw InvalidValueException(
                 valueName = "cancelAmount",
@@ -161,14 +213,11 @@ class PaymentEntity(
             )
         }
 
+        this.status = Status.PARTIAL_CANCELLED
         this.cancelledAmount += cancelAmount
         this.cancelledAt = cancelledAt
-
-        this.status = if (cancelledAmount >= amount) {
-            Status.CANCELLED
-        } else {
-            Status.PARTIAL_CANCELLED
-        }
+        this.cancelReason = reason
     }
+
     fun getCancellableAmount(): Int = amount - cancelledAmount
 }

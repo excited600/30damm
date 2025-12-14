@@ -3,8 +3,8 @@ package beyondeyesight.application
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Webhook
-import beyondeyesight.domain.service.payment.PaymentService
-import beyondeyesight.domain.service.payment.PaymentService.VerifyPaymentResponse
+import beyondeyesight.domain.service.payment.PaymentStateService
+import beyondeyesight.domain.service.payment.PaymentVerificationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,7 +12,8 @@ import java.util.UUID
 
 @Service
 class PaymentApplicationService(
-    private val paymentService: PaymentService
+    private val paymentVerificationService: PaymentVerificationService,
+    private val paymentStateService: PaymentStateService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -31,8 +32,8 @@ class PaymentApplicationService(
                 "Transaction.Paid" -> {
                     // 결제 완료 웹훅
                     webhook.data?.paymentId?.let { paymentId ->
-                        val result = verifyPayment(paymentId)
-                        logger.info("웹훅 결제 검증 결과: paymentId=$paymentId, success=${result.success}")
+                        verifyPayment(paymentId)
+                        logger.info("웹훅 결제 검증 결과: paymentId=$paymentId, success=${true}")
                     }
                 }
 
@@ -42,7 +43,7 @@ class PaymentApplicationService(
                     cancelPayment(
                         paymentId = webhook.data?.paymentId?: throw InvalidValueException("paymentId", Unit, "취소 웹훅에 paymentId 누락"),
                         reason = "이거 웹훅 요청 어떻게 오는지 보고, 그에 맞춰서 대응", //TODO
-                        amount = webhook.data.totalAmount?.toInt()
+                        amount = webhook.data.totalAmount
                     )
                     // 필요 시 DB 동기화 처리
                 }
@@ -78,8 +79,8 @@ class PaymentApplicationService(
         buyerEmail: String,
         buyerName: String,
         buyerPhone: String
-    ): PaymentService.PreparePaymentResponse {
-        return paymentService.preparePayment(
+    ): PaymentStateService.PreparePaymentResponse {
+        return paymentStateService.preparePayment(
             paymentId = paymentId,
             productType = productType,
             productUuid = productUuid,
@@ -92,13 +93,13 @@ class PaymentApplicationService(
     }
 
     @Transactional
-    fun verifyPayment(paymentId: String): VerifyPaymentResponse {
-        return paymentService.verifyPayment(paymentId)
+    fun verifyPayment(paymentId: String){
+        paymentVerificationService.verifyPayment(paymentId)
     }
 
     @Transactional
-    fun cancelPayment(paymentId: String, reason: String, amount: Int?): PaymentService.CancelPaymentResponse {
-        return paymentService.cancelPayment(paymentId, reason, amount)
+    fun cancelPayment(paymentId: String, reason: String, amount: Int) {
+        paymentStateService.cancelPayment(paymentId, reason, amount)
     }
 
 }

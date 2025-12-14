@@ -15,13 +15,13 @@ class GuestService(
     private val userRepository: UserRepository,
 ) {
     fun join(gatheringUuid: UUID, userUuid: UUID): GuestEntity {
-        val gatheringEntity = gatheringRepository.findByUuid(gatheringUuid) ?: throw ResourceNotFoundException(
+        val gatheringEntity = gatheringRepository.findByUuid(gatheringUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "Gathering",
-            resourceId = gatheringUuid
+            resourceUuid = gatheringUuid
         )
-        userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException(
+        userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
-            resourceId = userUuid
+            resourceUuid = userUuid
         )
         val guest = GuestEntity.Companion.join(
             gatheringUuid = gatheringEntity.uuid,

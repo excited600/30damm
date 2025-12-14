@@ -1,10 +1,8 @@
 package beyondeyesight.ui
 
 import beyondeyesight.application.PaymentApplicationService
-import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.payment.*
-import beyondeyesight.domain.model.payment.Currency
-import beyondeyesight.domain.service.payment.PaymentService
+import beyondeyesight.domain.service.payment.PaymentVerificationService
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.slf4j.LoggerFactory
@@ -15,15 +13,11 @@ import java.util.*
 @RestController
 @RequestMapping("/payments")
 class PaymentController(
-    private val paymentService: PaymentService,
+    private val paymentVerificationService: PaymentVerificationService,
     private val paymentApplicationService: PaymentApplicationService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-
-    /**
-     * 결제 준비 - 프론트에서 결제창 띄우기 전 호출
-     */
     @PostMapping("/prepare")
     fun preparePayment(
         @RequestBody request:
@@ -42,13 +36,9 @@ class PaymentController(
 
         return ResponseEntity.ok(
             PreparePaymentApiResponse(
-                success = true,
                 paymentId = result.paymentId,
                 storeId = result.storeId,
                 channelKey = result.channelKey,
-                orderName = result.productName,
-                amount = result.amount,
-                currency = result.currency
             )
         )
     }
@@ -59,19 +49,9 @@ class PaymentController(
     @PostMapping("/verify")
     fun verifyPayment(
         @RequestBody request: VerifyPaymentRequest
-    ): ResponseEntity<PaymentApiResponse> {
-
+    ): ResponseEntity<Unit> {
         val result = paymentApplicationService.verifyPayment(request.paymentId)
-        val response = PaymentApiResponse(
-            success = result.success,
-            message = result.message,
-            payment = result.payment
-        )
-        return if (result.success) {
-            ResponseEntity.ok(response)
-        } else {
-            ResponseEntity.badRequest().body(response)
-        }
+        return ResponseEntity.ok(Unit);
     }
 
     /**
@@ -81,7 +61,7 @@ class PaymentController(
     fun cancelPayment(
         paymentId: String,
         @RequestBody request: CancelPaymentRequest
-    ): ResponseEntity<PaymentApiResponse> {
+    ): ResponseEntity<Unit> {
 
         val result = paymentApplicationService.cancelPayment(
             paymentId = paymentId,
@@ -89,38 +69,7 @@ class PaymentController(
             amount = request.amount
         )
 
-        val response = PaymentApiResponse(
-            success = result.success,
-            message = result.message,
-            payment = result.payment
-        )
-
-
-        return if (result.success) {
-            ResponseEntity.ok(response)
-        } else {
-            ResponseEntity.badRequest().body(response)
-        }
-    }
-
-    /**
-     * 결제 단건 조회
-     */
-    @GetMapping("/{paymentId}")
-    fun getPayment(
-        @PathVariable paymentId: String
-    ): ResponseEntity<PaymentApiResponse> {
-
-        val payment = paymentService.getPayment(paymentId)
-            ?: return ResponseEntity.notFound().build()
-
-        return ResponseEntity.ok(
-            PaymentApiResponse(
-                success = true,
-                message = null,
-                payment = PaymentDto.from(payment)
-            )
-        )
+        return ResponseEntity.ok(Unit)
     }
 
     @PostMapping("/webhook")
@@ -136,7 +85,7 @@ class PaymentController(
                     paymentId = webhook.data?.paymentId,
                     transactionId = webhook.data?.transactionId,
                     status = webhook.data?.status,
-                    totalAmount = webhook.data?.totalAmount
+                    totalAmount = webhook.data?.totalAmount ?: 0 // TODO: 이거 0 값 확인해봐야.
                 )
             )
         )
@@ -161,13 +110,9 @@ data class PreparePaymentApiRequest(
 )
 
 data class PreparePaymentApiResponse(
-    val success: Boolean,
     val paymentId: String,
     val storeId: String,
     val channelKey: String,
-    val orderName: String,
-    val amount: Int,
-    val currency: Currency
 )
 
 data class VerifyPaymentRequest(
@@ -177,49 +122,7 @@ data class VerifyPaymentRequest(
 data class CancelPaymentRequest(
     val reason: String,
 
-    val amount: Int? = null  // null이면 전액 취소
-)
-
-data class PaymentApiResponse(
-    val success: Boolean,
-    val message: String?,
-    val payment: PaymentDto?
-)
-
-data class PaymentDto(
-    val paymentId: String,
-    val productUuid: UUID,
-    val status: String,
-    val amount: Int,
-    val cancelledAmount: Int,
-    val orderName: String,
-    val paidAt: String?,
-    val cancelledAt: String?
-) {
-    companion object {
-        fun from(entity: PaymentEntity) = PaymentDto(
-            paymentId = entity.paymentId,
-            productUuid = entity.productUuid,
-            status = entity.status.name,
-            amount = entity.amount,
-            cancelledAmount = entity.cancelledAmount,
-            orderName = entity.productName,
-            paidAt = entity.paidAt?.toString(),
-            cancelledAt = entity.cancelledAt?.toString()
-        )
-    }
-}
-
-// Extension function
-fun PaymentEntity.toDto() = PaymentDto(
-    paymentId = this.paymentId,
-    productUuid = this.productUuid,
-    status = this.status.name,
-    amount = this.amount,
-    cancelledAmount = this.cancelledAmount,
-    orderName = this.productName,
-    paidAt = this.paidAt?.toString(),
-    cancelledAt = this.cancelledAt?.toString()
+    val amount: Int
 )
 
 
@@ -241,5 +144,5 @@ data class PortOneWebhookData(
     val status: String? = null,
 
     @JsonProperty("totalAmount")
-    val totalAmount: Long? = null
+    val totalAmount: Int? = null
 )

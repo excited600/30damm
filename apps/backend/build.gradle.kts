@@ -73,27 +73,32 @@ openApiGenerate {
     outputDir.set("${buildDir}/generated")
     apiPackage.set("beyondeyesight.api")
     modelPackage.set("beyondeyesight.model")
-    typeMappings.set(mapOf(
-        "date-time" to "LocalDateTime",
-        "DateTime" to "LocalDateTime",
-        "time" to "LocalTime",
-        "date" to "LocalDate"
-    ))
-    importMappings.set(mapOf(
-        "LocalDateTime" to "java.time.LocalDateTime",
-        "LocalTime" to "java.time.LocalTime",
-        "LocalDate" to "java.time.LocalDate"
-    ))
-    configOptions.set(mapOf(
-        "interfaceOnly" to "false",
-        "serviceInterface" to "true",
-        "useSpringBoot3" to "true",
-        "useTags" to "true",
-        "dateLibrary" to "java8",
-        "serializationLibrary" to "jackson",
-        "exceptionHandler" to "false",
-        "skipDefaultInterface" to "true",
-        "useOneOfInterfaces" to "true"
+    typeMappings.set(
+        mapOf(
+            "date-time" to "LocalDateTime",
+            "DateTime" to "LocalDateTime",
+            "time" to "LocalTime",
+            "date" to "LocalDate"
+        )
+    )
+    importMappings.set(
+        mapOf(
+            "LocalDateTime" to "java.time.LocalDateTime",
+            "LocalTime" to "java.time.LocalTime",
+            "LocalDate" to "java.time.LocalDate"
+        )
+    )
+    configOptions.set(
+        mapOf(
+            "interfaceOnly" to "false",
+            "serviceInterface" to "true",
+            "useSpringBoot3" to "true",
+            "useTags" to "true",
+            "dateLibrary" to "java8",
+            "serializationLibrary" to "jackson",
+            "exceptionHandler" to "false",
+            "skipDefaultInterface" to "true",
+            "useOneOfInterfaces" to "true"
     ))
 }
 
