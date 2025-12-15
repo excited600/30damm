@@ -8,14 +8,14 @@ import beyondeyesight.domain.model.payment.Webhook
 import beyondeyesight.domain.model.payment.WebhookData
 import beyondeyesight.model.PreparePaymentRequest
 import beyondeyesight.model.PreparePaymentResponse
+import beyondeyesight.model.VerifyPaymentRequest
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
-@RestController
-@RequestMapping("/payments")
+@Service
 class PaymentController(
     private val paymentApplicationService: PaymentApplicationService,
 ) : PaymentsApiService {
@@ -47,8 +47,8 @@ class PaymentController(
         )
     }
 
-    override fun verifyPayment(paymentId: String) {
-        paymentApplicationService.verifyPayment(paymentId)
+    override fun verifyPayment(paymentId: String, verifyPaymentRequest: VerifyPaymentRequest) {
+        paymentApplicationService.verifyPayment(paymentId, verifyPaymentRequest.paymentToken, verifyPaymentRequest.txId, verifyPaymentRequest.amount)
     }
 
     /**

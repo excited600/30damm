@@ -24,8 +24,8 @@ paths:
     $ref: './paths/gatherings.yml#/~1gatherings'
   /series:
     $ref: './paths/gatherings.yml#/~1series'
-  /gatherings/{gatheringUuid}/guests:
-    $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1guests'
+  /gatherings/{gatheringUuid}/join:
+    $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1join'
 
   # Payments
   /payments/{paymentId}/prepare:
@@ -36,8 +36,6 @@ paths:
 components:
   schemas:
     # Gatherings
-    #    GetGatheringsResponse:
-    #      $ref: './components/schemas/gatherings.yml#/GetGatheringsResponse'
     OpenGatheringRequest:
       $ref: './components/schemas/gathering/openGathering/openGatheringRequest.yml#/OpenGatheringRequest'
     OpenGatheringResponse:
@@ -52,10 +50,15 @@ components:
       $ref: './components/schemas/gathering/gathering.yml#/Gathering'
     ScrollFilteredGatheringsResponse:
       $ref: './components/schemas/gathering/scrollFilteredGatherings/scrollFilteredGatheringsResponse.yml#/ScrollFilteredGatheringsResponse'
+    JoinGatheringRequest:
+      $ref: './components/schemas/gathering/joinGathering/joinGatheringRequest.yml#/JoinGatheringRequest'
+
+    # Payments
     PreparePaymentRequest:
       $ref: './components/schemas/payment/preparePayment/preparePaymentRequest.yml#/PreparePaymentRequest'
     PreparePaymentResponse:
       $ref: './components/schemas/payment/preparePayment/preparePaymentResponse.yml#/PreparePaymentResponse'
+
 
 #    # Users
 #    SignUpRequest:

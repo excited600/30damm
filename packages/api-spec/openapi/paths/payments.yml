@@ -38,6 +38,27 @@
         schema:
           type: string
         description: Unique identifier for the payment
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - paymentToken
+              - txId
+              - amount
+            properties:
+              paymentToken:
+                type: string
+                description: Token received from the payment gateway to verify the payment
+              txId:
+                type: string
+                description: Transaction ID provided by the payment gateway
+              amount:
+                type: integer
+                description: Amount to be verified in Won(KRW)
+
     responses:
       '200':
         description: Payment verified successfully

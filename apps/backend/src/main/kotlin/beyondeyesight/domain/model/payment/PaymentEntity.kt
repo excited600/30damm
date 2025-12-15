@@ -81,7 +81,7 @@ class PaymentEntity(
     var cancelReason: String?,
     @Column(length = 500)
     var failReason: String?,
-) : BaseEntity(uuid) {
+) : BaseEntity(uuid, RESOURCE_NAME) {
 
     companion object {
         fun ready(
@@ -113,8 +113,9 @@ class PaymentEntity(
                 cancelReason = null,
                 failReason = null
             )
-
         }
+
+        const val RESOURCE_NAME = "payments"
     }
 
     fun pay(paidAt: LocalDateTime) {
@@ -123,6 +124,8 @@ class PaymentEntity(
     }
 
     fun synchronize(payment: Payment) {
+        //TODO: 트랜잭션 id 여러개로. 부분취소 지원하기 위해.
+        this.transactionId = payment.transactionId
         when (payment) {
             is PaymentCancelled -> {
                 this.cancel(

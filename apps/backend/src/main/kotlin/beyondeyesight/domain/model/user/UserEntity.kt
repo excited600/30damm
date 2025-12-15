@@ -38,7 +38,7 @@ class UserEntity(
     @Enumerated(EnumType.STRING)
     val provider: Provider,
 
-    ) : BaseEntity(uuid = uuid) {
+    ) : BaseEntity(uuid = uuid, resourceName = RESOURCE_NAME) {
 
     companion object {
         fun signUp(
@@ -66,6 +66,7 @@ class UserEntity(
                 provider = Provider.THIRTY_FORTY,
             )
         }
+        const val RESOURCE_NAME = "users"
     }
 
     enum class Provider {

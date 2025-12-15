@@ -13,6 +13,8 @@ abstract class BaseEntity(
     @Id
     @Column(nullable = false)
     val uuid: UUID,
+
+    val resourceName: String
 ) {
 
     @CreationTimestamp

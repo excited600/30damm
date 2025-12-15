@@ -1,33 +1,17 @@
 package beyondeyesight.ui
 
-import beyondeyesight.application.GatheringApplicationService
-import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.api.GatheringsApiService
+import beyondeyesight.application.GatheringApplicationService
 import beyondeyesight.config.toDurationHours
 import beyondeyesight.config.toHoursFloat
 import beyondeyesight.domain.exception.InvalidValueException
-import beyondeyesight.domain.model.gathering.Category
-import beyondeyesight.domain.model.gathering.DateSchedule
-import beyondeyesight.domain.model.gathering.ScheduleType
-import beyondeyesight.domain.model.gathering.SubCategory
-import beyondeyesight.domain.model.gathering.WeeklySchedule
-import beyondeyesight.model.DateScheduleSeriesRequest
-import beyondeyesight.model.GatheringApproveType
-import beyondeyesight.model.GatheringCategory
-import beyondeyesight.model.GatheringDayOfWeek
-import beyondeyesight.model.GatheringStatus
-import beyondeyesight.model.GatheringSubCategory
-import beyondeyesight.model.OpenGatheringRequest
-import beyondeyesight.model.OpenGatheringResponse
-import beyondeyesight.model.ScheduleSeriesRequest
-import beyondeyesight.model.ScrollFilteredGatheringsResponse
-import beyondeyesight.model.WeeklyScheduleSeriesRequest
+import beyondeyesight.domain.model.gathering.*
+import beyondeyesight.model.*
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -43,11 +27,15 @@ class GatheringController(
 
     override fun joinGathering(
         gatheringUuid: UUID,
-        joinGatheringRequest: beyondeyesight.model.JoinGatheringRequest
+        joinGatheringRequest: JoinGatheringRequest
     ) {
         gatheringApplicationService.join(
             gatheringUuid = gatheringUuid,
-            userUuid = joinGatheringRequest.userUuid
+            userUuid = joinGatheringRequest.userUuid,
+            paymentId = joinGatheringRequest.paymentId,
+            paymentToken = joinGatheringRequest.paymentToken,
+            txId = joinGatheringRequest.txId,
+            amount = joinGatheringRequest.amount
         )
     }
 

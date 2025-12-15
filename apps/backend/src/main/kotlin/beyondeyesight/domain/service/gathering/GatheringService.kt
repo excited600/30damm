@@ -14,7 +14,7 @@ import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.service.LockService
-import beyondeyesight.domain.service.payment.PaymentGateway
+import beyondeyesight.domain.service.payment.PaymentConfirmService
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -29,7 +29,7 @@ class GatheringService(
     private val userRepository: UserRepository,
     private val seriesRepository: SeriesRepository,
     private val seriesScheduleRepository: SeriesScheduleRepository,
-    private val paymentGateway: PaymentGateway,
+    private val paymentConfirmService: PaymentConfirmService
 ) {
     fun open(
         hostUuid: UUID,
@@ -137,7 +137,7 @@ class GatheringService(
         gatheringRepository.save(gathering)
     }
 
-    fun join(gatheringUuid: UUID, userUuid: UUID) {
+    fun join(gatheringUuid: UUID, userUuid: UUID, paymentId: String, paymentToken: String, txId: String, amount: Int) {
         userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
             resourceUuid = userUuid
@@ -156,6 +156,13 @@ class GatheringService(
                     resourceName = "Gathering",
                     resourceUuid = gatheringUuid
                 )
+
+            if (guestRepository.existsByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gathering.uuid)) {
+                throw CannotJoinException.alreadyJoined(
+                    userUuid = userUuid,
+                    gatheringUuid = gathering.uuid,
+                )
+            }
 
             val currentGuestCount = guestRepository.countByGathering(gathering.uuid)
 
@@ -201,9 +208,23 @@ class GatheringService(
                 }
             }
 
+            if (gathering.fee != amount) {
+                throw CannotJoinException.priceChanged(
+                    currentPrice = gathering.fee,
+                    priceAtPay = amount
+                )
+            }
+
             guestService.join(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
+            )
+
+            paymentConfirmService.confirmPayment(
+                paymentId = paymentId,
+                paymentToken = paymentToken,
+                txId = txId,
+                amount = amount
             )
         } finally {
             lockService.unlock("gathering", gatheringUuid.toString(), token)

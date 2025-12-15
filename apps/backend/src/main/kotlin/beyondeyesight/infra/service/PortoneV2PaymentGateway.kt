@@ -3,11 +3,12 @@ package beyondeyesight.infra.service
 import beyondeyesight.config.PortoneProperties
 import beyondeyesight.domain.exception.payment.PaymentFailException
 import beyondeyesight.domain.model.payment.Currency
+import beyondeyesight.domain.model.payment.Payment
 import beyondeyesight.domain.model.payment.PaymentCancelResponse
 import beyondeyesight.domain.model.payment.PaymentClientConfig
-import beyondeyesight.domain.model.payment.PaymentFailed
 import beyondeyesight.domain.service.payment.PaymentGateway
 import org.slf4j.LoggerFactory
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -19,14 +20,14 @@ class PortoneV2PaymentGateway(
 ): PaymentGateway {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    override fun getPayment(paymentId: String): PaymentFailed {
+    override fun getPayment(paymentId: String): Payment {
         logger.debug("포트원 결제 조회: paymentId=$paymentId")
 
         try {
             val response = portOneWebClient.get()
                 .uri("/payments/{paymentId}", paymentId)
                 .retrieve()
-                .bodyToMono(PaymentFailed::class.java)
+                .bodyToMono(Payment::class.java)
                 .block() ?: throw PaymentFailException("Payment response is null")
 
             logger.info("결제 조회 성공: paymentId=$paymentId, status=${response.status}")
@@ -94,5 +95,25 @@ class PortoneV2PaymentGateway(
             storeId = properties.storeId,
             channelKey = properties.channelKey
         )
+    }
+
+    override fun confirm(
+        paymentId: String,
+        paymentToken: String,
+        txId: String,
+        amount: Int
+    ) {
+        val confirmResponse = portOneWebClient.post()
+            .uri("/payments/${paymentId}/confirm")
+            .bodyValue(
+                mapOf(
+                    "paymentToken" to paymentToken,
+                    "txId" to txId,
+                    "totalAmount" to amount
+                )
+            )
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
+            .block()
     }
 }

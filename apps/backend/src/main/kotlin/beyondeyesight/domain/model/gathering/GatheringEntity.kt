@@ -74,7 +74,7 @@ class GatheringEntity(
     val dayOfWeek: DayOfWeek,
     @Column(nullable = false)
     val score: Int,
-): BaseEntity(uuid = uuid) {
+): BaseEntity(uuid = uuid, resourceName = RESOURCE_NAME) {
 
     fun close() {
         this.status = Status.CLOSED
@@ -136,6 +136,7 @@ class GatheringEntity(
 
         const val INITIAL_TOTAL_GUESTS = 1
         const val INITIAL_CLICK_COUNT = 0
+        const val RESOURCE_NAME = "gatherings"
     }
 
     enum class ApproveType {

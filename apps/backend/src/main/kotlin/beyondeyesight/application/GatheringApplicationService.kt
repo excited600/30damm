@@ -176,7 +176,14 @@ class GatheringApplicationService(
     }
 
     @Transactional
-    fun join(gatheringUuid: UUID, userUuid: UUID) {
-        gatheringService.join(gatheringUuid, userUuid)
+    fun join(gatheringUuid: UUID, userUuid: UUID, paymentId: String, paymentToken: String, txId: String, amount: Int) {
+        gatheringService.join(
+            gatheringUuid = gatheringUuid,
+            userUuid = userUuid,
+            paymentId = paymentId,
+            paymentToken = paymentToken,
+            txId = txId,
+            amount = amount
+        )
     }
 }

@@ -141,6 +141,7 @@ CREATE TABLE payments (
     paid_at TIMESTAMP NULL,
     cancelled_at TIMESTAMP NULL,
     cancel_reason VARCHAR(500) NULL,
+    failed_at TIMESTAMP NULL,
     fail_reason VARCHAR(500) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()

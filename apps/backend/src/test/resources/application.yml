@@ -20,3 +20,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+portone:
+  api-secret: Na5vnSd3bSdBtded0DGBWxQbVD8u6oSMHzvvhr7ohSTNm8PyLvSFn4qQlYA2Fq9cVRnBgrf4N6JHGcs7
+  store-id: store-c47dce95-6209-4f04-87f1-78914a40214a
+  base-url: https://api.portone.io
+  channel-key: channel-key-5fc8cfc4-5959-4118-9125-ff591ff94093

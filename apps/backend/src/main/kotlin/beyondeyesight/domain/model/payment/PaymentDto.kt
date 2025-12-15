@@ -33,7 +33,7 @@ sealed interface Payment {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentVirtualAccountIssued(
-    override val status: Status,
+    override val status: Status = Status.VIRTUAL_ACCOUNT_ISSUED,
     override val id: String,
     override val transactionId: String,
     override val merchantId: String,
@@ -42,7 +42,7 @@ data class PaymentVirtualAccountIssued(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentReady(
-    override val status: Status,
+    override val status: Status = Status.READY,
     override val id: String,
     override val transactionId: String,
     override val merchantId: String,
@@ -51,7 +51,7 @@ data class PaymentReady(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentPayPending(
-    override val status: Status,
+    override val status: Status = Status.PAY_PENDING,
     override val id: String,
     override val transactionId: String,
     override val merchantId: String,
@@ -60,7 +60,7 @@ data class PaymentPayPending(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentPartialCancelled(
-    override val status: Status,
+    override val status: Status = Status.PARTIAL_CANCELLED,
     override val id: String,
     override val transactionId: String,
     override val merchantId: String,
@@ -72,7 +72,7 @@ data class PaymentPartialCancelled(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentPaid(
-    override val status: Status,
+    override val status: Status = Status.PAID,
     override val id: String,
     override val transactionId: String,
     override val merchantId: String,
@@ -83,7 +83,7 @@ data class PaymentPaid(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentFailed(
-    override val status: Status,
+    override val status: Status = Status.FAILED,
     override val id: String,
     override val transactionId: String,
     override val merchantId: String,

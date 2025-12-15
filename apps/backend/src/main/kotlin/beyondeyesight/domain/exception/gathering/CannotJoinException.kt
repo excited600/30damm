@@ -25,5 +25,18 @@ class CannotJoinException(
                         "$gatheringUuid because it is full."
             )
         }
+
+        fun priceChanged(currentPrice: Int, priceAtPay: Int): CannotJoinException {
+            return CannotJoinException(
+                "Cannot join gathering because price has changed. " +
+                        "Current price: $currentPrice, price at pay time: $priceAtPay"
+            )
+        }
+
+        fun alreadyJoined(userUuid: UUID, gatheringUuid: UUID): CannotJoinException {
+            return CannotJoinException(
+                "User with uuid $userUuid has already joined gathering with uuid $gatheringUuid."
+            )
+        }
     }
 }

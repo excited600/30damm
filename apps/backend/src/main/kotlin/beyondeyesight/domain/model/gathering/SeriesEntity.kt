@@ -52,4 +52,8 @@ class SeriesEntity(
     @Column(nullable = false)
     val introduction: String,
 
-) : BaseEntity(uuid)
+) : BaseEntity(uuid = uuid, resourceName = RESOURCE_NAME) {
+    companion object {
+        const val RESOURCE_NAME = "series"
+    }
+}

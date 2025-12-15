@@ -1,6 +1,7 @@
 package beyondeyesight.domain.service.payment
 
 import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.payment.InvalidOperationException
 import beyondeyesight.domain.exception.payment.PaymentFailException
@@ -10,10 +11,12 @@ import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Status
 import beyondeyesight.domain.repository.payment.PaymentRepository
+import beyondeyesight.domain.service.LockService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -21,6 +24,7 @@ import java.util.UUID
 class PaymentStateService(
     private val paymentRepository: PaymentRepository,
     private val paymentGateway: PaymentGateway,
+    private val lockService: LockService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -84,6 +88,7 @@ class PaymentStateService(
         paymentRepository.save(payment)
     }
 
+    /* 멱등하게 하고싶어서 lock을 씀. lock을 안쓰면 paymentId unique constraint에 걸려 500 에러가 내려갈 수 있음. 그런데 큰 문제가 아닌데 과하게 코딩이 된 것 같기도 하다.*/
     fun preparePayment(
         paymentId: String,
         productType: ProductType,
@@ -94,39 +99,40 @@ class PaymentStateService(
         buyerName: String,
         buyerPhone: String,
     ) {
-        if (paymentRepository.existsByPaymentId(paymentId)) {
-            throw InvalidValueException(
-                valueName = "paymentId",
-                value = paymentId,
-                reason = "Already exists"
-            )
-        }
-
-        val paymentEntity = paymentRepository.save(
-            PaymentEntity.ready(
-                paymentId = paymentId,
-                productUuid = productUuid,
-                amount = amount,
-                productName = productName,
-                buyerEmail = buyerEmail,
-                buyerName = buyerName,
-                buyerPhone = buyerPhone,
-                productType = productType,
-            )
+        val lockToken = lockService.lockWithRetry(
+            resourceName = PaymentEntity.RESOURCE_NAME, resourceId = paymentId, expire = Duration.ofSeconds(10),
+            waitTimeout = Duration.ofSeconds(20),
+            retryInterval = Duration.ofMillis(100)
+        ) ?: throw LockAcquireFailException.forResource(
+            resourceName = PaymentEntity.RESOURCE_NAME,
+            resourceId = paymentId,
+            duration = Duration.ofSeconds(20)
         )
-
+        val paymentEntity: PaymentEntity
         try {
+            if (paymentRepository.existsByPaymentId(paymentId)) {
+                return
+            }
+            paymentEntity = paymentRepository.save(
+                PaymentEntity.ready(
+                    paymentId = paymentId,
+                    productUuid = productUuid,
+                    amount = amount,
+                    productName = productName,
+                    buyerEmail = buyerEmail,
+                    buyerName = buyerName,
+                    buyerPhone = buyerPhone,
+                    productType = productType,
+                )
+            )
             paymentGateway.preRegisterPayment(paymentId, amount, Currency.KRW)
-        } catch (e: Exception) {
-            logger.warn("Pre Register by PaymentGateway failed. paymentId: $paymentId, amount: $amount, ${e.message}")
+            logger.info("[3040] Payment 준비 완료. paymentId=$paymentId, productType=${paymentEntity.productType} productUuid=${paymentEntity.productUuid}, amount=${paymentEntity.amount}")
+        } finally {
+            lockService.unlock(
+                resourceName = PaymentEntity.RESOURCE_NAME,
+                resourceId = paymentId,
+                token = lockToken
+            )
         }
-
-        logger.info("[3040] Payment 준비 완료. paymentId=$paymentId, productType=${paymentEntity.productType} productUuid=${paymentEntity.productUuid}, amount=${paymentEntity.amount}")
     }
-
-    data class PreparePaymentResponse(
-        val paymentId: String,
-        val storeId: String,
-        val channelKey: String,
-    )
 }

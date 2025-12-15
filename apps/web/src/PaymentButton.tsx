@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 
 // 포트원 V2 SDK 타입 정의
 interface PaymentResponse {
@@ -6,6 +6,8 @@ interface PaymentResponse {
     message?: string;
     paymentId?: string;
     transactionType?: string;
+    paymentToken: string;
+    txId: string;
 }
 
 interface PaymentRequest {
@@ -35,8 +37,8 @@ declare global {
 }
 
 // API 호출 함수들
-const preparePayment = async (paymentData: {
-    paymentId: string;
+const preparePayment = async (paymentId: string, paymentData: {
+
     productType: string;
     productUuid: string;
     productName: string;
@@ -46,7 +48,7 @@ const preparePayment = async (paymentData: {
     buyerPhone: string;
 
 }) => {
-    const response = await fetch('http://localhost:8080/payments/prepare', {
+    const response = await fetch(`http://localhost:8080/payments/${paymentId}/prepare`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -61,15 +63,18 @@ const preparePayment = async (paymentData: {
     return response.json();
 };
 
-const verifyPayment = async (verifyData: {
-    paymentId: string;
+const verifyPayment = async (paymentId: string, verifyData: {
+
+    paymentToken: string,
+    txId: string,
+    amount: number
 }) => {
-    const response = await fetch('http://localhost:8080/payments/verify', {
+    const response = await fetch(`http://localhost:8080/payments/${paymentId}/verify`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(verifyData),
+        body: JSON.stringify(verifyData)
     });
 
     if (!response.ok) {
@@ -92,10 +97,10 @@ function PaymentButton() {
     }, []);
 
     const handlePayment = async () => {
-        const { PortOne } = window;
-        const paymentId = `GW5_payment_${Date.now()}`;
+        const {PortOne} = window;
+        const paymentId = `GW8_payment_${Date.now()}`;
         const productType = "GATHERING"
-        const productUuid ="62252cce-ecc4-468f-b422-4cdd0e5bac98";
+        const productUuid = "62252cce-ecc4-468f-b422-4cdd0e5bac98";
         const productName = '상품명';
         const amount = 500;
         const buyerEmail = "wom2277@naver.com";
@@ -103,16 +108,16 @@ function PaymentButton() {
         const buyerPhone = "010-1234-5678"
         try {
             // 1. 결제 준비 API 호출 (UI 렌더링 전)
-            await preparePayment({
-                paymentId,
-                productType,
-                productUuid,
-                productName,
-                amount,
-                buyerEmail,
-                buyerName,
-                buyerPhone,
-            });
+            await preparePayment(paymentId,
+                {
+                    productType,
+                    productUuid,
+                    productName,
+                    amount,
+                    buyerEmail,
+                    buyerName,
+                    buyerPhone,
+                });
             console.log('결제 준비 완료');
 
             // 2. 포트원 결제창 호출 (UI 렌더링)
@@ -127,20 +132,24 @@ function PaymentButton() {
                 customer: {
                     fullName: buyerName,
                     phoneNumber: buyerPhone,
-                },
+                }
             });
 
             console.log("response");
             console.log(response);
-
+            //
             if (response.code) {
                 // 에러 발생
                 console.log('결제 실패', response.message);
             } else {
                 // 3. 결제 성공 → 검증 API 호출
-                const verifyResult = await verifyPayment({
-                    paymentId: response.paymentId!,
-                });
+                const verifyResult = await verifyPayment(
+                    response.paymentId!,
+                    {
+                        paymentToken: response.paymentToken,
+                        txId: response.txId,
+                        amount: amount
+                    });
                 console.log('결제 검증 완료', verifyResult);
             }
         } catch (error) {

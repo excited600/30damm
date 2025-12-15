@@ -10,4 +10,6 @@ interface GuestRepository {
     fun countByGathering(gatheringUuid: UUID): Long
 
     fun countByGatheringAndGender(gatheringUuid: UUID, gender: Gender): Long
+
+    fun existsByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID): Boolean
 }

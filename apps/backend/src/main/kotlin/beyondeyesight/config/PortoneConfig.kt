@@ -24,6 +24,7 @@ class PortoneConfig(
 
     @Bean
     fun portOneWebClient(): WebClient {
+        // TODO 이렇게 하면 모든 외부 요청에 포트원 설정이 들어갈거같은데... 다른 서드파티(카카오메시지 등) 이용할 때 문제될듯
         return WebClient.builder()
             .baseUrl(properties.baseUrl)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

@@ -1,62 +1,70 @@
 package beyondeyesight.domain.service.payment
 
 import beyondeyesight.domain.exception.ResourceNotFoundException
+import beyondeyesight.domain.exception.payment.CannotConfirmException
 import beyondeyesight.domain.exception.payment.VerificationFailedException
-import beyondeyesight.domain.model.payment.PaymentCancelResponse
-import beyondeyesight.domain.model.payment.PaymentCancellation
+import beyondeyesight.domain.model.payment.Payment
 import beyondeyesight.domain.model.payment.PaymentEntity
-import beyondeyesight.domain.model.payment.PaymentFailed
 import beyondeyesight.domain.model.payment.Status
 import beyondeyesight.domain.repository.payment.PaymentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 @Service
-class PaymentVerificationService(
+class PaymentConfirmService(
     private val paymentRepository: PaymentRepository,
     private val paymentGateway: PaymentGateway,
     private val paymentStateService: PaymentStateService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun verifyPayment(paymentId: String) {
-        logger.info("[3040] 결제 검증 시작. paymentId=$paymentId")
+    fun confirmPayment(paymentId: String, paymentToken: String, txId: String, amount: Int) {
+        logger.info("[3040] 결제 컨펌 시작. paymentId=$paymentId")
 
-        // 비관적 락으로 조회 (동시 요청 대비) // TODO: 락테이블로 바꾸기. 어떤 동시성 문제인지 정확히 알기
-        val paymentEntity = paymentRepository.findByPaymentIdForUpdate(paymentId)
+        val paymentEntity = paymentRepository.findByPaymentId(paymentId)
             ?: throw ResourceNotFoundException.byField(
                 resourceName = "Payment",
                 fieldName = "paymentId",
                 fieldValue = paymentId
             )
-
         val paymentDto = paymentGateway.getPayment(paymentId)
-
         // 검증: 금액 일치 여부 (위변조 방지)
         if (paymentDto.amount.total != paymentEntity.amount) {
-            onVerificationFailed(paymentEntity, paymentDto, paymentId)
+            logger.error(
+                "[3040] 서버 금액과 pg 금액이 다름. server=${paymentEntity.amount}, pg=${paymentDto.amount.total}, paymentId=$paymentId"
+            )
+            throw VerificationFailedException.invalidAmount(
+                serverAmount = paymentEntity.amount,
+                pgAmount = paymentDto.amount.total
+            )
         }
-        // 동기화 처리
+        // 동기화
         val synchronized = paymentStateService.synchronize(paymentEntity = paymentEntity, paymentDto = paymentDto)
         when (synchronized.status) {
-            Status.READY, Status.FAILED, Status.CANCELLED, Status.PARTIAL_CANCELLED -> throw VerificationFailedException.invalidStatus(synchronized.status)
-            Status.PAID, Status.PAY_PENDING, Status.VIRTUAL_ACCOUNT_ISSUED -> return
+            Status.READY -> paymentGateway.confirm(
+                paymentId = paymentId,
+                paymentToken = paymentToken,
+                txId = txId,
+                amount = amount
+            )
+
+            Status.PAID -> return
+            Status.PAY_PENDING, Status.VIRTUAL_ACCOUNT_ISSUED, Status.FAILED, Status.CANCELLED, Status.PARTIAL_CANCELLED ->
+                throw CannotConfirmException.invalidStatus(synchronized.status)
         }
     }
 
     private fun onVerificationFailed(
         paymentEntity: PaymentEntity,
-        paymentDto: PaymentFailed,
+        paymentDto: Payment,
         paymentId: String
     ): Nothing {
         logger.error(
             "[3040] 서버 금액과 pg 금액이 다름. server=${paymentEntity.amount}, pg=${paymentDto.amount.total}, paymentId=$paymentId"
         )
         try {
-            val cancelPaymentResponse = paymentGateway.cancelPayment(paymentId, "Auto cancel due to amount mismatch", null)
+            val cancelPaymentResponse =
+                paymentGateway.cancelPayment(paymentId, "Auto cancel due to amount mismatch", null)
             paymentStateService.cancel(
                 payment = paymentEntity,
                 cancelledAt = cancelPaymentResponse.cancellation?.cancelledAt,
@@ -71,24 +79,5 @@ class PaymentVerificationService(
             serverAmount = paymentEntity.amount,
             pgAmount = paymentDto.amount.total
         )
-    }
-
-    private fun parseDateTime(isoString: String?): LocalDateTime {
-        if (isoString == null) return LocalDateTime.now()
-
-        return try {
-            LocalDateTime.parse(isoString)
-        } catch (e: Exception) {
-            LocalDateTime.now()
-        }
-    }
-
-
-    fun generatePaymentId(): String {
-        val timestamp = LocalDateTime.now().format(
-            DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")
-        )
-        val random = UUID.randomUUID().toString().take(4).uppercase()
-        return "PAY-$timestamp-$random"
     }
 }

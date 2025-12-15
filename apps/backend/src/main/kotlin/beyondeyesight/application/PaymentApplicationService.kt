@@ -5,7 +5,7 @@ import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Webhook
 import beyondeyesight.domain.service.payment.PaymentGateway
 import beyondeyesight.domain.service.payment.PaymentStateService
-import beyondeyesight.domain.service.payment.PaymentVerificationService
+import beyondeyesight.domain.service.payment.PaymentConfirmService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,7 +13,7 @@ import java.util.UUID
 
 @Service
 class PaymentApplicationService(
-    private val paymentVerificationService: PaymentVerificationService,
+    private val paymentConfirmService: PaymentConfirmService,
     private val paymentStateService: PaymentStateService,
     private val paymentGateway: PaymentGateway
 ) {
@@ -34,7 +34,7 @@ class PaymentApplicationService(
                 "Transaction.Paid" -> {
                     // 결제 완료 웹훅
                     webhook.data?.paymentId?.let { paymentId ->
-                        verifyPayment(paymentId)
+//                        verifyPayment(paymentId)
                         logger.info("웹훅 결제 검증 결과: paymentId=$paymentId, success=${true}")
                     }
                 }
@@ -104,8 +104,9 @@ class PaymentApplicationService(
     }
 
     @Transactional
-    fun verifyPayment(paymentId: String) {
-        paymentVerificationService.verifyPayment(paymentId)
+    fun verifyPayment(paymentId: String, paymentToken: String, txId: String, amount: Int) {
+        //TODO: 지워야함
+        paymentConfirmService.confirmPayment(paymentId, paymentToken, txId, amount)
     }
 
     @Transactional
