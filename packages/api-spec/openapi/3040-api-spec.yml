@@ -244,6 +244,21 @@ paths:
       responses:
         '200':
           description: Payment verified successfully
+  /payments/webhook:
+    post:
+      operationId: paymentWebhook
+      tags:
+        - Payments
+      summary: Payment gateway webhook to handle payment notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentWebhook'
+      responses:
+        '200':
+          description: Webhook handled successfully
 components:
   schemas:
     OpenGatheringRequest:
@@ -730,6 +745,21 @@ components:
         channelKey:
           type: string
           description: Key representing the payment channel used.
+    PaymentWebhook:
+      type: object
+      required:
+        - type
+        - timestamp
+        - data
+      properties:
+        type:
+          $ref: '#/components/schemas/WebhookType'
+        timestamp:
+          type: string
+          format: date-time
+          description: Unix timestamp when the webhook event was generated
+        data:
+          $ref: '#/components/schemas/WebhookData'
     Gathering_Category:
       type: string
       enum:
@@ -830,3 +860,36 @@ components:
       enum:
         - GATHERING
       description: Type of the product
+    WebhookType:
+      type: string
+      enum:
+        - Transaction.Ready
+        - Transaction.Paid
+        - Transaction.VirtualAccountIssued
+        - Transaction.PartialCancelled
+        - Transaction.Cancelled
+        - Transaction.Failed
+        - Transaction.PayPending
+        - Transaction.CancelPending
+        - Transaction.DisputeCreated
+        - Transaction.DisputeResolved
+      description: Type of the payment webhook event
+    WebhookData:
+      type: object
+      required:
+        - storeId
+        - paymentId
+        - transactionId
+      properties:
+        storeId:
+          type: string
+          description: Identifier for the store or merchant
+        paymentId:
+          type: string
+          description: Unique identifier for the payment
+        transactionId:
+          type: string
+          description: Unique identifier for the transaction
+        cancellationId:
+          type: string
+          description: Unique identifier for the cancellation

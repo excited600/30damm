@@ -32,6 +32,8 @@ paths:
     $ref: './paths/payments.yml#/~1payments~1{paymentId}~1prepare'
   /payments/{paymentId}/verify:
     $ref: './paths/payments.yml#/~1payments~1{paymentId}~1verify'
+  /payments/webhook:
+    $ref: './paths/payments.yml#/~1payments~1webhook'
 
 components:
   schemas:
@@ -58,7 +60,8 @@ components:
       $ref: './components/schemas/payment/preparePayment/preparePaymentRequest.yml#/PreparePaymentRequest'
     PreparePaymentResponse:
       $ref: './components/schemas/payment/preparePayment/preparePaymentResponse.yml#/PreparePaymentResponse'
-
+    PaymentWebhook:
+      $ref: './components/schemas/payment/webhook/paymentWebhook.yml#/PaymentWebhook'
 
 #    # Users
 #    SignUpRequest:

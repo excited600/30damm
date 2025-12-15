@@ -62,3 +62,20 @@
     responses:
       '200':
         description: Payment verified successfully
+
+/payments/webhook:
+  post:
+    operationId: paymentWebhook
+    tags:
+      - Payments
+    summary: Payment gateway webhook to handle payment notifications
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/payment/webhook/paymentWebhook.yml#/PaymentWebhook'
+
+    responses:
+      '200':
+        description: Webhook handled successfully

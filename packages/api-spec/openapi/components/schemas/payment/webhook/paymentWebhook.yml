@@ -1,0 +1,50 @@
+PaymentWebhook:
+  type: object
+  required:
+    - type
+    - timestamp
+    - data
+  properties:
+    type:
+      $ref: '#/WebhookType'
+    timestamp:
+      type: string
+      format: date-time
+      description: Unix timestamp when the webhook event was generated
+    data:
+      $ref: '#/WebhookData'
+
+WebhookData:
+  type: object
+  required:
+    - storeId
+    - paymentId
+    - transactionId
+  properties:
+    storeId:
+      type: string
+      description: Identifier for the store or merchant
+    paymentId:
+      type: string
+      description: Unique identifier for the payment
+    transactionId:
+      type: string
+      description: Unique identifier for the transaction
+    cancellationId:
+      type: string
+      description: Unique identifier for the cancellation
+
+WebhookType:
+  type: string
+  enum:
+    - Transaction.Ready
+    - Transaction.Paid
+    - Transaction.VirtualAccountIssued
+    - Transaction.PartialCancelled
+    - Transaction.Cancelled
+    - Transaction.Failed
+    - Transaction.PayPending
+    - Transaction.CancelPending
+    - Transaction.DisputeCreated
+    - Transaction.DisputeResolved
+  description: Type of the payment webhook event

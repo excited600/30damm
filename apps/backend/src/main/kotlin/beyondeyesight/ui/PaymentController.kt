@@ -6,6 +6,7 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Webhook
 import beyondeyesight.domain.model.payment.WebhookData
+import beyondeyesight.model.PaymentWebhook
 import beyondeyesight.model.PreparePaymentRequest
 import beyondeyesight.model.PreparePaymentResponse
 import beyondeyesight.model.VerifyPaymentRequest
@@ -19,6 +20,10 @@ import org.springframework.web.bind.annotation.*
 class PaymentController(
     private val paymentApplicationService: PaymentApplicationService,
 ) : PaymentsApiService {
+    override fun paymentWebhook(paymentWebhook: PaymentWebhook) {
+        println("haha")
+    }
+
     override fun preparePayment(
         paymentId: String,
         preparePaymentRequest: PreparePaymentRequest
@@ -70,7 +75,6 @@ class PaymentController(
         return ResponseEntity.ok(Unit)
     }
 
-    @PostMapping("/webhook")
     fun handleWebhook(
         @RequestBody webhook: PortOneWebhook,
         @RequestHeader("x-portone-signature") signature: String?
