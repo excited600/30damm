@@ -23,6 +23,7 @@ class GuestEntity(
     val userUuid: UUID,
     @Column(name = "joined_at", nullable = false)
     val joinedAt: LocalDateTime,
+//    TODO: status로 APPROVAL_PENDING, PAYMENT_PENDING, JOINED 등 상태 관리 필요
 ) {
     companion object {
         fun join(

@@ -186,4 +186,13 @@ class GatheringApplicationService(
             amount = amount
         )
     }
+
+    @Transactional
+    fun leave(userUuid: UUID, gatheringUuid: UUID, reason: String) {
+        gatheringService.leave(
+            gatheringUuid = gatheringUuid,
+            userUuid = userUuid,
+            reason = reason
+        )
+    }
 }

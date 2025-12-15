@@ -33,7 +33,7 @@ class PaymentStateService(
         reason: String,
         amount: Int
     ) {
-        logger.info("Payment Cancel Request: paymentId=$paymentId, reason=$reason, amount=$amount")
+        logger.info("결제 취소 요청: paymentId=$paymentId, reason=$reason, amount=$amount")
 
         val payment = paymentRepository.findByPaymentIdForUpdate(paymentId)
             ?: throw ResourceNotFoundException.byField(
@@ -41,7 +41,6 @@ class PaymentStateService(
                 fieldName = "paymentId",
                 fieldValue = paymentId
             )
-
 
         if (payment.status != Status.PAID && payment.status != Status.PARTIAL_CANCELLED) {
             throw InvalidOperationException.cannotCancel("Payment의 상태가 취소 가능한 상태가 아님: ${payment.status}")
@@ -79,6 +78,7 @@ class PaymentStateService(
     }
 
 
+    // Toodo: 이거 필요없을듯 웹훅 보고 얘기하자..
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun cancel(payment: PaymentEntity, cancelledAt: LocalDateTime?, reason: String) {
         payment.cancel(
@@ -95,6 +95,7 @@ class PaymentStateService(
         productUuid: UUID,
         amount: Int,
         productName: String,
+        buyerUuid: UUID,
         buyerEmail: String,
         buyerName: String,
         buyerPhone: String,
@@ -119,6 +120,7 @@ class PaymentStateService(
                     productUuid = productUuid,
                     amount = amount,
                     productName = productName,
+                    buyerUuid = buyerUuid,
                     buyerEmail = buyerEmail,
                     buyerName = buyerName,
                     buyerPhone = buyerPhone,

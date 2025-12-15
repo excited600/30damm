@@ -683,6 +683,7 @@ components:
         - productUuid
         - productName
         - amount
+        - buyerUuid
         - buyerEmail
         - buyerName
         - buyerPhone
@@ -699,6 +700,10 @@ components:
         amount:
           type: integer
           description: Total amount for the payment in Won(KRW)
+        buyerUuid:
+          type: string
+          format: uuid
+          description: UUID of the buyer
         buyerEmail:
           type: string
           format: email

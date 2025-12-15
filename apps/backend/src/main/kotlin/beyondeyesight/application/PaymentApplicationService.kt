@@ -82,6 +82,7 @@ class PaymentApplicationService(
         productUuid: UUID,
         amount: Int,
         productName: String,
+        buyerUuid: UUID,
         buyerEmail: String,
         buyerName: String,
         buyerPhone: String,
@@ -93,6 +94,7 @@ class PaymentApplicationService(
             productUuid = productUuid,
             amount = amount,
             productName = productName,
+            buyerUuid = buyerUuid,
             buyerEmail = buyerEmail,
             buyerName = buyerName,
             buyerPhone = buyerPhone

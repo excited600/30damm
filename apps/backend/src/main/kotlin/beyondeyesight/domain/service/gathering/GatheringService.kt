@@ -8,13 +8,19 @@ import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.gathering.*
+import beyondeyesight.domain.model.payment.ProductType
+import beyondeyesight.domain.model.payment.Status
 import beyondeyesight.domain.repository.gathering.GuestRepository
 import beyondeyesight.domain.repository.user.UserRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
+import beyondeyesight.domain.repository.payment.PaymentRepository
 import beyondeyesight.domain.service.LockService
 import beyondeyesight.domain.service.payment.PaymentConfirmService
+import beyondeyesight.domain.service.payment.PaymentGateway
+import beyondeyesight.domain.service.payment.PaymentStateService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -29,8 +35,12 @@ class GatheringService(
     private val userRepository: UserRepository,
     private val seriesRepository: SeriesRepository,
     private val seriesScheduleRepository: SeriesScheduleRepository,
-    private val paymentConfirmService: PaymentConfirmService
+    private val paymentConfirmService: PaymentConfirmService,
+    private val paymentRepository: PaymentRepository,
+    private val paymentStateService: PaymentStateService,
+    private val paymentGateway: PaymentGateway,
 ) {
+    val logger = LoggerFactory.getLogger(javaClass)
     fun open(
         hostUuid: UUID,
         approveType: GatheringEntity.ApproveType,
@@ -86,6 +96,7 @@ class GatheringService(
         return gatheringRepository.save(entity)
     }
 
+
     private fun validate(
         minAge: Int,
         maxAge: Int,
@@ -135,6 +146,34 @@ class GatheringService(
             ?: throw IllegalArgumentException("Gathering not found with uuid: $uuid")
         gathering.close()
         gatheringRepository.save(gathering)
+    }
+
+    // TODO: 부분 취소 적용
+    fun leave(gatheringUuid: UUID, userUuid: UUID, reason: String) {
+        guestRepository.deleteByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gatheringUuid)
+
+        val paymentEntity =
+            paymentRepository.findByProductTypeAndProductUuidAndBuyerUuid(
+                productType = ProductType.GATHERING,
+                productUuid = gatheringUuid,
+                buyerUuid = userUuid,
+            ) ?: return
+
+        val paymentDto = paymentGateway.getPayment(paymentEntity.paymentId)
+        val synchronized = paymentStateService.synchronize(paymentEntity = paymentEntity, paymentDto = paymentDto)
+
+        if (synchronized.status != Status.PAID && synchronized.status != Status.PARTIAL_CANCELLED) {
+            logger.warn("[3040] 사용자 $userUuid 님의 모임 $gatheringUuid 탈퇴 시도 시 결제 상태가 취소 가능한 상태가 아님: ${paymentEntity.status}")
+            return
+        }
+        paymentStateService.cancelPayment(
+            paymentId = paymentEntity.paymentId,
+            reason = reason,
+            amount = paymentEntity.getCancellableAmount()
+        )
+
+        logger.info("[3040] 사용자 $userUuid 님이 모임 $gatheringUuid 에서 나감.")
+
     }
 
     fun join(gatheringUuid: UUID, userUuid: UUID, paymentId: String, paymentToken: String, txId: String, amount: Int) {

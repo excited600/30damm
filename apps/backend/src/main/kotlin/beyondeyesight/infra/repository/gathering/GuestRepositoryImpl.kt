@@ -1,11 +1,12 @@
 package beyondeyesight.infra.repository.gathering
 
 import beyondeyesight.domain.model.GuestEntity
+import beyondeyesight.domain.model.GuestId
 import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.domain.repository.gathering.GuestRepository
 import org.springframework.stereotype.Repository
-import java.util.UUID
+import java.util.*
 
 @Repository
 class GuestRepositoryImpl(
@@ -47,6 +48,23 @@ class GuestRepositoryImpl(
                     )
                 )
         }.firstOrNull()?: 0L
+    }
+
+    override fun existsByUserUuidAndGatheringUuid(
+        userUuid: UUID,
+        gatheringUuid: UUID
+    ): Boolean {
+        return guestJpaRepository.existsByUserUuidAndGatheringUuid(
+            userUuid = userUuid,
+            gatheringUuid = gatheringUuid
+        )
+    }
+
+    override fun deleteByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID) {
+        guestJpaRepository.deleteById(GuestId(
+            gatheringUuid = gatheringUuid,
+            userUuid = userUuid
+        ))
     }
 
 }

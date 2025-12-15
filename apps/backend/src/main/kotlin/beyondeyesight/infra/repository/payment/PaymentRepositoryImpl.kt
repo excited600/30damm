@@ -53,7 +53,7 @@ class PaymentRepositoryImpl(
             .firstOrNull()
     }
 
-    override fun findByProductTypeAndProductId(productType: ProductType, productUuid: UUID): List<PaymentEntity> {
+    override fun findAllByProductTypeAndProductUuid(productType: ProductType, productUuid: UUID): List<PaymentEntity> {
         return paymentJpaRepository.findAll {
             select(entity(PaymentEntity::class))
                 .from(entity(PaymentEntity::class))
@@ -64,6 +64,26 @@ class PaymentRepositoryImpl(
                     )
                 )
         }.filterNotNull()
+    }
+
+    override fun findByProductTypeAndProductUuidAndBuyerUuid(
+        productType: ProductType,
+        productUuid: UUID,
+        buyerUuid: UUID,
+    ): PaymentEntity? {
+        return paymentJpaRepository.findAll {
+            select(
+                entity(PaymentEntity::class)
+            ).from(
+                entity(PaymentEntity::class)
+            ).where(
+                and(
+                    path(PaymentEntity::productType).eq(productType),
+                    path(PaymentEntity::productUuid).eq(productUuid),
+                    path(PaymentEntity::buyerUuid).eq(buyerUuid),
+                )
+            )
+        }.firstOrNull()
     }
 
     override fun existsByPaymentId(paymentId: String): Boolean {

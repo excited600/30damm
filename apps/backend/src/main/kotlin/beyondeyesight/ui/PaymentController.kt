@@ -34,6 +34,7 @@ class PaymentController(
             productUuid = preparePaymentRequest.productUuid,
             amount = preparePaymentRequest.amount,
             productName = preparePaymentRequest.productName,
+            buyerUuid = preparePaymentRequest.buyerUuid,
             buyerEmail = preparePaymentRequest.buyerEmail,
             buyerName = preparePaymentRequest.buyerName,
             buyerPhone = preparePaymentRequest.buyerPhone,

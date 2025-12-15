@@ -133,6 +133,7 @@ CREATE TABLE payments (
     amount INTEGER NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status in ('PENDING', 'READY', 'VIRTUAL_ACCOUNT_ISSUED', 'PAID', 'FAILED', 'CANCELLED', 'PARTIAL_CANCELLED')),
     product_name VARCHAR(200) NOT NULL,
+    buyer_uuid UUID NOT NULL,
     buyer_email VARCHAR(100) NULL,
     buyer_name VARCHAR(50) NULL,
     buyer_phone VARCHAR(20) NULL,

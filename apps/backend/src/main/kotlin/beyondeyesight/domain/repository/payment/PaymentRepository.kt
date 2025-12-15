@@ -10,7 +10,13 @@ interface PaymentRepository {
 
     fun findByPaymentIdForUpdate(paymentId: String): PaymentEntity?
 
-    fun findByProductTypeAndProductId(productType: ProductType, productUuid: UUID): List<PaymentEntity>
+    fun findAllByProductTypeAndProductUuid(productType: ProductType, productUuid: UUID): List<PaymentEntity>
+
+    fun findByProductTypeAndProductUuidAndBuyerUuid(
+        productType: ProductType,
+        productUuid: UUID,
+        buyerUuid: UUID,
+    ): PaymentEntity?
 
     fun existsByPaymentId(paymentId: String): Boolean
 

@@ -47,6 +47,9 @@ class PaymentEntity(
     @Column(nullable = false, length = 200)
     val productName: String,
 
+    @Column(name = "buyer_uuid", nullable = false)
+    val buyerUuid: UUID,
+
     @Column(length = 100)
     val buyerEmail: String?,
 
@@ -90,6 +93,7 @@ class PaymentEntity(
             productUuid: UUID,
             productName: String,
             amount: Int,
+            buyerUuid: UUID,
             buyerEmail: String,
             buyerName: String,
             buyerPhone: String,
@@ -102,6 +106,7 @@ class PaymentEntity(
                 amount = amount,
                 status = Status.READY,
                 productName = productName,
+                buyerUuid = buyerUuid,
                 buyerEmail = buyerEmail,
                 buyerName = buyerName,
                 buyerPhone = buyerPhone,

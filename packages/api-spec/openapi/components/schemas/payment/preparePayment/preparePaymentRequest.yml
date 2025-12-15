@@ -5,6 +5,8 @@ PreparePaymentRequest:
     - productUuid
     - productName
     - amount
+    - buyerUuid
+#    buyerUuid만 받고 buyerEmail, name, phone은 받지 않아도 될듯
     - buyerEmail
     - buyerName
     - buyerPhone
@@ -21,6 +23,10 @@ PreparePaymentRequest:
     amount:
       type: integer
       description: Total amount for the payment in Won(KRW)
+    buyerUuid:
+      type: string
+      format: uuid
+      description: UUID of the buyer
     buyerEmail:
       type: string
       format: email
