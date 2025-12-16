@@ -1,15 +1,10 @@
 package beyondeyesight.domain.model
 
-import beyondeyesight.domain.model.gathering.GatheringEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.IdClass
-import jakarta.persistence.Table
+import beyondeyesight.config.uuidV7
+import jakarta.persistence.*
 import java.io.Serializable
 import java.time.LocalDateTime
-import beyondeyesight.config.uuidV7
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "guests")

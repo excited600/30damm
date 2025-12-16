@@ -224,8 +224,5 @@ class PaymentEntity(
     }
 
     fun getCancellableAmount(): Int = amount - cancelledAmount
-    override fun resourceName(): String {
-        return RESOURCE_NAME
-    }
 
 }

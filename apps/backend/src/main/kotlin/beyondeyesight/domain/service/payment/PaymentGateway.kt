@@ -2,9 +2,8 @@ package beyondeyesight.domain.service.payment
 
 import beyondeyesight.domain.model.payment.Currency
 import beyondeyesight.domain.model.payment.Payment
-import beyondeyesight.domain.model.payment.PaymentCancelResponse
+import beyondeyesight.domain.model.payment.CancelPaymentResponse
 import beyondeyesight.domain.model.payment.PaymentClientConfig
-import beyondeyesight.domain.model.payment.PaymentFailed
 
 interface PaymentGateway {
     fun getPayment(paymentId: String): Payment
@@ -13,7 +12,7 @@ interface PaymentGateway {
         paymentId: String,
         reason: String,
         amount: Int? = null  // null이면 전액 취소
-    ): PaymentCancelResponse
+    ): CancelPaymentResponse
 
     fun preRegisterPayment(
         paymentId: String,

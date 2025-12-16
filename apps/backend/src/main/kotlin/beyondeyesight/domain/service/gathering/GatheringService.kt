@@ -7,24 +7,24 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
+import beyondeyesight.domain.model.GuestEntity
 import beyondeyesight.domain.model.GuestId
-import beyondeyesight.domain.model.ScrollResult
-import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.gathering.*
 import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
 import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Status
-import beyondeyesight.domain.repository.gathering.GuestRepository
-import beyondeyesight.domain.repository.user.UserRepository
+import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.repository.gathering.GatheringRepository
+import beyondeyesight.domain.repository.gathering.GuestRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
 import beyondeyesight.domain.repository.gathering.SeriesScheduleRepository
 import beyondeyesight.domain.repository.payment.PaymentRepository
+import beyondeyesight.domain.repository.user.UserRepository
 import beyondeyesight.domain.service.LockService
-import beyondeyesight.domain.service.payment.PaymentConfirmService
+import beyondeyesight.domain.service.payment.PaymentService
 import beyondeyesight.domain.service.payment.PaymentGateway
-import beyondeyesight.domain.service.payment.PaymentStateService
+import beyondeyesight.domain.service.payment.PaymentSynchronizeService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -40,11 +40,10 @@ class GatheringService(
     private val userRepository: UserRepository,
     private val seriesRepository: SeriesRepository,
     private val seriesScheduleRepository: SeriesScheduleRepository,
-    private val paymentConfirmService: PaymentConfirmService,
+    private val paymentService: PaymentService,
     private val paymentRepository: PaymentRepository,
-    private val paymentStateService: PaymentStateService,
+    private val paymentSynchronizeService: PaymentSynchronizeService,
     private val paymentGateway: PaymentGateway,
-    private val gatheringRefundService: GatheringRefundService,
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
     fun open(
@@ -165,11 +164,11 @@ class GatheringService(
         ) ?: return
 
         if (paymentEntity.amount > 0) {
-            gatheringRefundService.refund(
+            refund(
                 userUuid = userUuid,
                 gatheringUuid = gatheringUuid,
                 reason = reason,
-                paymentEntity = paymentEntity,
+                paymentId = paymentEntity.paymentId,
                 amount = paymentEntity.amount
             )
         }
@@ -263,7 +262,7 @@ class GatheringService(
                     )
                 }
                 if (confirmPaymentRequest.amount > 0) {
-                    paymentConfirmService.confirmPayment(
+                    paymentService.confirmPayment(
                         paymentId = confirmPaymentRequest.paymentId,
                         paymentToken = confirmPaymentRequest.paymentToken,
                         txId = confirmPaymentRequest.txId,
@@ -469,7 +468,7 @@ class GatheringService(
                 userUuid = userUuid,
             )
             logger.info("[3040] 결제 실패 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
-            paymentStateService.synchronize(paymentEntity.paymentId)
+            paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
@@ -518,7 +517,7 @@ class GatheringService(
                 userUuid = userUuid,
             )
             logger.info("[3040] 결제 취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
-            paymentStateService.synchronize(paymentEntity.paymentId)
+            paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
 
             lockService.unlock(
@@ -565,7 +564,7 @@ class GatheringService(
                 userUuid = userUuid,
             )
             logger.info("[3040] 결제 부분취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
-            paymentStateService.synchronize(paymentEntity.paymentId)
+            paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
 
             lockService.unlock(
@@ -673,7 +672,7 @@ class GatheringService(
                 userUuid = userUuid,
             )
             logger.info("[3040] 결제 완료 웹훅 처리: 모임 참가 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
-            paymentStateService.synchronize(paymentEntity.paymentId)
+            paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
@@ -681,5 +680,51 @@ class GatheringService(
                 token = lockToken
             )
         }
+    }
+
+    // close할 때도 refund 있음.
+    private fun refund(userUuid: UUID, gatheringUuid: UUID, reason: String, paymentId: String, amount: Int) {
+
+        val refundAmount = calculateRefundAmount(
+            gatheringUuid = gatheringUuid,
+            userUuid = userUuid,
+            amount = amount
+        )
+
+        paymentService.cancelPayment(
+            paymentId = paymentId,
+            reason = reason,
+            amount = refundAmount
+        )
+    }
+
+    private fun calculateRefundAmount(gatheringUuid: UUID, userUuid: UUID, amount: Int): Int {
+        val now = LocalDateTime.now()
+        val guestId = GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid)
+        val guest = guestRepository.findByGuestId(guestId)
+            ?: throw ResourceNotFoundException.byField(
+                resourceName = GuestEntity.RESOURCE_NAME,
+                fieldName = "guestId",
+                fieldValue = guestId
+            )
+
+        if (guest.joinedAt.plusMinutes(30) < now) {
+            return amount
+        }
+
+        val gathering = gatheringRepository.findByUuid(gatheringUuid) ?: throw ResourceNotFoundException.byUuid(
+            resourceName = "Gathering",
+            resourceUuid = gatheringUuid
+        )
+
+        if (gathering.startDateTime.minusDays(2).isBefore(now)) {
+            return 0
+        }
+
+        if (gathering.startDateTime.minusDays(4).isBefore(now)) {
+            return amount * 90 / 100
+        }
+
+        return amount
     }
 }

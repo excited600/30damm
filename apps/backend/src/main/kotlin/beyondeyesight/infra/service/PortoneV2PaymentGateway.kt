@@ -1,10 +1,10 @@
 package beyondeyesight.infra.service
 
 import beyondeyesight.config.PortoneProperties
-import beyondeyesight.domain.exception.payment.PaymentFailException
+import beyondeyesight.domain.exception.payment.PaymentGatewayException
 import beyondeyesight.domain.model.payment.Currency
 import beyondeyesight.domain.model.payment.Payment
-import beyondeyesight.domain.model.payment.PaymentCancelResponse
+import beyondeyesight.domain.model.payment.CancelPaymentResponse
 import beyondeyesight.domain.model.payment.PaymentClientConfig
 import beyondeyesight.domain.service.payment.PaymentGateway
 import org.slf4j.LoggerFactory
@@ -28,14 +28,14 @@ class PortoneV2PaymentGateway(
                 .uri("/payments/{paymentId}", paymentId)
                 .retrieve()
                 .bodyToMono(Payment::class.java)
-                .block() ?: throw PaymentFailException("Payment response is null")
+                .block() ?: throw PaymentGatewayException.noResponse()
 
             logger.info("결제 조회 성공: paymentId=$paymentId, status=${response.status}")
             return response
 
         } catch (e: Exception) {
             logger.error("결제 조회 실패: paymentId=$paymentId", e)
-            throw PaymentFailException("Payment Retrieve Fail: ${e.message}")
+            throw PaymentGatewayException.getFail( e.message?: "에러메시지 없음")
         }
     }
 
@@ -43,7 +43,7 @@ class PortoneV2PaymentGateway(
         paymentId: String,
         reason: String,
         amount: Int?
-    ): PaymentCancelResponse {
+    ): CancelPaymentResponse {
         logger.info("결제 취소 요청: paymentId=$paymentId, reason=$reason, amount=$amount")
 
         val requestBody = mutableMapOf<String, Any>("reason" to reason)
@@ -54,15 +54,15 @@ class PortoneV2PaymentGateway(
                 .uri("/payments/{paymentId}/cancel", paymentId)
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(PaymentCancelResponse::class.java)
-                .block() ?: throw PaymentFailException("Cancel response is null")
+                .bodyToMono(CancelPaymentResponse::class.java)
+                .block() ?: throw PaymentGatewayException.noResponse()
 
             logger.info("결제 취소 성공: paymentId=$paymentId, cancelledAmount=${response.cancellation?.totalAmount}")
             return response
 
         } catch (e: Exception) {
             logger.error("결제 취소 실패: paymentId=$paymentId", e)
-            throw PaymentFailException("결제 취소 실패: ${e.message}")
+            throw PaymentGatewayException.cancelFail(e.message?: "에러메시지 없음")
         }
     }
 

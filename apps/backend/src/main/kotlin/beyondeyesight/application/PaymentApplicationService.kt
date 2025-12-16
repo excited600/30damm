@@ -6,7 +6,8 @@ import beyondeyesight.domain.model.payment.WebhookType
 import beyondeyesight.domain.repository.payment.PaymentRepository
 import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.payment.PaymentGateway
-import beyondeyesight.domain.service.payment.PaymentStateService
+import beyondeyesight.domain.service.payment.PaymentService
+import beyondeyesight.domain.service.payment.PaymentSynchronizeService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +15,8 @@ import java.util.*
 
 @Service
 class PaymentApplicationService(
-    private val paymentStateService: PaymentStateService,
+    private val paymentSynchronizeService: PaymentSynchronizeService,
+    private val paymentService: PaymentService,
     private val paymentGateway: PaymentGateway,
     private val paymentRepository: PaymentRepository,
     private val gatheringService: GatheringService,
@@ -106,7 +108,7 @@ class PaymentApplicationService(
         buyerPhone: String,
         mapper: (String, String, String) -> R
     ): R {
-        paymentStateService.preparePayment(
+        paymentService.preparePayment(
             paymentId = paymentId,
             productType = productType,
             productUuid = productUuid,

@@ -8,8 +8,6 @@ class VerificationFailedException private constructor(override val message: Stri
     message = message) {
 
     companion object {
-
-
         fun invalidAmount(serverAmount: Int, pgAmount: Int): VerificationFailedException {
             return VerificationFailedException("결제 금액 불일치: 서버 금액 $serverAmount, PG 금액 $pgAmount")
         }
