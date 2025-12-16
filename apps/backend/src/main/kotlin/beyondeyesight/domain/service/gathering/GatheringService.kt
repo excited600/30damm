@@ -8,6 +8,7 @@ import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.GuestId
+import beyondeyesight.domain.model.ScrollResult
 import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.gathering.*
 import beyondeyesight.domain.model.payment.ConfirmPaymentRequest

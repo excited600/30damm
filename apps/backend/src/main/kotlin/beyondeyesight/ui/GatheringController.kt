@@ -5,7 +5,9 @@ import beyondeyesight.application.GatheringApplicationService
 import beyondeyesight.config.toDurationHours
 import beyondeyesight.config.toHoursFloat
 import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.ScrollResult
 import beyondeyesight.domain.model.gathering.*
+import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
 import beyondeyesight.model.*
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -33,7 +35,7 @@ class GatheringController(
             gatheringUuid = gatheringUuid,
             userUuid = joinGatheringRequest.userUuid,
             confirmPaymentRequest = joinGatheringRequest.confirmPaymentRequest?.let {
-                beyondeyesight.domain.model.payment.ConfirmPaymentRequest(
+                ConfirmPaymentRequest(
                     paymentId = it.paymentId,
                     amount = it.amount,
                     paymentToken = it.paymentToken,
@@ -187,7 +189,9 @@ class GatheringController(
 
     override fun scrollFilteredGatherings(
         size: Int,
-        cursor: String?,
+        uuid: UUID?,
+        score: Int?,
+        statuses: List<GatheringStatus>?,
         categories: List<GatheringCategory>?,
         guestCount: Int?,
         dayOfWeek: GatheringDayOfWeek?,
@@ -202,7 +206,111 @@ class GatheringController(
         minFee: Int?,
         maxFee: Int?
     ): ScrollFilteredGatheringsResponse {
-        TODO("Not yet implemented")
+        val cursor = if (uuid != null && score != null) {
+            GatheringCursor(
+                uuid = uuid,
+                score = score
+            )
+        } else {
+            null
+        }
+
+        val filter = GatheringFilter(
+            statuses = statuses?.map { requestStatus ->
+                Status.entries.find { it.name == requestStatus.name } ?: throw InvalidValueException(
+                    valueName = "staus",
+                    value = requestStatus,
+                    reason = "존재하지 않는 모임 상태."
+                )
+            },
+            categories = categories?.map { requestCategory ->
+                Category.entries.find { it.name == requestCategory.name } ?: throw InvalidValueException(
+                    valueName = "category",
+                    value = requestCategory,
+                    reason = "존재하지 않는 모임 카테고리."
+                )
+            },
+            guestCount = guestCount,
+            dayOfWeek = dayOfWeek?.let { requestDayOfWeek ->
+                DayOfWeek.entries.find { it.name == requestDayOfWeek.name } ?: throw InvalidValueException(
+                    valueName = "dayOfWeek",
+                    value = requestDayOfWeek,
+                    reason = "존재하지 않는 요일."
+                )
+            },
+            startDate = startDate,
+            endDate = endDate,
+            location = location,
+            startAge = startAge,
+            endAge = endAge,
+            genderRatioEnabled = genderRatioEnabled,
+            minCapacity = minCapacity,
+            maxCapacity = maxCapacity,
+            minFee = minFee,
+            maxFee = maxFee
+        )
+        return gatheringApplicationService.scroll(
+            cursor = cursor,
+            size = size,
+            filter = filter,
+            mapper = { scrollResult: ScrollResult<GatheringEntity, GatheringCursor> ->
+                ScrollFilteredGatheringsResponse(
+                    hasNext = scrollResult.hasNext,
+                    gatherings = scrollResult.items.map { gatheringEntity ->
+                        Gathering(
+                            uuid = gatheringEntity.uuid,
+                            hostUuid = gatheringEntity.hostUuid,
+                            approveType = GatheringApproveType.entries.find { it.name == gatheringEntity.approveType.name }
+                                ?: throw InvalidValueException(
+                                    valueName = "approveType",
+                                    value = gatheringEntity.approveType,
+                                    reason = "존재하지 않는 approveType"
+                                ),
+                            minCapacity = gatheringEntity.minCapacity,
+                            maxCapacity = gatheringEntity.maxCapacity,
+                            genderRatioEnabled = gatheringEntity.genderRatioEnabled,
+                            minAge = gatheringEntity.minAge,
+                            maxAge = gatheringEntity.maxAge,
+                            totalGuests = gatheringEntity.totalGuests,
+                            fee = gatheringEntity.fee,
+                            discountEnabled = gatheringEntity.discountEnabled,
+                            offline = gatheringEntity.offline,
+                            place = gatheringEntity.place,
+                            category = GatheringCategory.entries.find { category -> category.name == gatheringEntity.category.name }
+                                ?: throw InvalidValueException(
+                                    valueName = "category",
+                                    value = gatheringEntity.category,
+                                    reason = "존재하지 않는 카테고리"
+                                ),
+                            subCategory = GatheringSubCategory.entries.find { it.name == gatheringEntity.subCategory.name }
+                                ?: throw InvalidValueException(
+                                    valueName = "subCategory",
+                                    value = gatheringEntity.subCategory,
+                                    reason = "존재하지 않는 서브카테고리"
+                                ),
+                            status = GatheringStatus.entries.find { it.name == gatheringEntity.status.name }
+                                ?: throw InvalidValueException(
+                                    valueName = "status",
+                                    value = gatheringEntity.status,
+                                    reason = "존재하지 않는 status"
+                                ),
+                            imageUrl = gatheringEntity.imageUrl,
+                            title = gatheringEntity.title,
+                            introduction = gatheringEntity.introduction,
+                            clickCount = gatheringEntity.clickCount,
+                            startDateTime = gatheringEntity.startDateTime,
+                            maxMaleCount = gatheringEntity.maxMaleCount,
+                            maxFemaleCount = gatheringEntity.maxFemaleCount,
+                            duration = gatheringEntity.duration.toHoursFloat()
+                        )
+                    },
+                    cursor = ScrollFilteredGatheringsResponseCursor(
+                        score = scrollResult.cursor.score,
+                        uuid = scrollResult.cursor.uuid
+                    )
+                )
+            }
+        )
     }
 }
 

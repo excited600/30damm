@@ -1,12 +1,21 @@
 ScrollFilteredGatheringsResponse:
-  allOf:
-    - $ref: '../../shared.yml#/ScrollPage'
-    - type: object
-      required:
-        - gatherings
+  type: object
+  required:
+    - hasNext
+    - gatherings
+    - cursor
+  properties:
+    cursor:
+      type: object
       properties:
-        gatherings:
-          type: array
-          description: List of gatherings
-          items:
-            $ref: '../gathering.yml#/Gathering'
+        score:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+    hasNext:
+      type: boolean
+    gatherings:
+      type: array
+      items:
+        $ref: '../gathering.yml#/Gathering'

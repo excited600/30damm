@@ -1,13 +1,17 @@
 package beyondeyesight.application
 
 import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.model.ScrollResult
 import beyondeyesight.domain.model.gathering.Category
 import beyondeyesight.domain.model.gathering.DateSchedule
+import beyondeyesight.domain.model.gathering.GatheringCursor
 import beyondeyesight.domain.model.gathering.GatheringEntity
+import beyondeyesight.domain.model.gathering.GatheringFilter
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
+import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.gathering.GuestService
 import org.springframework.stereotype.Service
@@ -20,6 +24,7 @@ import java.util.UUID
 @Service
 class GatheringApplicationService(
     private val gatheringService: GatheringService,
+    private val gatheringRepository: GatheringRepository,
 ) {
     @Transactional
     fun schedule(
@@ -191,5 +196,20 @@ class GatheringApplicationService(
             userUuid = userUuid,
             reason = reason
         )
+    }
+
+    @Transactional(readOnly = true)
+    fun <R> scroll(
+        cursor: GatheringCursor?,
+        size: Int,
+        filter: GatheringFilter,
+        mapper: (ScrollResult<GatheringEntity, GatheringCursor>) -> R
+    ): R {
+        val result = gatheringRepository.scroll(
+            cursor = cursor,
+            size = size,
+            filter = filter,
+        )
+        return mapper.invoke(result)
     }
 }

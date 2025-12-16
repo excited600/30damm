@@ -23,12 +23,19 @@ paths:
         - Gatherings
       summary: Scroll filtered gatherings with cursor-based pagination
       parameters:
-        - name: cursor
+        - name: uuid
           in: query
           required: false
           schema:
             type: string
+            format: uuid
           description: Cursor for the page. Omit for the first page.
+        - name: score
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Score of gatherings. Omit for the first page.
         - name: size
           in: query
           required: true
@@ -37,6 +44,14 @@ paths:
             minimum: 1
             maximum: 100
           description: Number of gatherings to retrieve per page
+        - name: statuses
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Gathering_Status'
+          description: Filter gatherings by statuses
         - name: categories
           in: query
           required: false
@@ -653,17 +668,26 @@ components:
           format: float
           description: Duration of the gathering in hours (can contain decimals)
     ScrollFilteredGatheringsResponse:
-      allOf:
-        - $ref: '#/components/schemas/ScrollPage'
-        - type: object
-          required:
-            - gatherings
+      type: object
+      required:
+        - hasNext
+        - gatherings
+        - cursor
+      properties:
+        cursor:
+          type: object
           properties:
-            gatherings:
-              type: array
-              description: List of gatherings
-              items:
-                $ref: '#/components/schemas/Gathering'
+            score:
+              type: integer
+            uuid:
+              type: string
+              format: uuid
+        hasNext:
+          type: boolean
+        gatherings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gathering'
     JoinGatheringRequest:
       type: object
       required:
@@ -744,6 +768,15 @@ components:
           description: Unix timestamp when the webhook event was generated
         data:
           $ref: '#/components/schemas/WebhookData'
+    Gathering_Status:
+      type: string
+      enum:
+        - OPEN_PENDING
+        - OPEN
+        - CLOSED
+        - IN_PROGRESS
+        - FINISHED
+      description: Status of the gathering
     Gathering_Category:
       type: string
       enum:
@@ -767,18 +800,6 @@ components:
         - FRIDAY
         - SATURDAY
       description: Day of the week
-    ScrollPage:
-      type: object
-      required:
-        - hasNext
-      properties:
-        cursor:
-          type: string
-          nullable: true
-          description: Cursor for the next page
-        hasNext:
-          type: boolean
-          description: Indicates if there is a next page
     Gathering_ApproveType:
       type: string
       enum:
@@ -790,14 +811,6 @@ components:
       enum:
         - HOME_PARTY
       description: Sub-category of the gathering
-    Gathering_Status:
-      type: string
-      enum:
-        - OPEN
-        - CLOSED
-        - IN_PROGRESS
-        - FINISHED
-      description: Status of the gathering
     Gathering_WeeklyScheduleSummary:
       type: object
       required:

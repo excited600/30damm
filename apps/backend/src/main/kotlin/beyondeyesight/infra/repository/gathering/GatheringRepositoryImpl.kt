@@ -66,7 +66,7 @@ class GatheringRepositoryImpl(
 
         return ScrollResult(
             items = items,
-            cursor = items.lastOrNull()?.let {
+            cursor = items.last().let {
                 GatheringCursor(
                     score = it.score,
                     uuid = it.uuid
@@ -80,7 +80,7 @@ class GatheringRepositoryImpl(
         filter: GatheringFilter
     ): List<Predicate?> {
         return listOf(
-            filter.statuses.takeIf { it.isNotEmpty() }?.let {
+            filter.statuses?.takeIf { it.isNotEmpty() }?.let {
                 path(GatheringEntity::status).`in`(it.map { status -> Status.valueOf(status.name) })
             },
             filter.categories?.takeIf { it.isNotEmpty() }?.let {

@@ -30,12 +30,19 @@
       - Gatherings
     summary: Scroll filtered gatherings with cursor-based pagination
     parameters:
-      - name: cursor
+      - name: uuid
         in: query
         required: false
         schema:
           type: string
+          format: uuid
         description: Cursor for the page. Omit for the first page.
+      - name: score
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Score of gatherings. Omit for the first page.
       - name: size
         in: query
         required: true
@@ -44,6 +51,14 @@
           minimum: 1
           maximum: 100
         description: Number of gatherings to retrieve per page
+      - name: statuses
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '../components/schemas/shared.yml#/Gathering_Status'
+        description: Filter gatherings by statuses
       - name: categories
         in: query
         required: false
