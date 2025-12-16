@@ -182,6 +182,40 @@ paths:
       responses:
         '201':
           description: Joined gathering successfully
+  /gatherings/{gatheringUuid}/leave:
+    post:
+      operationId: leaveGathering
+      tags:
+        - Gatherings
+      summary: Leave a gathering as a guest
+      parameters:
+        - name: gatheringUuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the gathering to leave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userUuid
+                - reason
+              properties:
+                userUuid:
+                  type: string
+                  format: uuid
+                  description: UUID of the user leaving the gathering
+                reason:
+                  type: string
+                  description: Reason for leaving the gathering
+      responses:
+        '204':
+          description: Left gathering successfully
   /payments/{paymentId}/prepare:
     post:
       operationId: preparePayment

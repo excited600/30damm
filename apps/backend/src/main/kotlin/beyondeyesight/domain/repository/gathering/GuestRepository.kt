@@ -1,6 +1,7 @@
 package beyondeyesight.domain.repository.gathering
 
 import beyondeyesight.domain.model.GuestEntity
+import beyondeyesight.domain.model.GuestId
 import beyondeyesight.domain.model.user.Gender
 import java.util.UUID
 
@@ -11,7 +12,9 @@ interface GuestRepository {
 
     fun countByGatheringAndGender(gatheringUuid: UUID, gender: Gender): Long
 
-    fun existsByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID): Boolean
+    fun existsByGuestId(guestId: GuestId): Boolean
+
+    fun findByGuestId(guestId: GuestId): GuestEntity?
 
     fun deleteByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID)
 }

@@ -26,6 +26,8 @@ paths:
     $ref: './paths/gatherings.yml#/~1series'
   /gatherings/{gatheringUuid}/join:
     $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1join'
+  /gatherings/{gatheringUuid}/leave:
+    $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1leave'
 
   # Payments
   /payments/{paymentId}/prepare:

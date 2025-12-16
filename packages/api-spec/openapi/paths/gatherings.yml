@@ -151,6 +151,41 @@
           application/json:
             schema:
               $ref: '../3040-api-spec-overview.yml#/components/schemas/OpenGatheringResponse'
+
+/gatherings/{gatheringUuid}/leave:
+  post:
+    operationId: leaveGathering
+    tags:
+      - Gatherings
+    summary: Leave a gathering as a guest
+    parameters:
+      - name: gatheringUuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The UUID of the gathering to leave
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - userUuid
+              - reason
+            properties:
+              userUuid:
+                type: string
+                format: uuid
+                description: UUID of the user leaving the gathering
+              reason:
+                type: string
+                description: Reason for leaving the gathering
+    responses:
+      '204':
+        description: Left gathering successfully
 /series:
   post:
     operationId: scheduleSeries

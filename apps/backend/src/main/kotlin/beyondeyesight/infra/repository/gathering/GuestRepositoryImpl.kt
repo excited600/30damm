@@ -50,14 +50,14 @@ class GuestRepositoryImpl(
         }.firstOrNull()?: 0L
     }
 
-    override fun existsByUserUuidAndGatheringUuid(
-        userUuid: UUID,
-        gatheringUuid: UUID
+    override fun existsByGuestId(
+        guestId: GuestId
     ): Boolean {
-        return guestJpaRepository.existsByUserUuidAndGatheringUuid(
-            userUuid = userUuid,
-            gatheringUuid = gatheringUuid
-        )
+        return guestJpaRepository.existsById(guestId)
+    }
+
+    override fun findByGuestId(guestId: GuestId): GuestEntity? {
+        return guestJpaRepository.findById(guestId).orElse(null)
     }
 
     override fun deleteByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID) {

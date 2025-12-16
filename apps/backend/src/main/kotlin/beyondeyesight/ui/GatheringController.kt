@@ -39,6 +39,17 @@ class GatheringController(
         )
     }
 
+    override fun leaveGathering(
+        gatheringUuid: UUID,
+        leaveGatheringRequest: LeaveGatheringRequest
+    ) {
+        gatheringApplicationService.leave(
+            gatheringUuid = gatheringUuid,
+            userUuid = leaveGatheringRequest.userUuid,
+            reason = leaveGatheringRequest.reason
+        )
+    }
+
     override fun openGathering(openGatheringRequest: OpenGatheringRequest): OpenGatheringResponse {
         return gatheringApplicationService.open(
             hostUuid = openGatheringRequest.hostUuid,

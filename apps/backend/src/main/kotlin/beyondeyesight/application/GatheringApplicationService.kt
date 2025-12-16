@@ -19,7 +19,6 @@ import java.util.UUID
 @Service
 class GatheringApplicationService(
     private val gatheringService: GatheringService,
-    private val guestService: GuestService,
 ) {
     @Transactional
     fun schedule(

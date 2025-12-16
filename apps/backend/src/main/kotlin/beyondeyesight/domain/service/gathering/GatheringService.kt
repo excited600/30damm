@@ -7,7 +7,7 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
-import beyondeyesight.domain.exception.gathering.CannotLeaveException
+import beyondeyesight.domain.model.GuestId
 import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.gathering.*
 import beyondeyesight.domain.model.payment.PaymentEntity
@@ -42,6 +42,7 @@ class GatheringService(
     private val paymentRepository: PaymentRepository,
     private val paymentStateService: PaymentStateService,
     private val paymentGateway: PaymentGateway,
+    private val gatheringRefundService: GatheringRefundService,
 ) {
     val logger = LoggerFactory.getLogger(javaClass)
     fun open(
@@ -151,38 +152,25 @@ class GatheringService(
         gatheringRepository.save(gathering)
     }
 
-    // TODO: 부분 취소 적용
     fun leave(gatheringUuid: UUID, userUuid: UUID, reason: String) {
         guestService.leave(userUuid = userUuid, gatheringUuid = gatheringUuid)
+        logger.info("[3040] 사용자 $userUuid 님이 모임 $gatheringUuid 에서 나감.")
 
-        val paymentEntity =
-            paymentRepository.findByProductTypeAndProductUuidAndBuyerUuid(
-                productType = ProductType.GATHERING,
-                productUuid = gatheringUuid,
-                buyerUuid = userUuid,
-            ) ?: return
+        val paymentEntity = paymentRepository.findByProductTypeAndProductUuidAndBuyerUuid(
+            productType = ProductType.GATHERING,
+            productUuid = gatheringUuid,
+            buyerUuid = userUuid,
+        ) ?: return
 
-        val pgPayment = paymentGateway.getPayment(paymentEntity.paymentId)
-
-        try {
-            if (pgPayment.status != Status.PAID && pgPayment.status != Status.PARTIAL_CANCELLED) {
-                logger.warn("[3040] 사용자 $userUuid 님의 모임 $gatheringUuid 탈퇴 시도 시 결제 상태가 취소 가능한 상태가 아님: ${paymentEntity.status}")
-                throw CannotLeaveException.invalidPaymentStatus(
-                    paymentId = paymentEntity.paymentId,
-                    status = pgPayment.status
-                )
-            }
-            paymentStateService.cancelPayment(
-                paymentId = paymentEntity.paymentId,
+        if (paymentEntity.amount > 0) {
+            gatheringRefundService.refund(
+                userUuid = userUuid,
+                gatheringUuid = gatheringUuid,
                 reason = reason,
-                amount = paymentEntity.getCancellableAmount()
+                paymentEntity = paymentEntity,
+                amount = paymentEntity.amount
             )
-
-            logger.info("[3040] 사용자 $userUuid 님이 모임 $gatheringUuid 에서 나감.")
-        } finally {
-            paymentStateService.synchronize(paymentId = paymentEntity.paymentId)
         }
-
     }
 
     fun join(gatheringUuid: UUID, userUuid: UUID, paymentId: String, paymentToken: String, txId: String, amount: Int) {
@@ -209,7 +197,7 @@ class GatheringService(
                     resourceUuid = gatheringUuid
                 )
 
-            if (guestRepository.existsByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gathering.uuid)) {
+            if (guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
                 throw CannotJoinException.alreadyJoined(
                     userUuid = userUuid,
                     gatheringUuid = gathering.uuid,
@@ -440,6 +428,7 @@ class GatheringService(
             }
         }
     }
+
     fun handleFailedWebhook(paymentEntity: PaymentEntity) {
         val lockToken = lockService.lockWithRetry(
             resourceName = GatheringEntity.RESOURCE_NAME,
@@ -447,13 +436,13 @@ class GatheringService(
             expire = Duration.ofSeconds(10),
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
-        )?:run {
+        ) ?: run {
             logger.error("[3040] 결제 실패 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
 
         try {
-            if (paymentEntity.status != Status.FAILED){
+            if (paymentEntity.status != Status.FAILED) {
                 logger.info("[3040] 실패 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
@@ -467,7 +456,7 @@ class GatheringService(
             val gatheringUuid = paymentEntity.productUuid
             val userUuid = paymentEntity.buyerUuid
 
-            if (!guestRepository.existsByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gatheringUuid)) {
+            if (!guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
                 logger.info("[3040] 이미 모임에서 나간 사용자입니다. 결제 실패를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
@@ -489,20 +478,20 @@ class GatheringService(
 
     }
 
-    fun handleCancelledWebhook(paymentEntity: PaymentEntity){
+    fun handleCancelledWebhook(paymentEntity: PaymentEntity) {
         val lockToken = lockService.lockWithRetry(
             resourceName = GatheringEntity.RESOURCE_NAME,
             resourceId = paymentEntity.productUuid.toString(),
             expire = Duration.ofSeconds(10),
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
-        )?:run {
+        ) ?: run {
             logger.error("[3040] 결제 취소 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
 
         try {
-            if (paymentEntity.status != Status.CANCELLED){
+            if (paymentEntity.status != Status.CANCELLED) {
                 logger.info("[3040] 취소 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
@@ -516,7 +505,7 @@ class GatheringService(
             val gatheringUuid = paymentEntity.productUuid
             val userUuid = paymentEntity.buyerUuid
 
-            if (!guestRepository.existsByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gatheringUuid)) {
+            if (!guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
                 logger.info("[3040] 이미 모임에서 나간 사용자입니다. 취소를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
@@ -544,12 +533,12 @@ class GatheringService(
             expire = Duration.ofSeconds(10),
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
-        )?:run {
+        ) ?: run {
             logger.error("[3040] 결제 부분취소 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
         try {
-            if (paymentEntity.status != Status.PARTIAL_CANCELLED){
+            if (paymentEntity.status != Status.PARTIAL_CANCELLED) {
                 logger.info("[3040] 부분 취소 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
@@ -563,7 +552,7 @@ class GatheringService(
             val gatheringUuid = paymentEntity.productUuid
             val userUuid = paymentEntity.buyerUuid
 
-            if (!guestRepository.existsByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gatheringUuid)) {
+            if (!guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
                 logger.info("[3040] 이미 모임에서 나간 사용자입니다. 부분 취소를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
@@ -591,13 +580,13 @@ class GatheringService(
             expire = Duration.ofSeconds(10),
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
-        )?:run {
+        ) ?: run {
             logger.error("[3040] 결제 완료 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
 
         try {
-            if (paymentEntity.status == Status.PAID){
+            if (paymentEntity.status == Status.PAID) {
                 logger.info("[3040] 결제 완료 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
@@ -622,7 +611,7 @@ class GatheringService(
                     return
                 }
 
-            if (guestRepository.existsByUserUuidAndGatheringUuid(userUuid = userUuid, gatheringUuid = gatheringUuid)) {
+            if (guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
                 logger.info("[3040] 결제 완료 웹훅 처리: 이미 모임에 참가한 사용자입니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }

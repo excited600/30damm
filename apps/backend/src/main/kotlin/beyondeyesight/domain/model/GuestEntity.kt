@@ -36,6 +36,7 @@ class GuestEntity(
                 joinedAt = LocalDateTime.now()
             )
         }
+        const val RESOURCE_NAME = "guests"
     }
 }
 
