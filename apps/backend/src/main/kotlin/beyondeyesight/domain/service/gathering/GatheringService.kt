@@ -10,6 +10,7 @@ import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.GuestId
 import beyondeyesight.domain.model.user.Gender
 import beyondeyesight.domain.model.gathering.*
+import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
 import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Status
@@ -67,7 +68,7 @@ class GatheringService(
         startDateTime: LocalDateTime,
         duration: Duration?,
     ): GatheringEntity {
-        validate(minAge, maxAge, maxMaleCount, maxFemaleCount, fee)
+        validateOpen(minAge, maxAge, maxMaleCount, maxFemaleCount, fee)
 
         val host = userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
@@ -101,7 +102,7 @@ class GatheringService(
     }
 
 
-    private fun validate(
+    private fun validateOpen(
         minAge: Int,
         maxAge: Int,
         maxMaleCount: Int?,
@@ -173,7 +174,7 @@ class GatheringService(
         }
     }
 
-    fun join(gatheringUuid: UUID, userUuid: UUID, paymentId: String, paymentToken: String, txId: String, amount: Int) {
+    fun join(gatheringUuid: UUID, userUuid: UUID, confirmPaymentRequest: ConfirmPaymentRequest?) {
         userRepository.findByUuid(userUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
             resourceUuid = userUuid
@@ -248,25 +249,26 @@ class GatheringService(
                 }
             }
 
-            if (gathering.fee != amount) {
-                throw CannotJoinException.priceChanged(
-                    currentPrice = gathering.fee,
-                    priceAtPay = amount
-                )
-            }
-
             guestService.join(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
             )
 
-            if (amount > 0) {
-                paymentConfirmService.confirmPayment(
-                    paymentId = paymentId,
-                    paymentToken = paymentToken,
-                    txId = txId,
-                    amount = amount
-                )
+            if (confirmPaymentRequest != null) {
+                if (gathering.fee != confirmPaymentRequest.amount) {
+                    throw CannotJoinException.priceChanged(
+                        currentPrice = gathering.fee,
+                        priceAtPay = confirmPaymentRequest.amount
+                    )
+                }
+                if (confirmPaymentRequest.amount > 0) {
+                    paymentConfirmService.confirmPayment(
+                        paymentId = confirmPaymentRequest.paymentId,
+                        paymentToken = confirmPaymentRequest.paymentToken,
+                        txId = confirmPaymentRequest.txId,
+                        amount = confirmPaymentRequest.amount
+                    )
+                }
             }
         } finally {
             lockService.unlock("gathering", gatheringUuid.toString(), token)

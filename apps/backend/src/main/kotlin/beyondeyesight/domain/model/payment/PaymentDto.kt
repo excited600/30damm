@@ -140,3 +140,10 @@ enum class PaymentCancellationStatus {
 data class PaymentCancelResponse(
     val cancellation: PaymentCancellation? = null
 )
+
+data class ConfirmPaymentRequest(
+    val paymentId: String,
+    val paymentToken: String,
+    val txId: String,
+    val amount: Int
+)

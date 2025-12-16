@@ -32,10 +32,14 @@ class GatheringController(
         gatheringApplicationService.join(
             gatheringUuid = gatheringUuid,
             userUuid = joinGatheringRequest.userUuid,
-            paymentId = joinGatheringRequest.paymentId,
-            paymentToken = joinGatheringRequest.paymentToken,
-            txId = joinGatheringRequest.txId,
-            amount = joinGatheringRequest.amount
+            confirmPaymentRequest = joinGatheringRequest.confirmPaymentRequest?.let {
+                beyondeyesight.domain.model.payment.ConfirmPaymentRequest(
+                    paymentId = it.paymentId,
+                    amount = it.amount,
+                    paymentToken = it.paymentToken,
+                    txId = it.txId,
+                )
+            }
         )
     }
 
@@ -110,11 +114,12 @@ class GatheringController(
     override fun scheduleSeries(scheduleSeriesRequest: ScheduleSeriesRequest) {
         gatheringApplicationService.schedule(
             hostUuid = scheduleSeriesRequest.hostUuid,
-            approveType = GatheringEntity.ApproveType.entries.find { it.name == scheduleSeriesRequest.approveType.name } ?: throw InvalidValueException(
-                valueName = "approveType",
-                value = scheduleSeriesRequest.approveType,
-                reason = null
-            ),
+            approveType = GatheringEntity.ApproveType.entries.find { it.name == scheduleSeriesRequest.approveType.name }
+                ?: throw InvalidValueException(
+                    valueName = "approveType",
+                    value = scheduleSeriesRequest.approveType,
+                    reason = null
+                ),
             minCapacity = scheduleSeriesRequest.minCapacity,
             maxCapacity = scheduleSeriesRequest.maxCapacity,
             genderRatioEnabled = scheduleSeriesRequest.genderRatioEnabled,
@@ -124,24 +129,27 @@ class GatheringController(
             discountEnabled = scheduleSeriesRequest.discountEnabled,
             offline = scheduleSeriesRequest.offline,
             place = scheduleSeriesRequest.place,
-            category = Category.entries.find { it.name == scheduleSeriesRequest.category.name } ?: throw InvalidValueException(
-                valueName = "category",
-                value = scheduleSeriesRequest.category,
-                reason = null
-            ),
-            subCategory = SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name } ?: throw InvalidValueException(
-                valueName = "subCategory",
-                value = scheduleSeriesRequest.subCategory,
-                reason = null
-            ),
+            category = Category.entries.find { it.name == scheduleSeriesRequest.category.name }
+                ?: throw InvalidValueException(
+                    valueName = "category",
+                    value = scheduleSeriesRequest.category,
+                    reason = null
+                ),
+            subCategory = SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name }
+                ?: throw InvalidValueException(
+                    valueName = "subCategory",
+                    value = scheduleSeriesRequest.subCategory,
+                    reason = null
+                ),
             imageUrl = scheduleSeriesRequest.imageUrl,
             title = scheduleSeriesRequest.title,
             introduction = scheduleSeriesRequest.introduction,
-            scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name } ?: throw InvalidValueException(
-                valueName = "scheduleType",
-                value = scheduleSeriesRequest.scheduleType,
-                reason = null
-            ),
+            scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name }
+                ?: throw InvalidValueException(
+                    valueName = "scheduleType",
+                    value = scheduleSeriesRequest.scheduleType,
+                    reason = null
+                ),
             weeklySchedule = (scheduleSeriesRequest as? WeeklyScheduleSeriesRequest)?.let { request ->
                 WeeklySchedule(
                     startDate = request.startDate,

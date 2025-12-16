@@ -7,6 +7,7 @@ import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.model.gathering.WeeklySchedule
+import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
 import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.gathering.GuestService
 import org.springframework.stereotype.Service
@@ -175,14 +176,11 @@ class GatheringApplicationService(
     }
 
     @Transactional
-    fun join(gatheringUuid: UUID, userUuid: UUID, paymentId: String, paymentToken: String, txId: String, amount: Int) {
+    fun join(gatheringUuid: UUID, userUuid: UUID, confirmPaymentRequest: ConfirmPaymentRequest?) {
         gatheringService.join(
             gatheringUuid = gatheringUuid,
             userUuid = userUuid,
-            paymentId = paymentId,
-            paymentToken = paymentToken,
-            txId = txId,
-            amount = amount
+            confirmPaymentRequest = confirmPaymentRequest,
         )
     }
 
