@@ -3,13 +3,9 @@ package beyondeyesight.domain.model.payment
 import beyondeyesight.config.uuidV7
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.model.BaseEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(
@@ -84,7 +80,7 @@ class PaymentEntity(
     var cancelReason: String?,
     @Column(length = 500)
     var failReason: String?,
-) : BaseEntity(uuid, RESOURCE_NAME) {
+) : BaseEntity(uuid) {
 
     companion object {
         fun ready(
@@ -136,7 +132,7 @@ class PaymentEntity(
                 this.cancel(
                     cancelAmount = payment.amount.cancelled,
                     cancelledAt = payment.cancelledAt,
-                    reason = null
+                    reason = null // TODO: 이유 넣어야할거같은데...
                 )
             }
 
@@ -228,4 +224,8 @@ class PaymentEntity(
     }
 
     fun getCancellableAmount(): Int = amount - cancelledAmount
+    override fun resourceName(): String {
+        return RESOURCE_NAME
+    }
+
 }

@@ -88,7 +88,7 @@ const signUp = async (userData: {
     email: string;
     nickname: string;
     age: number;
-    gender: 'MALE' | 'FEMALE';
+    gender: 'M' | 'F';
     introduction: string;
     password: string;
     phoneNumber: string;
@@ -187,20 +187,20 @@ function PaymentButton() {
         const paymentId = `GW8_payment_${Date.now()}`;
         const productType = "GATHERING"
         const productName = '상품명';
-        const amount = 500;
-        const buyerEmail = "wom2277@naver.com";
+        const amount = 1000;
+        const buyerEmail = `wom2277_${Date.now()}@naver.com`;
         const buyerName = "임근원";
-        const buyerPhone = "010-1234-5678"
+        const buyerPhone = `010-9111-1111`
         try {
             // host User 생성
             const hostResponse = await signUp({
-                email: 'host@example.com',
+                email: `host_${Date.now()}@example.com`,
                 nickname: '호스트',
                 age: 30,
-                gender: 'MALE',
+                gender: 'M',
                 introduction: '모임을 주최하는 호스트입니다.',
                 password: 'password123',
-                phoneNumber: '010-1111-1111',
+                phoneNumber: `010-8111-1111`,
                 phoneAuthenticated: true,
             });
             console.log('Host 회원가입 완료:', hostResponse);
@@ -211,7 +211,7 @@ function PaymentButton() {
                 email: buyerEmail,
                 nickname: buyerName,
                 age: 25,
-                gender: 'FEMALE',
+                gender: 'F',
                 introduction: '모임에 참여하는 게스트입니다.',
                 password: 'password123',
                 phoneNumber: buyerPhone,

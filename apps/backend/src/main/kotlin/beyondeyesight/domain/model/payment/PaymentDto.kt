@@ -2,7 +2,6 @@ package beyondeyesight.domain.model.payment
 
 import beyondeyesight.util.InstantToLocalDateTimeDeserializer
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -140,25 +139,4 @@ enum class PaymentCancellationStatus {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentCancelResponse(
     val cancellation: PaymentCancellation? = null
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Webhook(
-    val type: String,
-    val timestamp: String? = null,
-    val data: WebhookData? = null
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class WebhookData(
-    @JsonProperty("paymentId")
-    val paymentId: String? = null,
-
-    @JsonProperty("transactionId")
-    val transactionId: String? = null,
-
-    val status: String? = null,
-
-    @JsonProperty("totalAmount")
-    val totalAmount: Int // TODO: nullable인지 확인하기
 )

@@ -25,44 +25,6 @@
             schema:
               $ref: '../components/schemas/payment/preparePayment/preparePaymentResponse.yml#/PreparePaymentResponse'
 
-/payments/{paymentId}/verify:
-  post:
-    operationId: verifyPayment
-    tags:
-      - Payments
-    summary: Verify a payment
-    parameters:
-      - name: paymentId
-        in: path
-        required: true
-        schema:
-          type: string
-        description: Unique identifier for the payment
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - paymentToken
-              - txId
-              - amount
-            properties:
-              paymentToken:
-                type: string
-                description: Token received from the payment gateway to verify the payment
-              txId:
-                type: string
-                description: Transaction ID provided by the payment gateway
-              amount:
-                type: integer
-                description: Amount to be verified in Won(KRW)
-
-    responses:
-      '200':
-        description: Payment verified successfully
-
 /payments/webhook:
   post:
     operationId: paymentWebhook
@@ -75,7 +37,6 @@
         application/json:
           schema:
             $ref: '../components/schemas/payment/webhook/paymentWebhook.yml#/PaymentWebhook'
-
     responses:
       '200':
         description: Webhook handled successfully

@@ -1,18 +1,14 @@
 package beyondeyesight.domain.model.gathering
 
+import beyondeyesight.config.uuidV7
 import beyondeyesight.domain.model.BaseEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
-import beyondeyesight.config.uuidV7
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "gatherings")
@@ -74,7 +70,7 @@ class GatheringEntity(
     val dayOfWeek: DayOfWeek,
     @Column(nullable = false)
     val score: Int,
-): BaseEntity(uuid = uuid, resourceName = RESOURCE_NAME) {
+): BaseEntity(uuid = uuid) {
 
     fun close() {
         this.status = Status.CLOSED

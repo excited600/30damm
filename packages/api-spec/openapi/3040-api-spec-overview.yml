@@ -30,8 +30,6 @@ paths:
   # Payments
   /payments/{paymentId}/prepare:
     $ref: './paths/payments.yml#/~1payments~1{paymentId}~1prepare'
-  /payments/{paymentId}/verify:
-    $ref: './paths/payments.yml#/~1payments~1{paymentId}~1verify'
   /payments/webhook:
     $ref: './paths/payments.yml#/~1payments~1webhook'
 

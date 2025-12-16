@@ -1,12 +1,8 @@
 package beyondeyesight.domain.model.gathering
 
 import beyondeyesight.domain.model.BaseEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Table
-import java.util.UUID
+import jakarta.persistence.*
+import java.util.*
 
 @Entity
 @Table(name = "series")
@@ -52,7 +48,8 @@ class SeriesEntity(
     @Column(nullable = false)
     val introduction: String,
 
-) : BaseEntity(uuid = uuid, resourceName = RESOURCE_NAME) {
+) : BaseEntity(uuid = uuid) {
+
     companion object {
         const val RESOURCE_NAME = "series"
     }

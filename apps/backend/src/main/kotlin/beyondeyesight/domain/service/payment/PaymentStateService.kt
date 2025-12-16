@@ -4,9 +4,7 @@ import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.payment.InvalidOperationException
-import beyondeyesight.domain.exception.payment.PaymentFailException
 import beyondeyesight.domain.model.payment.Currency
-import beyondeyesight.domain.model.payment.Payment
 import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Status
@@ -18,7 +16,7 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Service
 class PaymentStateService(
@@ -70,11 +68,18 @@ class PaymentStateService(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun synchronize(
-        paymentEntity: PaymentEntity, paymentDto: Payment
-    ): PaymentEntity {
-        paymentEntity.synchronize(paymentDto)
-        return paymentRepository.save(paymentEntity)
+    fun synchronize(paymentId: String) {
+        val paymentEntity = paymentRepository.findByPaymentId(paymentId)?: run {
+            logger.error("[3040] 동기화 실패 - paymentId: $paymentId 에 해당하는 엔티티가 없습니다.")
+            throw ResourceNotFoundException.byField(
+                resourceName = PaymentEntity.RESOURCE_NAME,
+                fieldName = "paymentId",
+                fieldValue = paymentId
+            )
+        }
+        val pgPayment = paymentGateway.getPayment(paymentId)
+        paymentEntity.synchronize(pgPayment)
+        paymentRepository.save(paymentEntity)
     }
 
 

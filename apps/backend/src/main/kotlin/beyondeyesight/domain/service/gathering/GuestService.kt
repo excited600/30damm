@@ -29,4 +29,11 @@ class GuestService(
         )
         return guestRepository.save(guest)
     }
+
+    fun leave(gatheringUuid: UUID, userUuid: UUID) {
+        guestRepository.deleteByUserUuidAndGatheringUuid(
+            userUuid = userUuid,
+            gatheringUuid = gatheringUuid
+        )
+    }
 }
