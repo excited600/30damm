@@ -25,7 +25,7 @@ class PortoneV2PaymentGateway(
 
         try {
             val response = portOneWebClient.get()
-                .uri("/payments/{paymentId}", paymentId)
+                .uri("/payments/$paymentId")
                 .retrieve()
                 .bodyToMono(Payment::class.java)
                 .block() ?: throw PaymentGatewayException.noResponse()
@@ -51,7 +51,7 @@ class PortoneV2PaymentGateway(
 
         try {
             val response = portOneWebClient.post()
-                .uri("/payments/{paymentId}/cancel", paymentId)
+                .uri("/payments/$paymentId/cancel")
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(CancelPaymentResponse::class.java)
@@ -71,7 +71,7 @@ class PortoneV2PaymentGateway(
 
         try {
             portOneWebClient.post()
-                .uri("/payments/{paymentId}/pre-register", paymentId)
+                .uri("/payments/$paymentId/pre-register")
                 .bodyValue(
                     mapOf(
                         "storeId" to properties.storeId,
@@ -103,17 +103,23 @@ class PortoneV2PaymentGateway(
         txId: String,
         amount: Int
     ) {
-        val confirmResponse = portOneWebClient.post()
-            .uri("/payments/${paymentId}/confirm")
-            .bodyValue(
-                mapOf(
-                    "paymentToken" to paymentToken,
-                    "txId" to txId,
-                    "totalAmount" to amount
+        logger.debug("결제 컨펌. paymentId=${paymentId}, paymentToken=${paymentToken}, txId=${txId}, amount=${amount}")
+        try {
+            val confirmResponse = portOneWebClient.post()
+                .uri("/payments/$paymentId/confirm")
+                .bodyValue(
+                    mapOf(
+                        "paymentToken" to paymentToken,
+                        "txId" to txId,
+                        "totalAmount" to amount
+                    )
                 )
-            )
-            .retrieve()
-            .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
-            .block()
+                .retrieve()
+                .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
+                .block()
+        } catch (e: Exception) {
+            logger.error("결제 컨펌 실패: paymentId=$paymentId", e)
+            throw PaymentGatewayException.confirmFail(e.message?: "에러메시지 없음.")
+        }
     }
 }

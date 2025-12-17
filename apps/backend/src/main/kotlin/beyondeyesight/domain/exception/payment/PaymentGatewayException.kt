@@ -16,5 +16,9 @@ class PaymentGatewayException private constructor(override val message: String):
         fun cancelFail(errorMessage: String): PaymentGatewayException {
             return PaymentGatewayException("결제 취소 실패: $errorMessage")
         }
+
+        fun confirmFail(errorMessage: String): PaymentGatewayException {
+            return PaymentGatewayException("결제 컨펌 실패: $errorMessage")
+        }
     }
 }

@@ -17,14 +17,12 @@ class PaymentSynchronizeService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun synchronize(paymentId: String) {
-        val paymentEntity = paymentRepository.findByPaymentId(paymentId)?: run {
-            logger.error("[3040] 동기화 실패 - paymentId: $paymentId 에 해당하는 엔티티가 없습니다.")
-            throw ResourceNotFoundException.byField(
-                resourceName = PaymentEntity.RESOURCE_NAME,
-                fieldName = "paymentId",
-                fieldValue = paymentId
-            )
-        }
+        val paymentEntity = paymentRepository.findByPaymentId(paymentId)?: throw ResourceNotFoundException.byField(
+            resourceName = PaymentEntity.RESOURCE_NAME,
+            fieldName = "paymentId",
+            fieldValue = paymentId
+        ).also { logger.error("[3040] 동기화 실패 - paymentId: $paymentId 에 해당하는 엔티티가 없습니다.") }
+
         val pgPayment = paymentGateway.getPayment(paymentId)
         paymentEntity.synchronize(pgPayment)
         paymentRepository.save(paymentEntity)

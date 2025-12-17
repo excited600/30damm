@@ -45,7 +45,7 @@ class GatheringService(
     private val paymentSynchronizeService: PaymentSynchronizeService,
     private val paymentGateway: PaymentGateway,
 ) {
-    val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = LoggerFactory.getLogger(javaClass)
     fun open(
         hostUuid: UUID,
         approveType: GatheringEntity.ApproveType,
@@ -492,7 +492,7 @@ class GatheringService(
         } finally {
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
-                resourceId = paymentEntity.paymentId,
+                resourceId = paymentEntity.productUuid.toString(),
                 token = lockToken
             )
         }
@@ -542,7 +542,7 @@ class GatheringService(
 
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
-                resourceId = paymentEntity.paymentId,
+                resourceId = paymentEntity.productUuid.toString(),
                 token = lockToken
             )
         }
@@ -589,7 +589,7 @@ class GatheringService(
 
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
-                resourceId = paymentEntity.paymentId,
+                resourceId = paymentEntity.productUuid.toString(),
                 token = lockToken
             )
         }
@@ -665,6 +665,7 @@ class GatheringService(
                         reason = "정원 초과 M. gatheringUuid=${gatheringUuid}, userUuid=${userUuid}",
                         amount = null
                     )
+                    return
                 }
 
                 val currentFemaleGuestCount = guestRepository.countByGatheringAndGender(
@@ -684,6 +685,7 @@ class GatheringService(
                         reason = "정원 초과 F. gatheringUuid=${gatheringUuid}, userUuid=${userUuid}",
                         amount = null
                     )
+                    return
                 }
             }
 
@@ -696,7 +698,7 @@ class GatheringService(
         } finally {
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
-                resourceId = paymentEntity.paymentId,
+                resourceId = paymentEntity.productUuid.toString(),
                 token = lockToken
             )
         }
@@ -728,7 +730,7 @@ class GatheringService(
                 fieldValue = guestId
             )
 
-        if (guest.joinedAt.plusMinutes(30) < now) {
+        if (now <= guest.joinedAt.plusMinutes(30)) {
             return amount
         }
 
