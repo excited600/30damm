@@ -66,7 +66,7 @@ class GatheringRepositoryImpl(
 
         return ScrollResult(
             items = items,
-            cursor = items.last().let {
+            cursor = items.lastOrNull()?.let {
                 GatheringCursor(
                     score = it.score,
                     uuid = it.uuid

@@ -304,10 +304,12 @@ class GatheringController(
                             duration = gatheringEntity.duration.toHoursFloat()
                         )
                     },
-                    cursor = ScrollFilteredGatheringsResponseCursor(
-                        score = scrollResult.cursor.score,
-                        uuid = scrollResult.cursor.uuid
-                    )
+                    cursor = scrollResult.cursor?.let {
+                        ScrollFilteredGatheringsResponseCursor(
+                            score = it.score,
+                            uuid = it.uuid
+                        )
+                    }
                 )
             }
         )

@@ -3,7 +3,6 @@ ScrollFilteredGatheringsResponse:
   required:
     - hasNext
     - gatherings
-    - cursor
   properties:
     cursor:
       type: object
