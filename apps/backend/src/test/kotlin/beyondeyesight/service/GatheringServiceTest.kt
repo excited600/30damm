@@ -2,6 +2,7 @@ package beyondeyesight.service
 
 import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.gathering.*
@@ -260,11 +261,12 @@ class GatheringServiceTest {
         whenever(gatheringEntity.genderRatioEnabled).thenReturn(testCase.genderRatioEnabled)
         whenever(gatheringEntity.maxMaleCount).thenReturn(testCase.maxMaleCount)
         whenever(gatheringEntity.maxFemaleCount).thenReturn(testCase.maxFemaleCount)
+        whenever(gatheringEntity.isFree()).thenReturn(true)  // 무료 모임으로 테스트
         whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(testCase.currentGuestCount.toLong())
         whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.M)).thenReturn(testCase.currentMaleCount.toLong())
         whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(testCase.currentFemaleCount.toLong())
 
-        // when
+        // when: 무료 모임이므로 confirmPaymentRequest = null
         gatheringService.join(gatheringUuid, userUuid, confirmPaymentRequest = null)
 
         // then
@@ -342,6 +344,7 @@ class GatheringServiceTest {
             whenever(gatheringEntity.genderRatioEnabled).thenReturn(testCase.genderRatioEnabled)
             whenever(gatheringEntity.maxMaleCount).thenReturn(testCase.maxMaleCount)
             whenever(gatheringEntity.maxFemaleCount).thenReturn(testCase.maxFemaleCount)
+            whenever(gatheringEntity.isFree()).thenReturn(true)  // 무료 모임으로 테스트
             whenever(guestRepository.countByGathering(gatheringUuid)).thenReturn(testCase.currentGuestCount.toLong())
             whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.M)).thenReturn(testCase.currentMaleCount.toLong())
             whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(testCase.currentFemaleCount.toLong())
@@ -765,7 +768,7 @@ class GatheringServiceTest {
                 maxFemaleCount = null,
                 currentMaleCount = 0,
                 currentFemaleCount = 0,
-                expectedExceptionType = IllegalStateException::class.java
+                expectedExceptionType = LockAcquireFailException::class.java
             ),
 
             // 3. Gathering not found
