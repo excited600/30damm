@@ -141,6 +141,10 @@ class GatheringService(
             )
         }
 
+        if (fee < 0) {
+            throw InvalidValueException("fee", fee, "must not be negative")
+        }
+
         if (fee % 1000 != 0) {
             throw InvalidValueException("fee", fee, "must be a multiple of 1000")
         }
@@ -249,12 +253,28 @@ class GatheringService(
                 }
             }
 
+            if (gathering.isFree() && confirmPaymentRequest != null) {
+                throw InvalidValueException(
+                    valueName = "confirmPaymentRequest",
+                    value = confirmPaymentRequest,
+                    reason = "confirmPaymentRequest must be null when gathering is free"
+                )
+            }
+
+            if (!gathering.isFree() && confirmPaymentRequest == null) {
+                throw InvalidValueException(
+                    valueName = "confirmPaymentRequest",
+                    value = "null",
+                    reason = "confirmPaymentRequest must not be null when gathering is not free"
+                )
+            }
+
             guestService.join(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
             )
 
-            if (confirmPaymentRequest != null) {
+            if (!gathering.isFree() && confirmPaymentRequest != null) {
                 if (gathering.fee != confirmPaymentRequest.amount) {
                     throw CannotJoinException.priceChanged(
                         currentPrice = gathering.fee,

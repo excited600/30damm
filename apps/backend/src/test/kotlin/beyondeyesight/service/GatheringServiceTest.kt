@@ -16,6 +16,9 @@ import beyondeyesight.domain.service.LockService
 import beyondeyesight.domain.service.gathering.GatheringService
 import beyondeyesight.domain.service.gathering.GuestService
 import beyondeyesight.domain.service.payment.PaymentGateway
+import beyondeyesight.domain.service.payment.PaymentService
+import beyondeyesight.domain.service.payment.PaymentSynchronizeService
+import beyondeyesight.domain.repository.payment.PaymentRepository
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -35,6 +38,9 @@ class GatheringServiceTest {
     private val seriesRepository: SeriesRepository = mock()
     private val seriesScheduleRepository: SeriesScheduleRepository = mock()
     private val paymentGateway: PaymentGateway = mock()
+    private val paymentService: PaymentService = mock()
+    private val paymentRepository: PaymentRepository = mock()
+    private val paymentSynchronizeService: PaymentSynchronizeService = mock()
 
     val gatheringService = GatheringService(
         gatheringRepository = gatheringRepository,
@@ -44,6 +50,9 @@ class GatheringServiceTest {
         userRepository = userRepository,
         seriesRepository = seriesRepository,
         seriesScheduleRepository = seriesScheduleRepository,
+        paymentService = paymentService,
+        paymentRepository = paymentRepository,
+        paymentSynchronizeService = paymentSynchronizeService,
         paymentGateway = paymentGateway,
     )
 
@@ -256,7 +265,7 @@ class GatheringServiceTest {
         whenever(guestRepository.countByGatheringAndGender(gatheringUuid, Gender.F)).thenReturn(testCase.currentFemaleCount.toLong())
 
         // when
-        gatheringService.join(gatheringUuid, userUuid)
+        gatheringService.join(gatheringUuid, userUuid, confirmPaymentRequest = null)
 
         // then
         verify(userRepository).findByUuid(userUuid)
@@ -342,7 +351,7 @@ class GatheringServiceTest {
 
         // when & then
         val exception = assertThrows<Exception> {
-            gatheringService.join(gatheringUuid, userUuid)
+            gatheringService.join(gatheringUuid, userUuid, confirmPaymentRequest = null)
         }
 
         assertEquals(testCase.expectedExceptionType, exception::class.java)

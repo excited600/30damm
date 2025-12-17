@@ -9,6 +9,10 @@ import beyondeyesight.model.GatheringSubCategory
 import beyondeyesight.model.GatheringWeeklyScheduleSummary
 import beyondeyesight.model.JoinGatheringRequest
 import beyondeyesight.model.OpenGatheringRequest
+import beyondeyesight.model.PreparePaymentRequest
+import beyondeyesight.model.PreparePaymentResponse
+import beyondeyesight.model.ProductType
+import beyondeyesight.model.ConfirmPaymentRequest
 import beyondeyesight.model.OpenGatheringResponse
 import beyondeyesight.model.WeeklyScheduleSeriesRequest
 import beyondeyesight.ui.UserController
@@ -162,7 +166,7 @@ class GatheringControllerTest : EndToEndTestBase() {
     }
 
     @Test
-    fun `Join Gathering`() {
+    fun `무료 모임 참여`() {
         //given
         // 호스트 생성
         val hostSignUpRequest = UserController.SignUpRequest(
@@ -208,7 +212,7 @@ class GatheringControllerTest : EndToEndTestBase() {
 
         // Gathering 생성
         val anyString = "string"
-        val minFee = 1_000
+        val fee = 0
         val openGatheringRequest = OpenGatheringRequest(
             hostUuid = host.uuid,
             approveType = GatheringApproveType.FIRST_IN,
@@ -217,7 +221,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             genderRatioEnabled = false,
             minAge = 20,
             maxAge = 40,
-            fee = minFee,
+            fee = fee,
             discountEnabled = false,
             offline = true,
             place = anyString,
@@ -245,7 +249,7 @@ class GatheringControllerTest : EndToEndTestBase() {
         val joinRequest = JoinGatheringRequest(userUuid = guest.uuid)
 
         webTestClient.post()
-            .uri("/gatherings/${gathering.uuid}/guests")
+            .uri("/gatherings/${gathering.uuid}/join")
             .bodyValue(joinRequest)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -258,5 +262,145 @@ class GatheringControllerTest : EndToEndTestBase() {
         )
 
         assertThat(guestCount).isEqualTo(1L)
+    }
+
+    @Test
+    fun `유료 모임 참여`() {
+        // given
+        // 호스트 생성
+        val hostSignUpRequest = UserController.SignUpRequest(
+            email = "host@email.com",
+            nickname = "host",
+            age = 30,
+            gender = Gender.M,
+            introduction = "host intro",
+            password = "password",
+            phoneNumber = "01012345671",
+            phoneAuthenticated = true
+        )
+
+        val host = webTestClient.post()
+            .uri("/users/")
+            .bodyValue(hostSignUpRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful
+            .expectBody(UserController.SignUpResponse::class.java)
+            .returnResult()
+            .responseBody!!
+
+        // 게스트 생성
+        val guestSignUpRequest = UserController.SignUpRequest(
+            email = "guest@email.com",
+            nickname = "guest",
+            age = 25,
+            gender = Gender.F,
+            introduction = "guest intro",
+            password = "password",
+            phoneNumber = "01012345672",
+            phoneAuthenticated = true
+        )
+
+        val guest = webTestClient.post()
+            .uri("/users/")
+            .bodyValue(guestSignUpRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful
+            .expectBody(UserController.SignUpResponse::class.java)
+            .returnResult()
+            .responseBody!!
+
+        // 유료 Gathering 열기
+        val anyString = "string"
+        val fee = 10000
+        val openGatheringRequest = OpenGatheringRequest(
+            hostUuid = host.uuid,
+            approveType = GatheringApproveType.FIRST_IN,
+            minCapacity = 1,
+            maxCapacity = 10,
+            genderRatioEnabled = false,
+            minAge = 20,
+            maxAge = 40,
+            fee = fee,
+            discountEnabled = false,
+            offline = true,
+            place = anyString,
+            category = GatheringCategory.ACTIVITY,
+            subCategory = GatheringSubCategory.HOME_PARTY,
+            imageUrl = anyString,
+            title = anyString,
+            introduction = anyString,
+            startDateTime = LocalDateTime.now().plusDays(7),
+            maxMaleCount = null,
+            maxFemaleCount = null,
+            duration = 2.5f
+        )
+
+        val gathering = webTestClient.post()
+            .uri("/gatherings")
+            .bodyValue(openGatheringRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful
+            .expectBody(OpenGatheringResponse::class.java)
+            .returnResult()
+            .responseBody!!
+
+        // 결제 준비
+        val paymentId = "test-payment-${System.currentTimeMillis()}"
+        val preparePaymentRequest = PreparePaymentRequest(
+            productType = ProductType.GATHERING,
+            productUuid = gathering.uuid,
+            amount = fee,
+            productName = "테스트 모임",
+            buyerUuid = guest.uuid,
+            buyerEmail = "guest@email.com",
+            buyerName = "guest",
+            buyerPhone = "01012345672"
+        )
+
+        webTestClient.post()
+            .uri("/payments/{paymentId}/prepare", paymentId)
+            .bodyValue(preparePaymentRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful
+            .expectBody(PreparePaymentResponse::class.java)
+
+        // when
+        val joinRequest = JoinGatheringRequest(
+            userUuid = guest.uuid,
+            confirmPaymentRequest = ConfirmPaymentRequest(
+                paymentId = paymentId,
+                paymentToken = "test-token",
+                txId = "test-tx-id",
+                amount = fee
+            )
+        )
+
+        webTestClient.post()
+            .uri("/gatherings/${gathering.uuid}/join")
+            .bodyValue(joinRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful
+
+        // then
+        val guestCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM guests WHERE gathering_uuid = ?",
+            Long::class.java,
+            gathering.uuid
+        )
+        assertThat(guestCount).isEqualTo(1L)
+
+        val paymentCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM payments WHERE payment_id = ?",
+            Long::class.java,
+            paymentId
+        )
+        assertThat(paymentCount).isEqualTo(1L)
+
+        val paymentStatus = jdbcTemplate.queryForObject(
+            "SELECT status FROM payments WHERE payment_id = ?",
+            String::class.java,
+            paymentId
+        )
+        assertThat(paymentStatus).isEqualTo("PAID")
     }
 }

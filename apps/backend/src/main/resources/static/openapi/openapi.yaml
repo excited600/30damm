@@ -23,10 +23,19 @@ paths:
       - description: Cursor for the page. Omit for the first page.
         explode: true
         in: query
-        name: cursor
+        name: uuid
         required: false
         schema:
+          format: uuid
           type: string
+        style: form
+      - description: Score of gatherings. Omit for the first page.
+        explode: true
+        in: query
+        name: score
+        required: false
+        schema:
+          type: integer
         style: form
       - description: Number of gatherings to retrieve per page
         explode: true
@@ -37,6 +46,16 @@ paths:
           maximum: 100
           minimum: 1
           type: integer
+        style: form
+      - description: Filter gatherings by statuses
+        explode: true
+        in: query
+        name: statuses
+        required: false
+        schema:
+          items:
+            $ref: "#/components/schemas/Gathering_Status"
+          type: array
         style: form
       - description: Filter gatherings by categories
         explode: true
@@ -214,6 +233,31 @@ paths:
       summary: Join the gathering as a guest
       tags:
       - Gatherings
+  /gatherings/{gatheringUuid}/leave:
+    post:
+      operationId: leaveGathering
+      parameters:
+      - description: The UUID of the gathering to leave
+        explode: false
+        in: path
+        name: gatheringUuid
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/leaveGathering_request"
+        required: true
+      responses:
+        "204":
+          description: Left gathering successfully
+      summary: Leave a gathering as a guest
+      tags:
+      - Gatherings
   /payments/{paymentId}/prepare:
     post:
       operationId: preparePayment
@@ -240,30 +284,6 @@ paths:
                 $ref: "#/components/schemas/PreparePaymentResponse"
           description: Payment prepared successfully
       summary: Prepare a payment for a gathering
-      tags:
-      - Payments
-  /payments/{paymentId}/verify:
-    post:
-      operationId: verifyPayment
-      parameters:
-      - description: Unique identifier for the payment
-        explode: false
-        in: path
-        name: paymentId
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/verifyPayment_request"
-        required: true
-      responses:
-        "200":
-          description: Payment verified successfully
-      summary: Verify a payment
       tags:
       - Payments
   /payments/webhook:
@@ -410,7 +430,7 @@ components:
         place: place
         category: PARTY
         introduction: introduction
-        status: OPEN
+        status: OPEN_PENDING
       properties:
         uuid:
           description: UUID of the gathering
@@ -648,30 +668,30 @@ components:
         type: object
     Gathering:
       example:
-        maxMaleCount: 5
+        maxMaleCount: 2
         approveType: FIRST_IN
         subCategory: HOME_PARTY
-        clickCount: 3
-        fee: 9
-        maxCapacity: 6
-        totalGuests: 7
+        clickCount: 2
+        fee: 3
+        maxCapacity: 1
+        totalGuests: 9
         title: title
         uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         discountEnabled: true
-        maxFemaleCount: 2
-        duration: 2.027123
+        maxFemaleCount: 7
+        duration: 4.145608
         offline: true
         genderRatioEnabled: true
         startDateTime: 2000-01-23T04:56:07.000+00:00
         hostUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         maxAge: 5
-        minAge: 1
+        minAge: 5
         imageUrl: imageUrl
-        minCapacity: 0
+        minCapacity: 6
         place: place
         category: PARTY
         introduction: introduction
-        status: OPEN
+        status: OPEN_PENDING
       properties:
         uuid:
           description: UUID of the gathering
@@ -769,99 +789,90 @@ components:
       - uuid
       type: object
     ScrollFilteredGatheringsResponse:
-      allOf:
-      - $ref: "#/components/schemas/ScrollPage"
-      - properties:
-          gatherings:
-            description: List of gatherings
-            items:
-              $ref: "#/components/schemas/Gathering"
-            type: array
-        required:
-        - gatherings
-        type: object
       example:
-        cursor: cursor
+        cursor:
+          score: 0
+          uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         gatherings:
-        - maxMaleCount: 5
+        - maxMaleCount: 2
           approveType: FIRST_IN
           subCategory: HOME_PARTY
-          clickCount: 3
-          fee: 9
-          maxCapacity: 6
-          totalGuests: 7
+          clickCount: 2
+          fee: 3
+          maxCapacity: 1
+          totalGuests: 9
           title: title
           uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           discountEnabled: true
-          maxFemaleCount: 2
-          duration: 2.027123
+          maxFemaleCount: 7
+          duration: 4.145608
           offline: true
           genderRatioEnabled: true
           startDateTime: 2000-01-23T04:56:07.000+00:00
           hostUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           maxAge: 5
-          minAge: 1
+          minAge: 5
           imageUrl: imageUrl
-          minCapacity: 0
+          minCapacity: 6
           place: place
           category: PARTY
           introduction: introduction
-          status: OPEN
-        - maxMaleCount: 5
+          status: OPEN_PENDING
+        - maxMaleCount: 2
           approveType: FIRST_IN
           subCategory: HOME_PARTY
-          clickCount: 3
-          fee: 9
-          maxCapacity: 6
-          totalGuests: 7
+          clickCount: 2
+          fee: 3
+          maxCapacity: 1
+          totalGuests: 9
           title: title
           uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           discountEnabled: true
-          maxFemaleCount: 2
-          duration: 2.027123
+          maxFemaleCount: 7
+          duration: 4.145608
           offline: true
           genderRatioEnabled: true
           startDateTime: 2000-01-23T04:56:07.000+00:00
           hostUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           maxAge: 5
-          minAge: 1
+          minAge: 5
           imageUrl: imageUrl
-          minCapacity: 0
+          minCapacity: 6
           place: place
           category: PARTY
           introduction: introduction
-          status: OPEN
+          status: OPEN_PENDING
         hasNext: true
+      properties:
+        cursor:
+          $ref: "#/components/schemas/ScrollFilteredGatheringsResponse_cursor"
+        hasNext:
+          type: boolean
+        gatherings:
+          items:
+            $ref: "#/components/schemas/Gathering"
+          type: array
+      required:
+      - cursor
+      - gatherings
+      - hasNext
+      type: object
     JoinGatheringRequest:
       example:
-        paymentToken: paymentToken
-        amount: 0
-        paymentId: paymentId
         userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        txId: txId
+        confirmPaymentRequest:
+          paymentToken: paymentToken
+          amount: 0
+          paymentId: paymentId
+          txId: txId
       properties:
         userUuid:
           description: UUID of the user who wants to join the gathering
           format: uuid
           type: string
-        paymentId:
-          description: Unique identifier for the payment. It is generated by front
-            app.
-          type: string
-        paymentToken:
-          description: Token received from the payment gateway to verify the payment
-          type: string
-        txId:
-          description: Transaction ID provided by the payment gateway
-          type: string
-        amount:
-          description: Amount to be payed in Won(KRW)
-          type: integer
+        confirmPaymentRequest:
+          $ref: "#/components/schemas/ConfirmPaymentRequest"
       required:
-      - amount
-      - paymentId
-      - paymentToken
-      - txId
       - userUuid
       type: object
     PreparePaymentRequest:
@@ -955,6 +966,15 @@ components:
       - timestamp
       - type
       type: object
+    Gathering_Status:
+      description: Status of the gathering
+      enum:
+      - OPEN_PENDING
+      - OPEN
+      - CLOSED
+      - IN_PROGRESS
+      - FINISHED
+      type: string
     Gathering_Category:
       description: Category of the gathering
       enum:
@@ -978,18 +998,6 @@ components:
       - FRIDAY
       - SATURDAY
       type: string
-    ScrollPage:
-      properties:
-        cursor:
-          description: Cursor for the next page
-          nullable: true
-          type: string
-        hasNext:
-          description: Indicates if there is a next page
-          type: boolean
-      required:
-      - hasNext
-      type: object
     Gathering_ApproveType:
       description: Ways how to approve guests to join the gathering
       enum:
@@ -1000,14 +1008,6 @@ components:
       description: Sub-category of the gathering
       enum:
       - HOME_PARTY
-      type: string
-    Gathering_Status:
-      description: Status of the gathering
-      enum:
-      - OPEN
-      - CLOSED
-      - IN_PROGRESS
-      - FINISHED
       type: string
     Gathering_WeeklyScheduleSummary:
       properties:
@@ -1050,6 +1050,32 @@ components:
       - WEEKLY
       - DATE
       type: string
+    ConfirmPaymentRequest:
+      example:
+        paymentToken: paymentToken
+        amount: 0
+        paymentId: paymentId
+        txId: txId
+      properties:
+        paymentId:
+          description: Unique identifier for the payment. It is generated by front
+            app.
+          type: string
+        paymentToken:
+          description: Token received from the payment gateway to verify the payment
+          type: string
+        txId:
+          description: Transaction ID provided by the payment gateway
+          type: string
+        amount:
+          description: Amount to be payed in Won(KRW)
+          type: integer
+      required:
+      - amount
+      - paymentId
+      - paymentToken
+      - txId
+      type: object
     ProductType:
       description: Type of the product
       enum:
@@ -1093,19 +1119,27 @@ components:
       - storeId
       - transactionId
       type: object
-    verifyPayment_request:
+    leaveGathering_request:
       properties:
-        paymentToken:
-          description: Token received from the payment gateway to verify the payment
+        userUuid:
+          description: UUID of the user leaving the gathering
+          format: uuid
           type: string
-        txId:
-          description: Transaction ID provided by the payment gateway
+        reason:
+          description: Reason for leaving the gathering
           type: string
-        amount:
-          description: Amount to be verified in Won(KRW)
-          type: integer
       required:
-      - amount
-      - paymentToken
-      - txId
+      - reason
+      - userUuid
+      type: object
+    ScrollFilteredGatheringsResponse_cursor:
+      example:
+        score: 0
+        uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        score:
+          type: integer
+        uuid:
+          format: uuid
+          type: string
       type: object

@@ -76,6 +76,10 @@ class GatheringEntity(
         this.status = Status.CLOSED
     }
 
+    fun isFree(): Boolean {
+        return fee == 0
+    }
+
     companion object {
         fun open(
             hostUuid: UUID,
