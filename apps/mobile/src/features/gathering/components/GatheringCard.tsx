@@ -1,62 +1,134 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { colors } from "@/shared/constants/colors";
 import { spacing } from "@/shared/constants/spacing";
-import type { Gathering } from "@/api/types/gathering";
+import { typography } from "@/shared/constants/typography";
 
 interface GatheringCardProps {
-  gathering: Gathering;
+  title: string;
+  location: string;
+  dateTime: string;
+  duration: string;
+  participants: string;
+  hostName: string;
+  hostAvatarUri?: string;
+  price: string;
+  thumbnailUri?: string;
   onPress?: () => void;
 }
 
-export function GatheringCard({ gathering, onPress }: GatheringCardProps) {
+export function GatheringCard({
+  title,
+  location,
+  dateTime,
+  duration,
+  participants,
+  hostName,
+  hostAvatarUri,
+  price,
+  thumbnailUri,
+  onPress,
+}: GatheringCardProps) {
+  const subtitle = `${location} · ${dateTime} ${duration} ${participants}`;
+
   return (
-    <Pressable onPress={onPress} style={styles.container}>
-      <Text style={styles.title}>{gathering.title}</Text>
-      <Text style={styles.description} numberOfLines={2}>
-        {gathering.description}
-      </Text>
-      <View style={styles.footer}>
-        <Text style={styles.participants}>
-          {gathering.currentParticipants}/{gathering.maxParticipants}명
-        </Text>
-        <Text style={styles.status}>{gathering.status}</Text>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.container, pressed && styles.pressed]}>
+      <View style={styles.content}>
+        <View style={styles.thumbnail}>
+          {thumbnailUri && (
+            <Image source={{ uri: thumbnailUri }} style={styles.thumbnailImage} />
+          )}
+        </View>
+        <View style={styles.textGroup}>
+          <Text style={styles.title} numberOfLines={1}>
+            {title}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
+            {subtitle}
+          </Text>
+          <View style={styles.hostPriceRow}>
+            <View style={styles.host}>
+              {hostAvatarUri ? (
+                <Image source={{ uri: hostAvatarUri }} style={styles.avatar} />
+              ) : (
+                <View style={[styles.avatar, styles.avatarPlaceholder]} />
+              )}
+              <Text style={styles.hostName}>{hostName}</Text>
+            </View>
+            <Text style={styles.price}>{price}</Text>
+          </View>
+        </View>
       </View>
+      <View style={styles.divider} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 20,
+    gap: 12,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
+  pressed: {
+    opacity: 0.7,
   },
-  description: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: spacing.sm,
-  },
-  footer: {
+  content: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 10,
     alignItems: "center",
   },
-  participants: {
-    fontSize: 13,
-    color: colors.text.tertiary,
+  thumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
+    overflow: "hidden",
   },
-  status: {
-    fontSize: 13,
-    color: colors.primary,
-    fontWeight: "500",
+  thumbnailImage: {
+    width: "100%",
+    height: "100%",
+  },
+  textGroup: {
+    flex: 1,
+    gap: 10,
+  },
+  title: {
+    ...typography.body.lg,
+    color: colors.text.primary,
+  },
+  subtitle: {
+    ...typography.body.sm,
+    color: colors.text.secondary,
+  },
+  hostPriceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  host: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  avatarPlaceholder: {
+    backgroundColor: colors.surface,
+  },
+  hostName: {
+    ...typography.label.sm,
+    color: colors.text.primary,
+  },
+  price: {
+    ...typography.label.sm,
+    color: colors.text.primary,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.surface,
   },
 });
