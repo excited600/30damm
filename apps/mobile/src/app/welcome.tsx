@@ -24,7 +24,7 @@ export default function WelcomeScreen() {
       <View style={[styles.bottomCTA, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
         <Button
           label="시작하기"
-          onPress={() => router.push("/(auth)/login")}
+          onPress={() => router.push("/(auth)/register")}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
