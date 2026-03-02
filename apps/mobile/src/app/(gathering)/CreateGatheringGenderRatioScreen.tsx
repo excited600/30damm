@@ -16,8 +16,6 @@ import { Button } from "@/shared/components/ui/Button";
 const TOTAL_STEPS = 7;
 const CURRENT_STEP = 2;
 const TOTAL_POSITIONS = 11; // 10:0, 9:1, ..., 0:10
-const MALE_COLOR = "#5647FF";
-const FEMALE_COLOR = "#FF4747";
 
 export default function CreateGatheringGenderRatioScreen() {
   const insets = useSafeAreaInsets();
@@ -96,7 +94,7 @@ export default function CreateGatheringGenderRatioScreen() {
         {/* Title */}
         <View style={styles.title}>
           <Text style={styles.titleText}>
-            최대 인원의 성비를{"\n"}정할까요?
+            최대 인원의 성비를 정할까요?
           </Text>
         </View>
 
@@ -328,10 +326,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   maleRatio: {
-    backgroundColor: MALE_COLOR,
+    backgroundColor: colors.male,
   },
   femaleRatio: {
-    backgroundColor: FEMALE_COLOR,
+    backgroundColor: colors.female,
   },
   bottomCTA: {
     paddingHorizontal: 20,

@@ -16,6 +16,8 @@ export const colors = {
   success: "#34C759",
   warning: "#FF9500",
   disabled: "#555555",
+  male: "#5647FF",
+  female: "#FF4747",
   white: "#FFFFFF",
   black: "#000000",
 } as const;
