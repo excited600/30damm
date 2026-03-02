@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,24 +10,50 @@ import { colors } from "@/shared/constants/colors";
 
 const ITEM_HEIGHT = 30;
 
-interface WheelPickerProps {
+interface WheelPickerBaseProps {
   title: string;
-  min: number;
-  max: number;
   value: number;
   onChange: (value: number) => void;
 }
 
-export function WheelPicker({ title, min, max, value, onChange }: WheelPickerProps) {
+interface WheelPickerRangeProps extends WheelPickerBaseProps {
+  min: number;
+  max: number;
+  items?: never;
+}
+
+interface WheelPickerItemsProps extends WheelPickerBaseProps {
+  items: number[];
+  min?: never;
+  max?: never;
+}
+
+type WheelPickerProps = WheelPickerRangeProps | WheelPickerItemsProps;
+
+export function WheelPicker(props: WheelPickerProps) {
+  const { title, value, onChange } = props;
+
+  const itemList = useMemo(() => {
+    if (props.items) return props.items;
+    const list: number[] = [];
+    for (let i = props.min; i <= props.max; i++) list.push(i);
+    return list;
+  }, [props.items, props.min, props.max]);
+
+  const currentIndex = useMemo(
+    () => Math.max(0, itemList.indexOf(value)),
+    [itemList, value],
+  );
+
   const translateY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     translateY.setValue(0);
   }, [value]);
 
-  const clampValue = useCallback(
-    (v: number) => Math.max(min, Math.min(max, v)),
-    [min, max],
+  const clampIndex = useCallback(
+    (idx: number) => Math.max(0, Math.min(itemList.length - 1, idx)),
+    [itemList],
   );
 
   const panResponder = useRef(
@@ -39,7 +65,8 @@ export function WheelPicker({ title, min, max, value, onChange }: WheelPickerPro
       },
       onPanResponderRelease: (_, gestureState) => {
         const steps = Math.round(-gestureState.dy / ITEM_HEIGHT);
-        const newValue = clampValue(value + steps);
+        const newIndex = clampIndex(currentIndex + steps);
+        const newValue = itemList[newIndex];
 
         Animated.spring(translateY, {
           toValue: 0,
@@ -55,8 +82,8 @@ export function WheelPicker({ title, min, max, value, onChange }: WheelPickerPro
     }),
   ).current;
 
-  const prev = value - 1;
-  const next = value + 1;
+  const prevIndex = currentIndex - 1;
+  const nextIndex = currentIndex + 1;
 
   return (
     <View style={styles.container}>
@@ -64,27 +91,27 @@ export function WheelPicker({ title, min, max, value, onChange }: WheelPickerPro
       <View style={styles.line} />
       <View style={styles.wheelContainer} {...panResponder.panHandlers}>
         <Animated.View style={[styles.wheelContent, { transform: [{ translateY }] }]}>
-          {/* Previous item - rotated away like top of a wheel */}
+          {/* Previous item */}
           <View style={styles.itemWrapper}>
             <View style={styles.perspectiveTop}>
               <Text style={[styles.count, styles.countDimmed]}>
-                {prev >= min ? String(prev) : ""}
+                {prevIndex >= 0 ? String(itemList[prevIndex]) : ""}
               </Text>
             </View>
           </View>
 
-          {/* Selected item - flat, front-facing */}
+          {/* Selected item */}
           <View style={styles.itemWrapper}>
             <Text style={[styles.count, styles.countSelected]}>
               {String(value)}
             </Text>
           </View>
 
-          {/* Next item - rotated away like bottom of a wheel */}
+          {/* Next item */}
           <View style={styles.itemWrapper}>
             <View style={styles.perspectiveBottom}>
               <Text style={[styles.count, styles.countDimmed]}>
-                {next <= max ? String(next) : ""}
+                {nextIndex < itemList.length ? String(itemList[nextIndex]) : ""}
               </Text>
             </View>
           </View>
