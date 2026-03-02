@@ -195,6 +195,7 @@ export default function CreateGatheringGenderRatioScreen() {
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
+          onPress={() => router.push("/(gathering)/CreateGatheringPriceScreen")}
         />
       </View>
     </View>
