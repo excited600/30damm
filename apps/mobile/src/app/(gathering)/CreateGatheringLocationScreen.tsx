@@ -6,6 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { UnderlineInput } from "@/shared/components/ui/UnderlineInput";
+import { useCreateGatheringStore } from "@/store/useCreateGatheringStore";
 
 const TOTAL_STEPS = 7;
 const CURRENT_STEP = 6;
@@ -14,9 +15,15 @@ const LOCATION_MAX = 20;
 export default function CreateGatheringLocationScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [location, setLocation] = useState("");
+  const store = useCreateGatheringStore();
+  const [location, setLocation] = useState(store.location ?? "");
 
   const locationOverflow = location.length > LOCATION_MAX;
+
+  const handleNext = () => {
+    store.setLocation(location || null);
+    router.push("/(gathering)/CreateGatheringWhenScreen");
+  };
 
   return (
     <View style={[styles.createGatheringLocation, { paddingTop: insets.top }]}>
@@ -75,7 +82,7 @@ export default function CreateGatheringLocationScreen() {
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
-          onPress={() => router.push("/(gathering)/CreateGatheringWhenScreen")}
+          onPress={handleNext}
         />
       </View>
     </View>

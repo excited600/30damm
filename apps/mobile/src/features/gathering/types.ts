@@ -1,1 +1,9 @@
-export type { Gathering, GatheringStatus, GatheringFilters } from "@/api/types/gathering";
+export type {
+  GatheringCategory,
+  Gender,
+  OpenGatheringRequest,
+  OpenGatheringResponse,
+  GatheringListItem,
+  ScrollFilteredGatheringsResponse,
+  GatheringDetailResponse,
+} from "@/api/types/gathering";

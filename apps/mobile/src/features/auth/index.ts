@@ -1,2 +1,2 @@
-export { useLogin } from "./hooks/useAuth";
-export type { LoginRequest, LoginResponse, RegisterRequest } from "./types";
+export { useLogin, useSignup } from "./hooks/useAuth";
+export type { LoginRequest, SignupRequest } from "./types";

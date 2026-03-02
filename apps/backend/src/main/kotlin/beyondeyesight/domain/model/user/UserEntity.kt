@@ -17,11 +17,11 @@ class UserEntity(
     val email: String,
     @Column(nullable = false)
     var nickname: String,
-    @Column(nullable = true)
-    var age: Int?,
+    @Column(nullable = false)
+    var age: Int,
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    val gender: Gender?,
+    @Column(nullable = false)
+    val gender: Gender,
     @Column(nullable = true)
     var introduction: String?,
     @Column(nullable = false)
@@ -52,8 +52,8 @@ class UserEntity(
                 uuid = uuidV7(),
                 email = email,
                 nickname = nickname,
-                age = null,
-                gender = null,
+                age = 30,
+                gender = Gender.MALE,
                 introduction = null,
                 password = password,
                 phoneNumber = null,

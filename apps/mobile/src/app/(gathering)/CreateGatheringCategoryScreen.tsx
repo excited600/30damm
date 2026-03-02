@@ -1,44 +1,36 @@
+import { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
-import { WheelPicker } from "@/shared/components/ui/WheelPicker";
 import { useCreateGatheringStore } from "@/store/useCreateGatheringStore";
+import type { GatheringCategory } from "@/api/types/gathering";
 
 const TOTAL_STEPS = 7;
-const CURRENT_STEP = 1;
+const CURRENT_STEP = 4;
 
-export default function CreateGatheringParticipant() {
+const CATEGORIES: { label: string; value: GatheringCategory }[] = [
+  { label: "파티", value: "PARTY" },
+  { label: "맛집/음료", value: "FOOD_DRINK" },
+  { label: "액티비티", value: "ACTIVITY" },
+  { label: "없음", value: "NONE" },
+];
+
+export default function CreateGatheringCategoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const store = useCreateGatheringStore();
-  const [minCount, setMinCount] = useState(store.minCapacity);
-  const [maxCount, setMaxCount] = useState(store.maxCapacity);
-
-  const handleMinChange = (val: number) => {
-    setMinCount(val);
-    if (val > maxCount) {
-      setMaxCount(val);
-    }
-  };
-
-  const handleMaxChange = (val: number) => {
-    setMaxCount(val);
-    if (val < minCount) {
-      setMinCount(val);
-    }
-  };
+  const [category, setCategory] = useState<GatheringCategory>(store.category);
 
   const handleNext = () => {
-    store.setParticipants(minCount, maxCount);
-    router.push("/(gathering)/CreateGatheringGenderRatioScreen");
+    store.setCategory(category);
+    router.push("/(gathering)/CreateGatheringIntroductionScreen");
   };
 
   return (
-    <View style={[styles.createGathering1, { paddingTop: insets.top }]}>
+    <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* ProgressBar */}
       <View style={styles.progressBar}>
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -46,7 +38,12 @@ export default function CreateGatheringParticipant() {
             key={i}
             style={[
               styles.progressSegment,
-              { backgroundColor: i < CURRENT_STEP ? colors.accent.primary : colors.text.primary },
+              {
+                backgroundColor:
+                  i < CURRENT_STEP
+                    ? colors.accent.primary
+                    : colors.text.primary,
+              },
             ]}
           />
         ))}
@@ -63,37 +60,34 @@ export default function CreateGatheringParticipant() {
 
       {/* Content */}
       <View style={styles.content}>
-        {/* Title */}
         <View style={styles.title}>
-          <Text style={styles.titleText}>참여 인원(호스트 포함)</Text>
+          <Text style={styles.titleText}>어떤 모임인가요?</Text>
         </View>
 
-        {/* Space1 */}
         <View style={styles.space} />
 
-        {/* MinCount & MaxCount */}
-        <View style={styles.countsRow}>
-          <View style={styles.countWrapper}>
-            <WheelPicker
-              title="최소"
-              min={2}
-              max={maxCount}
-              value={minCount}
-              onChange={handleMinChange}
-            />
-          </View>
-          <View style={styles.countWrapper}>
-            <WheelPicker
-              title="최대"
-              min={minCount}
-              max={99}
-              value={maxCount}
-              onChange={handleMaxChange}
-            />
-          </View>
+        <View style={styles.categoryList}>
+          {CATEGORIES.map((cat) => (
+            <Pressable
+              key={cat.value}
+              style={[
+                styles.categoryOption,
+                category === cat.value && styles.categoryOptionSelected,
+              ]}
+              onPress={() => setCategory(cat.value)}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  category === cat.value && styles.categoryTextSelected,
+                ]}
+              >
+                {cat.label}
+              </Text>
+            </Pressable>
+          ))}
         </View>
 
-        {/* Space1 */}
         <View style={styles.space} />
       </View>
 
@@ -112,7 +106,7 @@ export default function CreateGatheringParticipant() {
 }
 
 const styles = StyleSheet.create({
-  createGathering1: {
+  screen: {
     flex: 1,
     backgroundColor: colors.background,
     gap: 10,
@@ -163,16 +157,30 @@ const styles = StyleSheet.create({
   },
   space: {
     flex: 1,
-    maxHeight: 150,
+    maxHeight: 100,
   },
-  countsRow: {
-    flexDirection: "row",
+  categoryList: {
+    gap: 12,
+  },
+  categoryOption: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.surface,
     alignItems: "center",
-    justifyContent: "center",
-    gap: 27,
   },
-  countWrapper: {
-    padding: 10,
+  categoryOptionSelected: {
+    backgroundColor: colors.accent.primary,
+    borderColor: colors.accent.primary,
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text.secondary,
+  },
+  categoryTextSelected: {
+    color: colors.text.primary,
   },
   bottomCTA: {
     paddingHorizontal: 20,

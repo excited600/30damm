@@ -5,14 +5,19 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Calendar, LocaleConfig } from "react-native-calendars";
+import { useMutation } from "@tanstack/react-query";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { WheelPicker } from "@/shared/components/ui/WheelPicker";
+import { useCreateGatheringStore } from "@/store/useCreateGatheringStore";
+import { gatheringClient } from "@/api/clients/gatheringClient";
+import type { OpenGatheringRequest } from "@/api/types/gathering";
 
 const TOTAL_STEPS = 7;
 const CURRENT_STEP = 7;
@@ -39,13 +44,18 @@ type ExpandedSection = "date" | "time" | "duration" | null;
 export default function CreateGatheringWhenScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const store = useCreateGatheringStore();
 
   const [expandedSection, setExpandedSection] = useState<ExpandedSection>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(store.date);
   const [hour, setHour] = useState(12);
   const [minute, setMinute] = useState(0);
   const [durationHour, setDurationHour] = useState(2);
-  const [durationMinute, setDurationMinute] = useState(0); // always 0, kept for WheelPicker
+  const [durationMinute, setDurationMinute] = useState(0);
+
+  const openGathering = useMutation({
+    mutationFn: (request: OpenGatheringRequest) => gatheringClient.open(request),
+  });
 
   const toggleSection = useCallback(
     (section: ExpandedSection) => {
@@ -89,6 +99,48 @@ export default function CreateGatheringWhenScreen() {
         },
       }
     : {};
+
+  const handleOpenGathering = () => {
+    const startTime = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+    const durationMinutes = durationHour * 60 + durationMinute;
+
+    store.setWhen(
+      selectedDate,
+      startTime,
+      durationMinutes > 0 ? durationMinutes : null,
+    );
+
+    const request: OpenGatheringRequest = {
+      title: store.title,
+      description: store.description,
+      category: store.category,
+      location: store.location,
+      date: selectedDate,
+      startTime,
+      duration: durationMinutes > 0 ? durationMinutes : null,
+      minCapacity: store.minCapacity,
+      maxCapacity: store.maxCapacity,
+      isGenderRatioEnabled: store.isGenderRatioEnabled,
+      maxMaleCapacity: store.maxMaleCapacity,
+      maxFemaleCapacity: store.maxFemaleCapacity,
+      isFree: store.isFree,
+      price: store.price,
+      isSplit: store.isSplit,
+    };
+
+    openGathering.mutate(request, {
+      onSuccess: (data) => {
+        store.reset();
+        router.replace({
+          pathname: "/(gathering)/GatheringDetailScreen",
+          params: { gatheringUuid: data.gatheringUuid, showToast: "true" },
+        });
+      },
+      onError: () => {
+        Alert.alert("오류", "모임 생성에 실패했습니다. 다시 시도해주세요.");
+      },
+    });
+  };
 
   return (
     <View style={[styles.createGatheringWhen, { paddingTop: insets.top }]}>
@@ -269,11 +321,11 @@ export default function CreateGatheringWhenScreen() {
         style={[styles.bottomCTA, { paddingBottom: Math.max(insets.bottom, 16) }]}
       >
         <Button
-          label="모임 열기"
+          label={openGathering.isPending ? "생성 중..." : "모임 열기"}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
-          onPress={() => router.push("/(gathering)/GatheringDetailScreen?showToast=true")}
+          onPress={handleOpenGathering}
         />
       </View>
     </View>

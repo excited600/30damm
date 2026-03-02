@@ -1,20 +1,26 @@
 import { useMutation } from "@tanstack/react-query";
-import apiClient from "@/api/client";
+import { authClient } from "@/api/clients/authClient";
 import { useAuthStore } from "@/store/useAuthStore";
-import type { LoginRequest, LoginResponse } from "../types";
-
-async function login(request: LoginRequest): Promise<LoginResponse> {
-  const { data } = await apiClient.post<LoginResponse>("/api/auth/login", request);
-  return data;
-}
+import type { LoginRequest, SignupRequest } from "@/api/types/auth";
 
 export function useLogin() {
-  const setToken = useAuthStore((state) => state.setToken);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({
-    mutationFn: login,
+    mutationFn: (request: LoginRequest) => authClient.login(request),
     onSuccess: (data) => {
-      setToken(data.accessToken);
+      setAuth(data.accessToken, data.userUuid);
+    },
+  });
+}
+
+export function useSignup() {
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  return useMutation({
+    mutationFn: (request: SignupRequest) => authClient.signup(request),
+    onSuccess: (data) => {
+      setAuth(data.accessToken, data.userUuid);
     },
   });
 }

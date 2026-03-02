@@ -1,52 +1,94 @@
 import { useState } from "react";
-import { View, Text, Image, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { Toast } from "@/shared/components/ui/Toast";
+import { gatheringClient } from "@/api/clients/gatheringClient";
+import type { GatheringDetailResponse } from "@/api/types/gathering";
 
-const MOCK_DETAIL = {
-  description:
-    "어쩌구저쩌구 소개소개소개 어쩌구저쩌구 소개소개소개어쩌구저쩌구 소개소개소개\n\n어쩌구저쩌구 소개소개소개 어쩌구저쩌구 소개소개소개어쩌구저쩌구 소개소개소개\n\n어쩌구저쩌구 소개소개소개 어쩌구저쩌구 소개소개소개어쩌구저쩌구 소개소개소개",
-  participants: [
-    { id: "1", name: "루트", isHost: true },
-    { id: "2", name: "루트", isHost: false },
-    { id: "3", name: "루트", isHost: false },
-    { id: "4", name: "루트", isHost: false },
-  ],
-  detailInfo: [
-    "카테고리",
-    "선착순",
-    "총 2명 ~ 20명",
-    "남 2/10 여 1/10",
-    "12.28(금) 오전 11시 · 2시간",
-    "신촌역 2호선",
-    "20,000원",
-  ],
+const CATEGORY_LABELS: Record<string, string> = {
+  NONE: "없음",
+  PARTY: "파티",
+  FOOD_DRINK: "맛집/음료",
+  ACTIVITY: "액티비티",
 };
+
+function formatDetailInfo(detail: GatheringDetailResponse): string[] {
+  const info: string[] = [];
+  info.push(CATEGORY_LABELS[detail.category] ?? detail.category);
+  info.push(`총 ${detail.minCapacity}명 ~ ${detail.maxCapacity}명`);
+  if (detail.isGenderRatioEnabled) {
+    info.push(
+      `남 ${detail.currentMaleCount}/${detail.maxMaleCapacity ?? "-"} 여 ${detail.currentFemaleCount}/${detail.maxFemaleCapacity ?? "-"}`,
+    );
+  } else {
+    info.push(
+      `남 ${detail.currentMaleCount} 여 ${detail.currentFemaleCount}`,
+    );
+  }
+  if (detail.date) {
+    const parts = [detail.date];
+    if (detail.startTime) parts.push(detail.startTime);
+    if (detail.duration) parts.push(`${detail.duration}시간`);
+    info.push(parts.join(" · "));
+  }
+  if (detail.location) info.push(detail.location);
+  if (detail.isFree) {
+    info.push("무료");
+  } else if (detail.price != null) {
+    info.push(`${detail.price.toLocaleString()}원${detail.isSplit ? " (1/N)" : ""}`);
+  }
+  return info;
+}
 
 export default function GatheringDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { imageUrl, showToast } = useLocalSearchParams<{ imageUrl?: string; showToast?: string }>();
-  const hasImage = !!imageUrl;
+  const { gatheringUuid, showToast } = useLocalSearchParams<{
+    gatheringUuid: string;
+    showToast?: string;
+  }>();
   const [toastVisible, setToastVisible] = useState(showToast === "true");
+
+  const { data: detail, isLoading } = useQuery({
+    queryKey: ["gathering", gatheringUuid],
+    queryFn: () => gatheringClient.getDetail(gatheringUuid!),
+    enabled: !!gatheringUuid,
+  });
+
+  if (isLoading || !detail) {
+    return (
+      <View style={[styles.gatheringDetailScreen, styles.centered, { paddingTop: insets.top }]}>
+        <ActivityIndicator size="large" color={colors.accent.primary} />
+      </View>
+    );
+  }
+
+  const hasImage = !!detail.imgUrl;
+  const detailInfo = formatDetailInfo(detail);
+  const participants = [
+    { ...detail.host, isHost: true },
+    ...detail.guests.map((g) => ({ ...g, isHost: false })),
+  ];
 
   return (
     <View style={[styles.gatheringDetailScreen, { paddingTop: insets.top }]}>
       {/* ScrollContent */}
       <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {hasImage ? (
-          <Image source={{ uri: imageUrl }} style={styles.gatheringPicture} />
+          <Image source={{ uri: detail.imgUrl! }} style={styles.gatheringPicture} />
         ) : (
           <View style={styles.space} />
         )}
 
         {/* BodySection */}
         <View style={styles.bodySection}>
-          <Text style={styles.bodyText}>{MOCK_DETAIL.description}</Text>
+          <Text style={styles.bodyTitle}>{detail.title}</Text>
+          <Text style={styles.bodyText}>{detail.description}</Text>
         </View>
 
         {/* ParticipantSection */}
@@ -55,12 +97,19 @@ export default function GatheringDetailScreen() {
             <Text style={styles.sectionTitleText}>함께하는 사람들</Text>
           </View>
           <View style={styles.participants}>
-            {MOCK_DETAIL.participants.map((p) => (
-              <View key={p.id} style={styles.participant}>
+            {participants.map((p) => (
+              <View key={p.userUuid} style={styles.participant}>
                 <View style={styles.participantProfile}>
-                  <View style={styles.profilePlaceholder} />
+                  {p.profileImageUrl ? (
+                    <Image
+                      source={{ uri: p.profileImageUrl }}
+                      style={styles.profileImage}
+                    />
+                  ) : (
+                    <View style={styles.profilePlaceholder} />
+                  )}
                 </View>
-                <Text style={styles.participantName}>{p.name}</Text>
+                <Text style={styles.participantName}>{p.nickname}</Text>
                 {p.isHost && (
                   <View style={styles.hostIcon}>
                     <Ionicons name="shield-checkmark" size={14} color={colors.accent.primary} />
@@ -77,7 +126,7 @@ export default function GatheringDetailScreen() {
             <Text style={styles.sectionTitleText}>상세정보</Text>
           </View>
           <View style={styles.detailInfo}>
-            {MOCK_DETAIL.detailInfo.map((info, i) => (
+            {detailInfo.map((info, i) => (
               <Text key={i} style={styles.detailInfoText}>
                 {info}
               </Text>
@@ -120,6 +169,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  centered: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
   scrollContent: {
     flex: 1,
   },
@@ -134,6 +187,13 @@ const styles = StyleSheet.create({
   bodySection: {
     paddingHorizontal: 10,
     paddingTop: 20,
+    gap: 8,
+  },
+  bodyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.text.primary,
+    lineHeight: 28,
   },
   bodyText: {
     fontSize: 16,
@@ -166,6 +226,11 @@ const styles = StyleSheet.create({
   },
   participantProfile: {
     alignItems: "center",
+  },
+  profileImage: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
   },
   profilePlaceholder: {
     width: 54,

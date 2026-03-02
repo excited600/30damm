@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
+import { useCreateGatheringStore } from "@/store/useCreateGatheringStore";
 
 const TOTAL_STEPS = 7;
 const CURRENT_STEP = 3;
@@ -18,9 +19,17 @@ const CURRENT_STEP = 3;
 export default function CreateGatheringPriceScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [isPaid, setIsPaid] = useState(false);
-  const [price, setPrice] = useState("");
-  const [splitByN, setSplitByN] = useState(false);
+  const store = useCreateGatheringStore();
+  const [isPaid, setIsPaid] = useState(!store.isFree);
+  const [price, setPrice] = useState(store.price ? String(store.price) : "");
+  const [splitByN, setSplitByN] = useState(store.isSplit);
+
+  const handleNext = () => {
+    const isFree = !isPaid;
+    const parsedPrice = isPaid ? parseInt(price, 10) || null : null;
+    store.setPrice(isFree, parsedPrice, splitByN);
+    router.push("/(gathering)/CreateGatheringCategoryScreen");
+  };
 
   return (
     <View style={[styles.createGatheringPrice, { paddingTop: insets.top }]}>
@@ -153,7 +162,7 @@ export default function CreateGatheringPriceScreen() {
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
-          onPress={() => router.push("/(gathering)/CreateGatheringIntroductionScreen")}
+          onPress={handleNext}
         />
       </View>
     </View>

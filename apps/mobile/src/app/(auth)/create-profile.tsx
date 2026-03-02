@@ -7,19 +7,45 @@ import {
   Platform,
   ScrollView,
   Pressable,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useRegisterStore } from "@/store/useRegisterStore";
+import { useSignup } from "@/features/auth/hooks/useAuth";
 
 export default function CreateProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const setToken = useAuthStore((s) => s.setToken);
+  const { email, password, reset } = useRegisterStore();
+  const signup = useSignup();
   const [nickname, setNickname] = useState("");
+
+  const handleSignup = () => {
+    if (nickname.length < 2 || nickname.length > 10) {
+      Alert.alert("알림", "닉네임은 2~10자로 입력해주세요.");
+      return;
+    }
+    signup.mutate(
+      { email, password, nickname },
+      {
+        onSuccess: () => {
+          reset();
+          router.replace("/(gathering)/GatheringCardListScreen");
+        },
+        onError: (err) => {
+          const message =
+            (err as any)?.response?.status === 409
+              ? "이미 사용 중인 이메일입니다."
+              : "회원가입에 실패했습니다. 다시 시도해주세요.";
+          Alert.alert("오류", message);
+        },
+      },
+    );
+  };
 
   return (
     <KeyboardAvoidingView
@@ -76,11 +102,8 @@ export default function CreateProfileScreen() {
 
         {/* CTA Button */}
         <Button
-          label="시작하기"
-          onPress={() => {
-            setToken("mock-token");
-            router.replace("/(gathering)/GatheringCardListScreen");
-          }}
+          label={signup.isPending ? "가입 중..." : "시작하기"}
+          onPress={handleSignup}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}

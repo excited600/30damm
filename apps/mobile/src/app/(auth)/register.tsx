@@ -5,13 +5,30 @@ import { useState } from "react";
 import { colors } from "@/shared/constants/colors";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
+import { useRegisterStore } from "@/store/useRegisterStore";
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const setCredentials = useRegisterStore((s) => s.setCredentials);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [error, setError] = useState("");
+
+  const handleNext = () => {
+    if (password !== passwordConfirm) {
+      setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    if (password.length < 8 || password.length > 20) {
+      setError("비밀번호는 8~20자로 입력해주세요.");
+      return;
+    }
+    setError("");
+    setCredentials(email, password);
+    router.push("/(auth)/create-profile");
+  };
 
   return (
     <KeyboardAvoidingView
@@ -44,20 +61,27 @@ export default function RegisterScreen() {
             label="비밀번호"
             placeholder="비밀번호를 입력해주세요"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              setError("");
+            }}
             secureTextEntry
           />
           <Input
             label="비밀번호 확인"
             placeholder="비밀번호를 확인해주세요"
             value={passwordConfirm}
-            onChangeText={setPasswordConfirm}
+            onChangeText={(text) => {
+              setPasswordConfirm(text);
+              setError("");
+            }}
             secureTextEntry
           />
+          {error !== "" && <Text style={styles.errorText}>{error}</Text>}
         </View>
         <Button
           label="다음으로"
-          onPress={() => router.push("/(auth)/create-profile")}
+          onPress={handleNext}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
@@ -97,6 +121,11 @@ const styles = StyleSheet.create({
   formGroup: {
     width: "100%",
     gap: 15,
+  },
+  errorText: {
+    color: "#FF4444",
+    fontSize: 13,
+    fontWeight: "500",
   },
   button: {
     width: "100%",

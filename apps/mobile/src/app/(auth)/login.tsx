@@ -1,18 +1,36 @@
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { colors } from "@/shared/constants/colors";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useLogin } from "@/features/auth/hooks/useAuth";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const setToken = useAuthStore((s) => s.setToken);
+  const login = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    login.mutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          router.replace("/(gathering)/GatheringCardListScreen");
+        },
+        onError: (err) => {
+          const message =
+            (err as any)?.response?.status === 401
+              ? "이메일 또는 비밀번호가 일치하지 않습니다."
+              : "로그인에 실패했습니다. 다시 시도해주세요.";
+          Alert.alert("오류", message);
+        },
+      },
+    );
+  };
 
   return (
     <KeyboardAvoidingView
@@ -50,11 +68,8 @@ export default function LoginScreen() {
           />
         </View>
         <Button
-          label="시작하기"
-          onPress={() => {
-            setToken("mock-token");
-            router.replace("/(gathering)/GatheringCardListScreen");
-          }}
+          label={login.isPending ? "로그인 중..." : "시작하기"}
+          onPress={handleLogin}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}

@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
+import { useCreateGatheringStore } from "@/store/useCreateGatheringStore";
 
 const TOTAL_STEPS = 7;
 const CURRENT_STEP = 2;
@@ -20,8 +21,9 @@ const TOTAL_POSITIONS = 11; // 10:0, 9:1, ..., 0:10
 export default function CreateGatheringGenderRatioScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [genderRatioEnabled, setGenderRatioEnabled] = useState(false);
-  const [maleRatio, setMaleRatio] = useState(5); // 0~10, default 5:5
+  const store = useCreateGatheringStore();
+  const [genderRatioEnabled, setGenderRatioEnabled] = useState(store.isGenderRatioEnabled);
+  const [maleRatio, setMaleRatio] = useState(5);
   const graphWidth = useRef(0);
 
   const femaleRatio = 10 - maleRatio;
@@ -59,6 +61,18 @@ export default function CreateGatheringGenderRatioScreen() {
   ).current;
 
   const signLeftPercent = (maleRatio / 10) * 100;
+
+  const handleNext = () => {
+    if (genderRatioEnabled) {
+      const maxCapacity = store.maxCapacity;
+      const maxMale = Math.round((maleRatio / 10) * maxCapacity);
+      const maxFemale = maxCapacity - maxMale;
+      store.setGenderRatio(true, maxMale, maxFemale);
+    } else {
+      store.setGenderRatio(false, null, null);
+    }
+    router.push("/(gathering)/CreateGatheringPriceScreen");
+  };
 
   return (
     <View style={[styles.createGatheringGenderRatio, { paddingTop: insets.top }]}>
@@ -195,7 +209,7 @@ export default function CreateGatheringGenderRatioScreen() {
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
-          onPress={() => router.push("/(gathering)/CreateGatheringPriceScreen")}
+          onPress={handleNext}
         />
       </View>
     </View>

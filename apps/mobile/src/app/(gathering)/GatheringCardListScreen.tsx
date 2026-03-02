@@ -1,27 +1,69 @@
-import { View, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { GatheringCard } from "@/features/gathering/components/GatheringCard";
+import { gatheringClient } from "@/api/clients/gatheringClient";
+import type { GatheringListItem } from "@/api/types/gathering";
 
-const MOCK_IMAGE = "https://picsum.photos/seed/gathering/400/300";
-
-const MOCK_GATHERINGS = Array.from({ length: 9 }, (_, i) => ({
-  id: String(i),
-  title: "제목입니다.제목입니다.제목입니다.",
-  location: "서대문구",
-  dateTime: "12.28(월) 오전 11시",
-  duration: "2시간",
-  participants: "7:3",
-  hostName: "루트",
-  price: "20,000원",
-  thumbnailUri: i % 2 === 0 ? MOCK_IMAGE : undefined,
-}));
+const PAGE_SIZE = 50;
 
 export default function GatheringCardListScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["gatherings"],
+      queryFn: ({ pageParam }) =>
+        gatheringClient.scroll({
+          size: PAGE_SIZE,
+          uuid: pageParam?.uuid,
+          score: pageParam?.score,
+        }),
+      initialPageParam: undefined as
+        | { uuid: string; score: number }
+        | undefined,
+      getNextPageParam: (lastPage) =>
+        lastPage.hasNext && lastPage.cursor
+          ? { uuid: lastPage.cursor.uuid, score: lastPage.cursor.score }
+          : undefined,
+    });
+
+  const gatherings = data?.pages.flatMap((page) => page.list) ?? [];
+
+  const formatGatheringCard = (item: GatheringListItem) => {
+    const dateTime = item.date
+      ? `${item.date}${item.startTime ? ` ${item.startTime}` : ""}`
+      : "";
+    const duration = item.duration ? `${item.duration}시간` : "";
+    const participants = `${item.maleCount}:${item.femaleCount}`;
+    const price = item.isFree
+      ? "무료"
+      : item.price
+        ? `${item.price.toLocaleString()}원`
+        : "";
+
+    return {
+      title: item.title,
+      location: item.location ?? "",
+      dateTime,
+      duration,
+      participants,
+      hostName: item.host.nickname,
+      hostAvatarUri: item.host.profileImageUrl ?? undefined,
+      price,
+      thumbnailUri: item.imgUrl ?? undefined,
+    };
+  };
+
+  const handleEndReached = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
   return (
     <View style={[styles.gatheringCardListScreen, { paddingTop: insets.top }]}>
@@ -40,30 +82,41 @@ export default function GatheringCardListScreen() {
       </View>
 
       {/* GatheringCardList */}
-      <ScrollView
-        style={styles.gatheringCardList}
-        showsVerticalScrollIndicator={false}
-      >
-        {MOCK_GATHERINGS.map((item) => (
-          <GatheringCard
-            key={item.id}
-            title={item.title}
-            location={item.location}
-            dateTime={item.dateTime}
-            duration={item.duration}
-            participants={item.participants}
-            hostName={item.hostName}
-            price={item.price}
-            thumbnailUri={item.thumbnailUri}
-            onPress={() =>
-              router.push({
-                pathname: "/(gathering)/GatheringDetailScreen",
-                params: item.thumbnailUri ? { imageUrl: item.thumbnailUri } : {},
-              })
-            }
-          />
-        ))}
-      </ScrollView>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={gatherings}
+          keyExtractor={(item) => item.gatheringUuid}
+          renderItem={({ item }) => {
+            const cardProps = formatGatheringCard(item);
+            return (
+              <GatheringCard
+                {...cardProps}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(gathering)/GatheringDetailScreen",
+                    params: { gatheringUuid: item.gatheringUuid },
+                  })
+                }
+              />
+            );
+          }}
+          style={styles.gatheringCardList}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View style={styles.footer}>
+                <ActivityIndicator size="small" color={colors.accent.primary} />
+              </View>
+            ) : null
+          }
+        />
+      )}
 
       {/* BottomTabBar */}
       <View style={[styles.bottomTabBar, { paddingBottom: Math.max(insets.bottom, 24) }]}>
@@ -111,8 +164,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "flex-end",
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   gatheringCardList: {
     flex: 1,
+  },
+  footer: {
+    paddingVertical: 16,
+    alignItems: "center",
   },
   bottomTabBar: {
     flexDirection: "row",
