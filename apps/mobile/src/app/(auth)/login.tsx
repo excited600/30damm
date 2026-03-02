@@ -1,12 +1,16 @@
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { colors } from "@/shared/constants/colors";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const setToken = useAuthStore((s) => s.setToken);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -47,6 +51,10 @@ export default function LoginScreen() {
         </View>
         <Button
           label="시작하기"
+          onPress={() => {
+            setToken("mock-token");
+            router.replace("/(tabs)");
+          }}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}

@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet } from "react-native";
+import { colors } from "@/shared/constants/colors";
 
-export default function SearchScreen() {
+export default function ChatScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>탐색</Text>
+      <Text style={styles.title}>채팅</Text>
     </View>
   );
 }
@@ -13,10 +14,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    color: colors.text.primary,
   },
 });

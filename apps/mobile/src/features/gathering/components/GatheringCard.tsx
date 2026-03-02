@@ -54,7 +54,9 @@ export function GatheringCard({
               )}
               <Text style={styles.hostName}>{hostName}</Text>
             </View>
-            <Text style={styles.price}>{price}</Text>
+            <View style={styles.priceBadge}>
+              <Text style={styles.price}>{price}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -66,7 +68,7 @@ export function GatheringCard({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.md,
-    paddingVertical: 20,
+    paddingVertical: 5,
     gap: 12,
   },
   pressed: {
@@ -123,6 +125,11 @@ const styles = StyleSheet.create({
     ...typography.label.sm,
     color: colors.text.primary,
   },
+  priceBadge: {
+    backgroundColor: colors.text.secondary,
+    borderRadius: 5,
+    padding: 3,
+  },
   price: {
     ...typography.label.sm,
     color: colors.text.primary,
@@ -130,5 +137,6 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: colors.surface,
+    opacity: 0.2,
   },
 });

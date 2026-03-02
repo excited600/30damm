@@ -1,37 +1,43 @@
 import { Tabs } from "expo-router";
+import { View, StyleSheet } from "react-native";
 import { colors } from "@/shared/constants/colors";
+import { HomeIcon, ChatIcon, MeIcon } from "@/shared/components/ui/TabIcons";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
-        headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.text.primary,
-        tabBarActiveTintColor: colors.primary,
+        headerShown: false,
+        tabBarActiveTintColor: colors.text.primary,
         tabBarInactiveTintColor: colors.text.tertiary,
-        tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopWidth: 1,
+          borderTopColor: colors.surface,
+          paddingTop: 8,
+          paddingBottom: 24,
+          paddingHorizontal: 40,
+          height: 53,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "홈",
-          tabBarLabel: "홈",
+          tabBarIcon: ({ color }) => <HomeIcon color={color} />,
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="chat"
         options={{
-          title: "탐색",
-          tabBarLabel: "탐색",
+          tabBarIcon: ({ color }) => <ChatIcon color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "프로필",
-          tabBarLabel: "프로필",
+          tabBarIcon: ({ color }) => <MeIcon color={color} />,
         }}
       />
     </Tabs>

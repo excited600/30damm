@@ -13,10 +13,12 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function CreateProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const setToken = useAuthStore((s) => s.setToken);
   const [nickname, setNickname] = useState("");
 
   return (
@@ -75,6 +77,10 @@ export default function CreateProfileScreen() {
         {/* CTA Button */}
         <Button
           label="시작하기"
+          onPress={() => {
+            setToken("mock-token");
+            router.replace("/(tabs)");
+          }}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
