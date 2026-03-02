@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { View, Text, Image, StyleSheet, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
+import { Toast } from "@/shared/components/ui/Toast";
 
 const MOCK_DETAIL = {
   description:
@@ -28,8 +30,9 @@ const MOCK_DETAIL = {
 export default function GatheringDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { imageUrl } = useLocalSearchParams<{ imageUrl?: string }>();
+  const { imageUrl, showToast } = useLocalSearchParams<{ imageUrl?: string; showToast?: string }>();
   const hasImage = !!imageUrl;
+  const [toastVisible, setToastVisible] = useState(showToast === "true");
 
   return (
     <View style={[styles.gatheringDetailScreen, { paddingTop: insets.top }]}>
@@ -92,6 +95,13 @@ export default function GatheringDetailScreen() {
           style={styles.button}
         />
       </View>
+
+      {/* Toast */}
+      <Toast
+        message="모임이 열렸습니다!"
+        visible={toastVisible}
+        onHide={() => setToastVisible(false)}
+      />
 
       {/* Header (absolute, overlaps image when hasImage=true) */}
       <View style={[styles.header, { top: insets.top }]}>
