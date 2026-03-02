@@ -100,6 +100,7 @@ export default function GatheringDetailScreen() {
       <Toast
         message="모임이 열렸습니다!"
         visible={toastVisible}
+        duration={1500}
         onHide={() => setToastVisible(false)}
       />
 
