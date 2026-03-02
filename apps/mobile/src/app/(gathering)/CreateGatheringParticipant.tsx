@@ -97,6 +97,7 @@ export default function CreateGatheringParticipant() {
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
+          onPress={() => router.push("/(gathering)/CreateGatheringGenderRatioScreen")}
         />
       </View>
     </View>
