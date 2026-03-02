@@ -30,7 +30,7 @@ export function UnderlineInput({
       <View style={styles.valueRow}>
         {icon && <View style={styles.iconWrapper}>{icon}</View>}
         <TextInput
-          style={[styles.fieldInput, icon && styles.fieldInputWithIcon]}
+          style={[styles.fieldInput, icon ? styles.fieldInputWithIcon : undefined]}
           placeholder={placeholder}
           placeholderTextColor={colors.text.tertiary}
           value={value}

@@ -1,6 +1,7 @@
 package beyondeyesight.domain.service
 
-import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.exception.InvalidValueException
+import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.domain.repository.user.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -14,26 +15,45 @@ class UserService(
     fun signUp(
         email: String,
         nickname: String,
-        age: Int,
-        gender: Gender,
-        introduction: String,
         password: String,
-        phoneNumber: String,
-        phoneAuthenticated: Boolean,
     ): UserEntity {
+        if (userRepository.findByEmail(email) != null) {
+            throw InvalidValueException(
+                valueName = "email",
+                value = email,
+                reason = "이미 사용 중인 이메일입니다."
+            )
+        }
+
         val encoded = passwordEncoder.encode(password) ?: throw IllegalStateException("not allowed null")
         val entity = UserEntity.signUp(
             email = email,
             nickname = nickname,
-            age = age,
-            gender = gender,
-            introduction = introduction,
             password = encoded,
-            phoneNumber = phoneNumber,
-            phoneAuthenticated = phoneAuthenticated,
         )
 
         return userRepository.save(entity)
     }
 
+    fun login(
+        email: String,
+        password: String,
+    ): UserEntity {
+        val user = userRepository.findByEmail(email)
+            ?: throw ResourceNotFoundException.byField(
+                resourceName = UserEntity.RESOURCE_NAME,
+                fieldName = "email",
+                fieldValue = email
+            )
+
+        if (!passwordEncoder.matches(password, user.password)) {
+            throw InvalidValueException(
+                valueName = "password",
+                value = "***",
+                reason = "비밀번호가 일치하지 않습니다."
+            )
+        }
+
+        return user
+    }
 }

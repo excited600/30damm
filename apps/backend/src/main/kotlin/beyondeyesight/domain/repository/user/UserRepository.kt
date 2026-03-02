@@ -7,4 +7,6 @@ interface UserRepository {
     fun save(userEntity: UserEntity): UserEntity
 
     fun findByUuid(uuid: UUID): UserEntity?
+
+    fun findByEmail(email: String): UserEntity?
 }

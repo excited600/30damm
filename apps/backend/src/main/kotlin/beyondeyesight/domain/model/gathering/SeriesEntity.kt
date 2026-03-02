@@ -11,42 +11,32 @@ class SeriesEntity(
     @Column(nullable = false)
     val hostUuid: UUID,
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val approveType: GatheringEntity.ApproveType,
-    @Column(nullable = false)
     val minCapacity: Int,
     @Column(nullable = false)
     val maxCapacity: Int,
     @Column(nullable = false)
     val genderRatioEnabled: Boolean,
-    @Column(nullable = false)
-    val minAge: Int,
-    @Column(nullable = false)
-    val maxAge: Int,
     @Column(nullable = true)
     val maxMaleCount: Int?,
     @Column(nullable = true)
     val maxFemaleCount: Int?,
     @Column(nullable = false)
     val fee: Int,
-    @Column(nullable = false)
-    val discountEnabled: Boolean,
-    @Column(nullable = false)
-    val offline: Boolean,
-    @Column(nullable = false)
-    val place: String,
+    @Column(name = "is_split", nullable = false)
+    val isSplit: Boolean,
+    @Column(nullable = true)
+    val place: String?,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val category: Category,
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val subCategory: SubCategory,
-    @Column(nullable = false)
-    val imageUrl: String,
+    @Column(name = "image_url", nullable = true)
+    val imageUrl: String?,
     @Column(nullable = false)
     val title: String,
-    @Column(nullable = false)
-    val introduction: String,
+    @Column(nullable = true)
+    val introduction: String?,
+    @Column(nullable = true)
+    val description: String?,
 
 ) : BaseEntity(uuid = uuid) {
 

@@ -16,4 +16,8 @@ class UserRepositoryImpl(
     override fun findByUuid(uuid: UUID): UserEntity? {
         return userJpaRepository.findById(uuid).orElse(null)
     }
+
+    override fun findByEmail(email: String): UserEntity? {
+        return userJpaRepository.findByEmail(email)
+    }
 }

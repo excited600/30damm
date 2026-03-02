@@ -67,4 +67,7 @@ class GuestRepositoryImpl(
         ))
     }
 
+    override fun findAllByGatheringUuid(gatheringUuid: UUID): List<GuestEntity> {
+        return guestJpaRepository.findAllByGatheringUuid(gatheringUuid)
+    }
 }

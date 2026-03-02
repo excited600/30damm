@@ -22,6 +22,11 @@ spring:
       port: 6379
       password: beyondeyesight
 
+jwt:
+  secret: dGhpcyBpcyBhIHZlcnkgc2VjcmV0IGtleSBmb3IgSldUIHRva2VuIGdlbmVyYXRpb24gMzA0MA==
+  access-token-expiry: 3600000
+  refresh-token-expiry: 604800000
+
 portone:
   api-secret: Na5vnSd3bSdBtded0DGBWxQbVD8u6oSMHzvvhr7ohSTNm8PyLvSFn4qQlYA2Fq9cVRnBgrf4N6JHGcs7
   store-id: store-c47dce95-6209-4f04-87f1-78914a40214a

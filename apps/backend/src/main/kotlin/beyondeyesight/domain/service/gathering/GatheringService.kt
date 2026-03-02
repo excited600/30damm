@@ -25,6 +25,7 @@ import beyondeyesight.domain.service.LockService
 import beyondeyesight.domain.service.payment.PaymentService
 import beyondeyesight.domain.service.payment.PaymentGateway
 import beyondeyesight.domain.service.payment.PaymentSynchronizeService
+import beyondeyesight.domain.model.user.UserEntity
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -46,30 +47,39 @@ class GatheringService(
     private val paymentGateway: PaymentGateway,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    data class GuestWithUser(val guest: beyondeyesight.domain.model.GuestEntity, val user: UserEntity)
+    data class GenderCounts(val maleCount: Int, val femaleCount: Int)
+    data class GatheringDetail(
+        val gathering: GatheringEntity,
+        val host: UserEntity,
+        val guestsWithUsers: List<GuestWithUser>,
+        val genderCounts: GenderCounts,
+    )
+    data class ScrollWithDetails(
+        val scrollResult: beyondeyesight.domain.model.ScrollResult<GatheringEntity, GatheringCursor>,
+        val hostUsers: Map<UUID, UserEntity>,
+        val genderCountsMap: Map<UUID, GenderCounts>,
+    )
+
     fun open(
         hostUuid: UUID,
-        approveType: GatheringEntity.ApproveType,
+        title: String,
+        description: String?,
+        category: Category,
+        location: String?,
+        startDateTime: LocalDateTime?,
+        duration: Duration?,
         minCapacity: Int,
         maxCapacity: Int,
         genderRatioEnabled: Boolean,
-        minAge: Int,
-        maxAge: Int,
         maxMaleCount: Int?,
         maxFemaleCount: Int?,
-        fee: Int,
-        discountEnabled: Boolean,
-        offline: Boolean,
-        place: String,
-        category: Category,
-        subCategory: SubCategory,
-        imageUrl: String,
-        title: String,
-        introduction: String,
-        startDateTime: LocalDateTime,
-        duration: Duration?,
+        isFree: Boolean,
+        price: Int?,
+        isSplit: Boolean,
+        imageUrl: String?,
     ): GatheringEntity {
-        validateOpen(minAge, maxAge, maxMaleCount, maxFemaleCount, fee)
-
         val host = userRepository.findByUuid(hostUuid) ?: throw ResourceNotFoundException.byUuid(
             resourceName = "User",
             resourceUuid = hostUuid
@@ -77,77 +87,23 @@ class GatheringService(
 
         val entity = GatheringEntity.open(
             hostUuid = host.uuid,
-            approveType = approveType,
+            title = title,
+            description = description,
+            category = category,
+            location = location,
+            startDateTime = startDateTime,
+            duration = duration,
             minCapacity = minCapacity,
             maxCapacity = maxCapacity,
             genderRatioEnabled = genderRatioEnabled,
-            minAge = minAge,
-            maxAge = maxAge,
             maxMaleCount = maxMaleCount,
             maxFemaleCount = maxFemaleCount,
-            fee = fee,
-            discountEnabled = discountEnabled,
-            offline = offline,
-            place = place,
-            category = category,
-            subCategory = subCategory,
+            isFree = isFree,
+            price = price,
+            isSplit = isSplit,
             imageUrl = imageUrl,
-            title = title,
-            introduction = introduction,
-            startDateTime = startDateTime,
-            score = 0,
-            duration = duration
         )
         return gatheringRepository.save(entity)
-    }
-
-
-    private fun validateOpen(
-        minAge: Int,
-        maxAge: Int,
-        maxMaleCount: Int?,
-        maxFemaleCount: Int?,
-        fee: Int
-    ) {
-        if (minAge < 1) {
-            throw InvalidValueException(
-                valueName = "minAge",
-                value = minAge,
-                reason = null
-            )
-        }
-
-        if (maxAge < minAge) {
-            throw InvalidValueException(
-                valueName = "maxAge",
-                value = maxAge,
-                reason = "maxAge must be greater than or equal to minAge"
-            )
-        }
-
-        if (maxMaleCount != null && maxMaleCount < 0) {
-            throw InvalidValueException(
-                valueName = "maxMaleCount",
-                value = maxMaleCount,
-                reason = "maxMaleCount cannot be negative"
-            )
-        }
-
-        if (maxFemaleCount != null && maxFemaleCount < 0) {
-            throw InvalidValueException(
-                valueName = "maxFemaleCount",
-                value = maxFemaleCount,
-                reason = "maxFemaleCount cannot be negative"
-            )
-        }
-
-        if (fee < 0) {
-            throw InvalidValueException("fee", fee, "must not be negative")
-        }
-
-        if (fee % 1000 != 0) {
-            throw InvalidValueException("fee", fee, "must be a multiple of 1000")
-        }
     }
 
     fun close(uuid: UUID) {
@@ -155,6 +111,67 @@ class GatheringService(
             ?: throw IllegalArgumentException("Gathering not found with uuid: $uuid")
         gathering.close()
         gatheringRepository.save(gathering)
+    }
+
+    fun getDetail(gatheringUuid: UUID): GatheringDetail {
+        val gathering = gatheringRepository.findByUuid(gatheringUuid)
+            ?: throw ResourceNotFoundException.byUuid(
+                resourceName = GatheringEntity.RESOURCE_NAME,
+                resourceUuid = gatheringUuid
+            )
+
+        val host = userRepository.findByUuid(gathering.hostUuid)
+            ?: throw ResourceNotFoundException.byUuid(
+                resourceName = UserEntity.RESOURCE_NAME,
+                resourceUuid = gathering.hostUuid
+            )
+
+        val guests = guestRepository.findAllByGatheringUuid(gatheringUuid)
+        val guestsWithUsers = guests.mapNotNull { guest ->
+            val user = userRepository.findByUuid(guest.userUuid) ?: return@mapNotNull null
+            GuestWithUser(guest, user)
+        }
+
+        val genderCounts = countGendersByGathering(gatheringUuid)
+
+        return GatheringDetail(
+            gathering = gathering,
+            host = host,
+            guestsWithUsers = guestsWithUsers,
+            genderCounts = genderCounts,
+        )
+    }
+
+    fun scroll(
+        cursor: GatheringCursor?,
+        size: Int,
+        filter: GatheringFilter,
+    ): ScrollWithDetails {
+        val result = gatheringRepository.scroll(
+            cursor = cursor,
+            size = size,
+            filter = filter,
+        )
+
+        val hostUuids = result.items.map { it.hostUuid }.distinct()
+        val hostUsers = hostUuids.mapNotNull { userRepository.findByUuid(it) }.associateBy { it.uuid }
+
+        val genderCountsMap = result.items.associate { gathering ->
+            gathering.uuid to countGendersByGathering(gathering.uuid)
+        }
+
+        return ScrollWithDetails(
+            scrollResult = result,
+            hostUsers = hostUsers,
+            genderCountsMap = genderCountsMap,
+        )
+    }
+
+    private fun countGendersByGathering(gatheringUuid: UUID): GenderCounts {
+        return GenderCounts(
+            maleCount = guestRepository.countByGatheringAndGender(gatheringUuid, Gender.MALE).toInt(),
+            femaleCount = guestRepository.countByGatheringAndGender(gatheringUuid, Gender.FEMALE).toInt()
+        )
     }
 
     fun leave(gatheringUuid: UUID, userUuid: UUID, reason: String) {
@@ -219,7 +236,7 @@ class GatheringService(
             }
 
             if (gathering.genderRatioEnabled) {
-                val currentMaleGuestCount = guestRepository.countByGatheringAndGender(gathering.uuid, Gender.M)
+                val currentMaleGuestCount = guestRepository.countByGatheringAndGender(gathering.uuid, Gender.MALE)
                 val maxMaleCount = gathering.maxMaleCount ?: throw DataIntegrityException(
                     tableName = "gathering",
                     resourceUuid = gathering.uuid,
@@ -230,13 +247,13 @@ class GatheringService(
                     throw CannotJoinException.full(
                         userUuid = userUuid,
                         gatheringUuid = gathering.uuid,
-                        gender = Gender.M
+                        gender = Gender.MALE
                     )
                 }
 
                 val currentFemaleGuestCount = guestRepository.countByGatheringAndGender(
                     gatheringUuid = gathering.uuid,
-                    gender = Gender.F
+                    gender = Gender.FEMALE
                 )
                 val maxFemaleCount = gathering.maxFemaleCount ?: throw DataIntegrityException(
                     tableName = "gathering",
@@ -248,7 +265,7 @@ class GatheringService(
                     throw CannotJoinException.full(
                         userUuid = userUuid,
                         gatheringUuid = gathering.uuid,
-                        gender = Gender.F
+                        gender = Gender.FEMALE
                     )
                 }
             }
@@ -297,21 +314,16 @@ class GatheringService(
 
     fun schedule(
         hostUuid: UUID,
-        approveType: GatheringEntity.ApproveType,
         minCapacity: Int,
         maxCapacity: Int,
         genderRatioEnabled: Boolean,
-        minAge: Int,
-        maxAge: Int,
         fee: Int,
-        discountEnabled: Boolean,
-        offline: Boolean,
-        place: String,
+        isSplit: Boolean,
+        place: String?,
         category: Category,
-        subCategory: SubCategory,
-        imageUrl: String,
+        imageUrl: String?,
         title: String,
-        introduction: String,
+        introduction: String?,
         scheduleType: ScheduleType,
         weeklySchedule: WeeklySchedule?,
         dateSchedule: DateSchedule?,
@@ -328,23 +340,19 @@ class GatheringService(
             SeriesEntity(
                 uuid = uuidV7(),
                 hostUuid = hostUuid,
-                approveType = approveType,
                 minCapacity = minCapacity,
                 maxCapacity = maxCapacity,
                 genderRatioEnabled = genderRatioEnabled,
-                minAge = minAge,
-                maxAge = maxAge,
                 maxMaleCount = maxMaleCount,
                 maxFemaleCount = maxFemaleCount,
                 fee = fee,
-                discountEnabled = discountEnabled,
-                offline = offline,
+                isSplit = isSplit,
                 place = place,
                 category = category,
-                subCategory = subCategory,
                 imageUrl = imageUrl,
                 title = title,
                 introduction = introduction,
+                description = null,
             )
         )
 
@@ -496,8 +504,6 @@ class GatheringService(
                 token = lockToken
             )
         }
-
-
     }
 
     fun handleCancelledWebhook(paymentEntity: PaymentEntity) {
@@ -539,7 +545,6 @@ class GatheringService(
             logger.info("[3040] 결제 취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
             paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
-
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
                 resourceId = paymentEntity.productUuid.toString(),
@@ -586,7 +591,6 @@ class GatheringService(
             logger.info("[3040] 결제 부분취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
             paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
-
             lockService.unlock(
                 resourceName = GatheringEntity.RESOURCE_NAME,
                 resourceId = paymentEntity.productUuid.toString(),
@@ -651,7 +655,7 @@ class GatheringService(
             }
 
             if (gathering.genderRatioEnabled && gathering.maxMaleCount != null && gathering.maxFemaleCount != null) {
-                val currentMaleGuestCount = guestRepository.countByGatheringAndGender(gathering.uuid, Gender.M)
+                val currentMaleGuestCount = guestRepository.countByGatheringAndGender(gathering.uuid, Gender.MALE)
                 val maxMaleCount = gathering.maxMaleCount ?: throw DataIntegrityException(
                     tableName = "gathering",
                     resourceUuid = gathering.uuid,
@@ -670,7 +674,7 @@ class GatheringService(
 
                 val currentFemaleGuestCount = guestRepository.countByGatheringAndGender(
                     gatheringUuid = gathering.uuid,
-                    gender = Gender.F
+                    gender = Gender.FEMALE
                 )
                 val maxFemaleCount = gathering.maxFemaleCount ?: throw DataIntegrityException(
                     tableName = "gathering",
@@ -704,9 +708,7 @@ class GatheringService(
         }
     }
 
-    // close할 때도 refund 있음.
     private fun refund(userUuid: UUID, gatheringUuid: UUID, reason: String, paymentId: String, amount: Int) {
-
         val refundAmount = calculateRefundAmount(
             gatheringUuid = gatheringUuid,
             userUuid = userUuid,
@@ -739,11 +741,13 @@ class GatheringService(
             resourceUuid = gatheringUuid
         )
 
-        if (gathering.startDateTime.minusDays(2).isBefore(now)) {
+        val startDateTime = gathering.startDateTime ?: return amount
+
+        if (startDateTime.minusDays(2).isBefore(now)) {
             return 0
         }
 
-        if (gathering.startDateTime.minusDays(4).isBefore(now)) {
+        if (startDateTime.minusDays(4).isBefore(now)) {
             return amount * 90 / 100
         }
 

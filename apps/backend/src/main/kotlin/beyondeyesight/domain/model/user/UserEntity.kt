@@ -18,18 +18,18 @@ class UserEntity(
     @Column(nullable = false)
     var nickname: String,
     @Column(nullable = true)
-    var age: Int, // TODO: 생년월일을 아예 가지고 있는게 나을듯.
+    var age: Int?,
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    val gender: Gender,
-    @Column(nullable = false)
-    var introduction: String,
+    @Column(nullable = true)
+    val gender: Gender?,
+    @Column(nullable = true)
+    var introduction: String?,
     @Column(nullable = false)
     var password: String,
-    @Column(name = "phone_number", nullable = false)
-    var phoneNumber: String,
-    @Column(name = "phone_authenticated", nullable = false)
-    var phoneAuthenticated: Boolean,
+    @Column(name = "phone_number", nullable = true)
+    var phoneNumber: String?,
+    @Column(name = "phone_authenticated", nullable = true)
+    var phoneAuthenticated: Boolean?,
     @Column(nullable = false)
     var hearts: Int,
     @Column(name = "is_private", nullable = false)
@@ -37,6 +37,8 @@ class UserEntity(
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val provider: Provider,
+    @Column(name = "profile_image_url", nullable = true)
+    var profileImageUrl: String?,
 
     ) : BaseEntity(uuid = uuid) {
 
@@ -44,26 +46,22 @@ class UserEntity(
         fun signUp(
             email: String,
             nickname: String,
-            age: Int,
-            gender: Gender,
-            introduction: String,
             password: String,
-            phoneNumber: String,
-            phoneAuthenticated: Boolean,
         ): UserEntity {
             return UserEntity(
                 uuid = uuidV7(),
                 email = email,
                 nickname = nickname,
-                age = age,
-                gender = gender,
-                introduction = introduction,
+                age = null,
+                gender = null,
+                introduction = null,
                 password = password,
-                phoneNumber = phoneNumber,
-                phoneAuthenticated = phoneAuthenticated,
+                phoneNumber = null,
+                phoneAuthenticated = null,
                 hearts = 0,
                 isPrivate = false,
                 provider = Provider.THIRTY_FORTY,
+                profileImageUrl = null,
             )
         }
         const val RESOURCE_NAME = "users"

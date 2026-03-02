@@ -16,12 +16,60 @@ tags:
   - name: Users
     description: 사용자
 paths:
-  /gatherings:
+  /api/v1/users/signup:
+    post:
+      operationId: signup
+      tags:
+        - Users
+      summary: 이메일 회원가입
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '400':
+          description: 유효성 검사 실패
+        '409':
+          description: 이메일 중복
+  /api/v1/users/login:
+    post:
+      operationId: login
+      tags:
+        - Users
+      summary: 로그인
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 유효성 검사 실패
+        '401':
+          description: 이메일 또는 비밀번호 불일치
+  /api/v1/gatherings:
     get:
       operationId: scrollFilteredGatherings
       tags:
         - Gatherings
-      summary: Scroll filtered gatherings with cursor-based pagination
+      summary: 모임 목록 조회 (커서 기반 페이지네이션)
+      security:
+        - BearerAuth: []
       parameters:
         - name: uuid
           in: query
@@ -136,16 +184,22 @@ paths:
           description: Filter gatherings by maximum fee
       responses:
         '200':
-          description: Gatherings retrieved successfully
+          description: 모임 목록 조회 성공
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScrollFilteredGatheringsResponse'
+        '400':
+          description: 유효성 검사 실패
+        '401':
+          description: 미인증
     post:
       operationId: openGathering
       tags:
         - Gatherings
-      summary: Open a new gathering
+      summary: 모임 생성
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -154,17 +208,52 @@ paths:
               $ref: '#/components/schemas/OpenGatheringRequest'
       responses:
         '201':
-          description: Gathering open successfully
+          description: 모임 생성 성공
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OpenGatheringResponse'
-  /series:
+        '400':
+          description: 유효성 검사 실패
+        '401':
+          description: 미인증
+  /api/v1/gatherings/{gatheringId}:
+    get:
+      operationId: getGatheringDetail
+      tags:
+        - Gatherings
+      summary: 모임 상세 조회
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gatheringId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 모임 ID (UUIDv7)
+      responses:
+        '200':
+          description: 모임 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetGatheringDetailResponse'
+        '400':
+          description: 유효성 검사 실패
+        '401':
+          description: 미인증
+        '404':
+          description: 모임을 찾을 수 없음
+  /api/v1/series:
     post:
       operationId: scheduleSeries
       tags:
         - Gatherings
       summary: Schedule gatherings based on host setting
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -174,12 +263,16 @@ paths:
       responses:
         '201':
           description: Gatherings scheduled successfully
-  /gatherings/{gatheringUuid}/join:
+        '401':
+          description: 미인증
+  /api/v1/gatherings/{gatheringUuid}/join:
     post:
       operationId: joinGathering
       tags:
         - Gatherings
       summary: Join the gathering as a guest
+      security:
+        - BearerAuth: []
       parameters:
         - name: gatheringUuid
           in: path
@@ -197,12 +290,16 @@ paths:
       responses:
         '201':
           description: Joined gathering successfully
-  /gatherings/{gatheringUuid}/leave:
+        '401':
+          description: 미인증
+  /api/v1/gatherings/{gatheringUuid}/leave:
     post:
       operationId: leaveGathering
       tags:
         - Gatherings
       summary: Leave a gathering as a guest
+      security:
+        - BearerAuth: []
       parameters:
         - name: gatheringUuid
           in: path
@@ -231,7 +328,9 @@ paths:
       responses:
         '204':
           description: Left gathering successfully
-  /payments/{paymentId}/prepare:
+        '401':
+          description: 미인증
+  /api/v1/payments/{paymentId}/prepare:
     post:
       operationId: preparePayment
       tags:
@@ -257,7 +356,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PreparePaymentResponse'
-  /payments/webhook:
+  /api/v1/payments/webhook:
     post:
       operationId: paymentWebhook
       tags:
@@ -273,185 +372,159 @@ paths:
         '200':
           description: Webhook handled successfully
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer 토큰 인증
   schemas:
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+        - nickname
+      properties:
+        email:
+          type: string
+          format: email
+          description: 유효한 이메일 주소
+        password:
+          type: string
+          minLength: 8
+          maxLength: 20
+          description: 비밀번호 (8~20자)
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 10
+          description: 닉네임 (2~10자)
+    SignupResponse:
+      type: object
+      required:
+        - userUuid
+        - accessToken
+        - refreshToken
+      properties:
+        userUuid:
+          type: string
+          format: uuid
+          description: 사용자 UUID (UUIDv7)
+        accessToken:
+          type: string
+          description: JWT 액세스 토큰
+        refreshToken:
+          type: string
+          description: JWT 리프레시 토큰
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 이메일 주소
+        password:
+          type: string
+          description: 비밀번호
+    LoginResponse:
+      type: object
+      required:
+        - userUuid
+        - accessToken
+        - refreshToken
+      properties:
+        userUuid:
+          type: string
+          format: uuid
+          description: 사용자 UUID (UUIDv7)
+        accessToken:
+          type: string
+          description: JWT 액세스 토큰
+        refreshToken:
+          type: string
+          description: JWT 리프레시 토큰
     OpenGatheringRequest:
       type: object
       required:
-        - hostUuid
-        - approveType
+        - title
+        - description
+        - category
         - minCapacity
         - maxCapacity
-        - genderRatioEnabled
-        - minAge
-        - maxAge
-        - fee
-        - discountEnabled
-        - offline
-        - place
-        - category
-        - subCategory
-        - imageUrl
-        - title
-        - introduction
-        - startDateTime
+        - isGenderRatioEnabled
+        - isFree
+        - isSplit
       properties:
-        hostUuid:
-          type: string
-          format: uuid
-          description: UUID of the host. tmp property
-        approveType:
-          $ref: '#/components/schemas/Gathering_ApproveType'
-        minCapacity:
-          type: integer
-          description: Minimum capacity of the gathering
-        maxCapacity:
-          type: integer
-          description: Maximum capacity of the gathering
-        maxMaleCount:
-          type: integer
-          description: Maximum number of male guests
-        maxFemaleCount:
-          type: integer
-          description: Maximum number of female guests
-        genderRatioEnabled:
-          type: boolean
-          description: If host can set gender ratio for the gathering
-        minAge:
-          type: integer
-          description: Minimum age of guests
-        maxAge:
-          type: integer
-          description: Maximum age of guests
-        fee:
-          type: integer
-          description: Fee to join the gathering
-        discountEnabled:
-          type: boolean
-          description: If host can set discount strategy for the gathering
-        offline:
-          type: boolean
-          description: If the gathering is offline
-        place:
-          type: string
-          description: Place where the gathering will be held
-        category:
-          $ref: '#/components/schemas/Gathering_Category'
-        subCategory:
-          $ref: '#/components/schemas/Gathering_SubCategory'
-        imageUrl:
-          type: string
-          description: URL of the gathering image
         title:
           type: string
-          description: Title of the gathering
-        introduction:
+          maxLength: 20
+          description: 모임 제목 (최대 20자)
+        description:
           type: string
-          description: Introduction of the gathering
-        startDateTime:
+          maxLength: 200
+          description: 모임 설명 (최대 200자)
+        category:
+          $ref: '#/components/schemas/Gathering_Category'
+        location:
           type: string
-          format: date-time
-          description: Start date and time of the gathering
+          nullable: true
+          description: 장소
+        date:
+          type: string
+          format: date
+          nullable: true
+          description: 날짜 (미래 날짜만 가능)
+        startTime:
+          type: string
+          nullable: true
+          description: 시작 시간 (HH:mm, 24시간제)
+          example: '19:00'
         duration:
-          type: number
-          format: float
-          description: Duration of the gathering in hours (can contain decimals)
+          type: integer
+          nullable: true
+          minimum: 30
+          description: 소요 시간 (분 단위, 최소 30분)
+        minCapacity:
+          type: integer
+          minimum: 2
+          description: 최소 인원 (최소 2명)
+        maxCapacity:
+          type: integer
+          description: 최대 인원 (minCapacity 이상)
+        isGenderRatioEnabled:
+          type: boolean
+          description: 성비 제한 활성화 여부
+        maxMaleCapacity:
+          type: integer
+          nullable: true
+          description: 최대 남성 인원 (isGenderRatioEnabled=true일 때만)
+        maxFemaleCapacity:
+          type: integer
+          nullable: true
+          description: 최대 여성 인원 (isGenderRatioEnabled=true일 때만)
+        isFree:
+          type: boolean
+          description: 무료 여부
+        price:
+          type: integer
+          nullable: true
+          description: 가격 (원 단위, isFree=false일 때 필수)
+        isSplit:
+          type: boolean
+          description: 더치페이 여부
     OpenGatheringResponse:
       type: object
       required:
-        - uuid
-        - hostUuid
-        - approveType
-        - minCapacity
-        - maxCapacity
-        - genderRatioEnabled
-        - minAge
-        - maxAge
-        - totalGuests
-        - fee
-        - discountEnabled
-        - offline
-        - place
-        - category
-        - subCategory
-        - status
-        - imageUrl
-        - title
-        - introduction
-        - clickCount
-        - startDateTime
+        - gatheringUuid
       properties:
-        uuid:
+        gatheringUuid:
           type: string
           format: uuid
-          description: UUID of the gathering
-        hostUuid:
-          type: string
-          format: uuid
-          description: UUID of the host. tmp property
-        approveType:
-          $ref: '#/components/schemas/Gathering_ApproveType'
-        minCapacity:
-          type: integer
-          description: Minimum capacity of the gathering
-        maxCapacity:
-          type: integer
-          description: Maximum capacity of the gathering
-        genderRatioEnabled:
-          type: boolean
-          description: If host can set gender ratio for the gathering
-        minAge:
-          type: integer
-          description: Minimum age of guests
-        maxAge:
-          type: integer
-          description: Maximum age of guests
-        maxMaleCount:
-          type: integer
-          description: Maximum number of male guests
-        maxFemaleCount:
-          type: integer
-          description: Maximum number of female guests
-        totalGuests:
-          type: integer
-          description: Total number of guests
-        fee:
-          type: integer
-          description: Fee to join the gathering
-        discountEnabled:
-          type: boolean
-          description: If host can set discount strategy for the gathering
-        offline:
-          type: boolean
-          description: If the gathering is offline
-        place:
-          type: string
-          description: Place where the gathering will be held
-        category:
-          $ref: '#/components/schemas/Gathering_Category'
-        subCategory:
-          $ref: '#/components/schemas/Gathering_SubCategory'
-        status:
-          $ref: '#/components/schemas/Gathering_Status'
-        imageUrl:
-          type: string
-          description: URL of the gathering image
-        title:
-          type: string
-          description: Title of the gathering
-        introduction:
-          type: string
-          description: Introduction of the gathering
-        clickCount:
-          type: integer
-          description: Number of clicks on the gathering
-        startDateTime:
-          type: string
-          format: date-time
-          description: Start date and time of the gathering
-        duration:
-          type: number
-          format: float
-          description: Duration of the gathering in hours (can contain decimals)
+          description: 생성된 모임 UUID (UUIDv7)
     ScheduleSeriesRequest:
       type: object
       required:
@@ -671,7 +744,7 @@ components:
       type: object
       required:
         - hasNext
-        - gatherings
+        - list
       properties:
         cursor:
           type: object
@@ -683,10 +756,216 @@ components:
               format: uuid
         hasNext:
           type: boolean
-        gatherings:
+        list:
           type: array
           items:
-            $ref: '#/components/schemas/Gathering'
+            type: object
+            required:
+              - gatheringUuid
+              - title
+              - maleCount
+              - femaleCount
+              - host
+              - isFree
+              - isSplit
+            properties:
+              gatheringUuid:
+                type: string
+                format: uuid
+                description: 모임 UUID (UUIDv7)
+              imgUrl:
+                type: string
+                format: uri
+                nullable: true
+                description: 대표 이미지 URL
+              title:
+                type: string
+                description: 모임 제목
+              location:
+                type: string
+                nullable: true
+                description: 장소
+              date:
+                type: string
+                format: date
+                nullable: true
+                description: 날짜 (YYYY-MM-DD)
+              startTime:
+                type: string
+                nullable: true
+                description: 시작 시간 (HH:mm, 24시간제)
+                example: '19:00'
+              duration:
+                type: integer
+                nullable: true
+                description: 소요 시간 (시간 단위)
+              maleCount:
+                type: integer
+                description: 현재 남성 참여 수
+              femaleCount:
+                type: integer
+                description: 현재 여성 참여 수
+              host:
+                type: object
+                required:
+                  - userUuid
+                  - nickname
+                  - gender
+                properties:
+                  userUuid:
+                    type: string
+                    format: uuid
+                    description: 호스트 UUID
+                  nickname:
+                    type: string
+                    description: 호스트 닉네임
+                  profileImageUrl:
+                    type: string
+                    format: uri
+                    nullable: true
+                    description: 호스트 프로필 이미지 URL
+                  gender:
+                    $ref: '#/components/schemas/Gender'
+              isFree:
+                type: boolean
+                description: 무료 여부
+              isSplit:
+                type: boolean
+                description: 더치페이 여부
+              price:
+                type: integer
+                nullable: true
+                description: 가격 (원 단위)
+    GetGatheringDetailResponse:
+      type: object
+      required:
+        - gatheringUuid
+        - title
+        - description
+        - host
+        - guests
+        - category
+        - minCapacity
+        - maxCapacity
+        - isGenderRatioEnabled
+        - currentMaleCount
+        - currentFemaleCount
+        - isFree
+        - isSplit
+      properties:
+        gatheringUuid:
+          type: string
+          format: uuid
+          description: 모임 UUID (UUIDv7)
+        imgUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: 대표 이미지 URL
+        title:
+          type: string
+          description: 모임 제목
+        description:
+          type: string
+          description: 모임 설명
+        host:
+          type: object
+          required:
+            - userUuid
+            - nickname
+            - gender
+          properties:
+            userUuid:
+              type: string
+              format: uuid
+              description: 호스트 UUID
+            nickname:
+              type: string
+              description: 호스트 닉네임
+            profileImageUrl:
+              type: string
+              format: uri
+              nullable: true
+              description: 호스트 프로필 이미지 URL
+            gender:
+              $ref: '#/components/schemas/Gender'
+        guests:
+          type: array
+          description: 참여 게스트 목록 (빈 배열 가능)
+          items:
+            type: object
+            required:
+              - userUuid
+              - nickname
+              - gender
+            properties:
+              userUuid:
+                type: string
+                format: uuid
+                description: 게스트 UUID
+              nickname:
+                type: string
+                description: 닉네임
+              profileImageUrl:
+                type: string
+                format: uri
+                nullable: true
+                description: 프로필 이미지 URL
+              gender:
+                $ref: '#/components/schemas/Gender'
+        category:
+          $ref: '#/components/schemas/Gathering_Category'
+        minCapacity:
+          type: integer
+          description: 최소 인원
+        maxCapacity:
+          type: integer
+          description: 최대 인원
+        isGenderRatioEnabled:
+          type: boolean
+          description: 성비 제한 활성화 여부
+        maxMaleCapacity:
+          type: integer
+          nullable: true
+          description: 최대 남성 인원
+        maxFemaleCapacity:
+          type: integer
+          nullable: true
+          description: 최대 여성 인원
+        currentMaleCount:
+          type: integer
+          description: 현재 남성 참여 수
+        currentFemaleCount:
+          type: integer
+          description: 현재 여성 참여 수
+        date:
+          type: string
+          format: date
+          nullable: true
+          description: 날짜 (YYYY-MM-DD)
+        startTime:
+          type: string
+          nullable: true
+          description: 시작 시간 (HH:mm, 24시간제)
+          example: '19:00'
+        duration:
+          type: integer
+          nullable: true
+          description: 소요 시간 (시간 단위)
+        location:
+          type: string
+          nullable: true
+          description: 장소
+        isFree:
+          type: boolean
+          description: 무료 여부
+        isSplit:
+          type: boolean
+          description: 더치페이 여부
+        price:
+          type: integer
+          nullable: true
+          description: 가격 (원 단위)
     JoinGatheringRequest:
       type: object
       required:
@@ -779,14 +1058,10 @@ components:
     Gathering_Category:
       type: string
       enum:
+        - NONE
         - PARTY
         - FOOD_DRINK
-        - STUDY
-        - INVEST
-        - LANGUAGE
         - ACTIVITY
-        - CULTURE
-        - LOVE
       description: Category of the gathering
     Gathering_DayOfWeek:
       type: string
@@ -799,17 +1074,12 @@ components:
         - FRIDAY
         - SATURDAY
       description: Day of the week
-    Gathering_ApproveType:
+    Gender:
       type: string
       enum:
-        - FIRST_IN
-        - APPROVAL
-      description: Ways how to approve guests to join the gathering
-    Gathering_SubCategory:
-      type: string
-      enum:
-        - HOME_PARTY
-      description: Sub-category of the gathering
+        - MALE
+        - FEMALE
+      description: Gender of the user
     Gathering_WeeklyScheduleSummary:
       type: object
       required:
@@ -851,6 +1121,17 @@ components:
         - WEEKLY
         - DATE
       description: Type of scheduling for the gatherings
+    Gathering_ApproveType:
+      type: string
+      enum:
+        - FIRST_IN
+        - APPROVAL
+      description: Ways how to approve guests to join the gathering
+    Gathering_SubCategory:
+      type: string
+      enum:
+        - HOME_PARTY
+      description: Sub-category of the gathering
     ConfirmPaymentRequest:
       type: object
       required:

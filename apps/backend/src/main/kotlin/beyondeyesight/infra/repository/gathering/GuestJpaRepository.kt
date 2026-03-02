@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface GuestJpaRepository : JpaRepository<GuestEntity, GuestId>, KotlinJdslJpqlExecutor {
-    fun existsByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID): Boolean
+    fun findAllByGatheringUuid(gatheringUuid: UUID): List<GuestEntity>
 }

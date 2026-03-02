@@ -11,8 +11,6 @@ class GatheringFilter(
     val startDate: LocalDate?,
     val endDate: LocalDate?,
     val location: String?,
-    val startAge: Int?,
-    val endAge: Int?,
     val genderRatioEnabled: Boolean?,
     val minCapacity: Int?,
     val maxCapacity: Int?,

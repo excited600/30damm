@@ -1,5 +1,4 @@
 import { Tabs } from "expo-router";
-import { View, StyleSheet } from "react-native";
 import { colors } from "@/shared/constants/colors";
 import { HomeIcon, ChatIcon, MeIcon } from "@/shared/components/ui/TabIcons";
 

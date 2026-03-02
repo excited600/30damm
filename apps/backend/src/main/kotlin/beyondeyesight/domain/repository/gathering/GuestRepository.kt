@@ -17,4 +17,6 @@ interface GuestRepository {
     fun findByGuestId(guestId: GuestId): GuestEntity?
 
     fun deleteByUserUuidAndGatheringUuid(userUuid: UUID, gatheringUuid: UUID)
+
+    fun findAllByGatheringUuid(gatheringUuid: UUID): List<GuestEntity>
 }

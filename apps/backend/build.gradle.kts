@@ -11,6 +11,10 @@ group = "beyondeyesight"
 version = "0.0.1-SNAPSHOT"
 description = "3040 project"
 
+springBoot {
+    mainClass.set("beyondeyesight.ApplicationKt")
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -36,6 +40,11 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
     implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // JWT
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     // Kotlin JDSL 코어
     implementation("com.linecorp.kotlin-jdsl:jpql-dsl:3.5.2")
@@ -228,7 +237,7 @@ tasks.register<Exec>("bundleOpenApi") {
     workingDir = file("${rootDir}/../../packages/api-spec/openapi")
     commandLine(
         "sh", "-c",
-        "source ~/.nvm/nvm.sh && npx @redocly/cli bundle 3040-api-spec-overview.yml -o 3040-api-spec.yml"
+        "npx @redocly/cli bundle 3040-api-spec-overview.yml -o 3040-api-spec.yml"
     )
 }
 

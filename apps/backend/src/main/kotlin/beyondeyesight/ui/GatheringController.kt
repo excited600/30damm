@@ -2,18 +2,22 @@ package beyondeyesight.ui
 
 import beyondeyesight.api.GatheringsApiService
 import beyondeyesight.application.GatheringApplicationService
+import beyondeyesight.config.currentUserUuid
 import beyondeyesight.config.toDurationHours
-import beyondeyesight.config.toHoursFloat
+import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
-import beyondeyesight.domain.model.ScrollResult
+import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.model.gathering.*
 import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
+import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.model.*
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.PathVariable
+import java.net.URI
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Service
@@ -21,10 +25,181 @@ class GatheringController(
     private val gatheringApplicationService: GatheringApplicationService
 ) : GatheringsApiService {
 
-    fun close(@PathVariable uuid: UUID): ResponseEntity<Unit> {
-        // TODO: 환불 로직
-        gatheringApplicationService.close(uuid)
-        return ResponseEntity.noContent().build()
+    override fun openGathering(openGatheringRequest: OpenGatheringRequest): OpenGatheringResponse {
+        val startDateTime = if (openGatheringRequest.date != null && openGatheringRequest.startTime != null) {
+            val time = LocalTime.parse(openGatheringRequest.startTime, DateTimeFormatter.ofPattern("HH:mm"))
+            openGatheringRequest.date.atTime(time)
+        } else {
+            null
+        }
+
+        val duration = openGatheringRequest.duration?.let { Duration.ofMinutes(it.toLong()) }
+
+        return gatheringApplicationService.open(
+            hostUuid = currentUserUuid(),
+            title = openGatheringRequest.title,
+            description = openGatheringRequest.description,
+            category = Category.valueOf(openGatheringRequest.category.name),
+            location = openGatheringRequest.location,
+            startDateTime = startDateTime,
+            duration = duration,
+            minCapacity = openGatheringRequest.minCapacity,
+            maxCapacity = openGatheringRequest.maxCapacity,
+            genderRatioEnabled = openGatheringRequest.isGenderRatioEnabled,
+            maxMaleCount = openGatheringRequest.maxMaleCapacity,
+            maxFemaleCount = openGatheringRequest.maxFemaleCapacity,
+            isFree = openGatheringRequest.isFree,
+            price = openGatheringRequest.price,
+            isSplit = openGatheringRequest.isSplit,
+            imageUrl = null,
+            mapper = { gatheringEntity ->
+                OpenGatheringResponse(gatheringUuid = gatheringEntity.uuid)
+            }
+        )
+    }
+
+    override fun getGatheringDetail(gatheringId: UUID): GetGatheringDetailResponse {
+        return gatheringApplicationService.getDetail(
+            gatheringUuid = gatheringId,
+            mapper = { detail ->
+                val gathering = detail.gathering
+                val host = detail.host
+                GetGatheringDetailResponse(
+                    gatheringUuid = gathering.uuid,
+                    title = gathering.title,
+                    description = gathering.description ?: gathering.introduction ?: "",
+                    host = toHostResponse(host),
+                    guests = detail.guestsWithUsers.map { guestWithUser ->
+                        GetGatheringDetailResponseGuestsInner(
+                            userUuid = guestWithUser.user.uuid,
+                            nickname = guestWithUser.user.nickname,
+                            gender = requireGender(guestWithUser.user),
+                            profileImageUrl = guestWithUser.user.profileImageUrl?.let { URI(it) },
+                        )
+                    },
+                    category = GatheringCategory.valueOf(gathering.category.name),
+                    minCapacity = gathering.minCapacity,
+                    maxCapacity = gathering.maxCapacity,
+                    isGenderRatioEnabled = gathering.genderRatioEnabled,
+                    maxMaleCapacity = gathering.maxMaleCount,
+                    maxFemaleCapacity = gathering.maxFemaleCount,
+                    currentMaleCount = detail.genderCounts.maleCount,
+                    currentFemaleCount = detail.genderCounts.femaleCount,
+                    date = gathering.startDateTime?.toLocalDate(),
+                    startTime = gathering.startDateTime?.toLocalTime()?.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    duration = gathering.duration?.toMinutes()?.toInt(),
+                    location = gathering.place,
+                    isFree = gathering.isFree(),
+                    isSplit = gathering.isSplit,
+                    price = if (gathering.isFree()) null else gathering.fee,
+                    imgUrl = gathering.imageUrl?.let { URI(it) },
+                )
+            }
+        )
+    }
+
+    override fun scrollFilteredGatherings(
+        size: Int,
+        uuid: UUID?,
+        score: Int?,
+        statuses: List<GatheringStatus>?,
+        categories: List<GatheringCategory>?,
+        guestCount: Int?,
+        dayOfWeek: GatheringDayOfWeek?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        location: String?,
+        startAge: Int?,
+        endAge: Int?,
+        genderRatioEnabled: Boolean?,
+        minCapacity: Int?,
+        maxCapacity: Int?,
+        minFee: Int?,
+        maxFee: Int?
+    ): ScrollFilteredGatheringsResponse {
+        val cursor = if (uuid != null && score != null) {
+            GatheringCursor(uuid = uuid, score = score)
+        } else {
+            null
+        }
+
+        val filter = GatheringFilter(
+            statuses = statuses?.map { requestStatus ->
+                Status.entries.find { it.name == requestStatus.name } ?: throw InvalidValueException(
+                    valueName = "status",
+                    value = requestStatus,
+                    reason = "존재하지 않는 모임 상태."
+                )
+            },
+            categories = categories?.map { requestCategory ->
+                Category.entries.find { it.name == requestCategory.name } ?: throw InvalidValueException(
+                    valueName = "category",
+                    value = requestCategory,
+                    reason = "존재하지 않는 모임 카테고리."
+                )
+            },
+            guestCount = guestCount,
+            dayOfWeek = dayOfWeek?.let { requestDayOfWeek ->
+                java.time.DayOfWeek.entries.find { it.name == requestDayOfWeek.name } ?: throw InvalidValueException(
+                    valueName = "dayOfWeek",
+                    value = requestDayOfWeek,
+                    reason = "존재하지 않는 요일."
+                )
+            },
+            startDate = startDate,
+            endDate = endDate,
+            location = location,
+            genderRatioEnabled = genderRatioEnabled,
+            minCapacity = minCapacity,
+            maxCapacity = maxCapacity,
+            minFee = minFee,
+            maxFee = maxFee
+        )
+
+        return gatheringApplicationService.scroll(
+            cursor = cursor,
+            size = size,
+            filter = filter,
+            mapper = { details ->
+                ScrollFilteredGatheringsResponse(
+                    hasNext = details.scrollResult.hasNext,
+                    list = details.scrollResult.items.map { gathering ->
+                        val host = details.hostUsers[gathering.hostUuid]
+                            ?: throw ResourceNotFoundException.byUuid(
+                                resourceName = UserEntity.RESOURCE_NAME,
+                                resourceUuid = gathering.hostUuid
+                            )
+                        val genderCounts = details.genderCountsMap[gathering.uuid]
+                            ?: throw DataIntegrityException(
+                                tableName = "gatherings",
+                                resourceUuid = gathering.uuid,
+                                cause = "gender counts not found"
+                            )
+                        ScrollFilteredGatheringsResponseListInner(
+                            gatheringUuid = gathering.uuid,
+                            title = gathering.title,
+                            maleCount = genderCounts.maleCount,
+                            femaleCount = genderCounts.femaleCount,
+                            host = toHostResponse(host),
+                            isFree = gathering.isFree(),
+                            isSplit = gathering.isSplit,
+                            imgUrl = gathering.imageUrl?.let { URI(it) },
+                            location = gathering.place,
+                            date = gathering.startDateTime?.toLocalDate(),
+                            startTime = gathering.startDateTime?.toLocalTime()?.format(DateTimeFormatter.ofPattern("HH:mm")),
+                            duration = gathering.duration?.toMinutes()?.toInt(),
+                            price = if (gathering.isFree()) null else gathering.fee,
+                        )
+                    },
+                    cursor = details.scrollResult.cursor?.let {
+                        ScrollFilteredGatheringsResponseCursor(
+                            score = it.score,
+                            uuid = it.uuid
+                        )
+                    }
+                )
+            }
+        )
     }
 
     override fun joinGathering(
@@ -56,91 +231,19 @@ class GatheringController(
         )
     }
 
-    override fun openGathering(openGatheringRequest: OpenGatheringRequest): OpenGatheringResponse {
-        return gatheringApplicationService.open(
-            hostUuid = openGatheringRequest.hostUuid,
-            approveType = GatheringEntity.ApproveType.valueOf(openGatheringRequest.approveType.name),
-            minCapacity = openGatheringRequest.minCapacity,
-            maxCapacity = openGatheringRequest.maxCapacity,
-            genderRatioEnabled = openGatheringRequest.genderRatioEnabled,
-            minAge = openGatheringRequest.minAge,
-            maxAge = openGatheringRequest.maxAge,
-            maxMaleCount = openGatheringRequest.maxMaleCount,
-            maxFemaleCount = openGatheringRequest.maxFemaleCount,
-            fee = openGatheringRequest.fee,
-            discountEnabled = openGatheringRequest.discountEnabled,
-            offline = openGatheringRequest.offline,
-            place = openGatheringRequest.place,
-            category = Category.valueOf(openGatheringRequest.category.name),
-            subCategory = SubCategory.valueOf(openGatheringRequest.subCategory.name),
-            imageUrl = openGatheringRequest.imageUrl,
-            title = openGatheringRequest.title,
-            introduction = openGatheringRequest.introduction,
-            startDateTime = openGatheringRequest.startDateTime,
-            duration = openGatheringRequest.duration.toDurationHours(),
-            mapper = { gatheringEntity: GatheringEntity, hostUuid: UUID ->
-                OpenGatheringResponse(
-                    uuid = gatheringEntity.uuid,
-                    hostUuid = hostUuid,
-                    minCapacity = gatheringEntity.minCapacity,
-                    maxCapacity = gatheringEntity.maxCapacity,
-                    genderRatioEnabled = gatheringEntity.genderRatioEnabled,
-                    minAge = gatheringEntity.minAge,
-                    maxAge = gatheringEntity.maxAge,
-                    fee = gatheringEntity.fee,
-                    discountEnabled = gatheringEntity.discountEnabled,
-                    offline = gatheringEntity.offline,
-                    place = gatheringEntity.place,
-                    category = GatheringCategory.valueOf(
-                        gatheringEntity.category.name
-                    ),
-                    subCategory = GatheringSubCategory.valueOf(
-                        gatheringEntity.subCategory.name
-                    ),
-                    imageUrl = gatheringEntity.imageUrl,
-                    status = GatheringStatus.valueOf(gatheringEntity.status.name),
-                    introduction = gatheringEntity.introduction,
-                    approveType = GatheringApproveType.valueOf(
-                        gatheringEntity.approveType.name
-                    ),
-                    startDateTime = gatheringEntity.startDateTime,
-                    duration = gatheringEntity.duration.toHoursFloat(),
-                    clickCount = gatheringEntity.clickCount,
-                    title = gatheringEntity.title,
-                    totalGuests = gatheringEntity.totalGuests
-                )
-            }
-        )
-    }
-
     override fun scheduleSeries(scheduleSeriesRequest: ScheduleSeriesRequest) {
         gatheringApplicationService.schedule(
-            hostUuid = scheduleSeriesRequest.hostUuid,
-            approveType = GatheringEntity.ApproveType.entries.find { it.name == scheduleSeriesRequest.approveType.name }
-                ?: throw InvalidValueException(
-                    valueName = "approveType",
-                    value = scheduleSeriesRequest.approveType,
-                    reason = null
-                ),
+            hostUuid = currentUserUuid(),
             minCapacity = scheduleSeriesRequest.minCapacity,
             maxCapacity = scheduleSeriesRequest.maxCapacity,
             genderRatioEnabled = scheduleSeriesRequest.genderRatioEnabled,
-            minAge = scheduleSeriesRequest.minAge,
-            maxAge = scheduleSeriesRequest.maxAge,
             fee = scheduleSeriesRequest.fee,
-            discountEnabled = scheduleSeriesRequest.discountEnabled,
-            offline = scheduleSeriesRequest.offline,
+            isSplit = false,
             place = scheduleSeriesRequest.place,
             category = Category.entries.find { it.name == scheduleSeriesRequest.category.name }
                 ?: throw InvalidValueException(
                     valueName = "category",
                     value = scheduleSeriesRequest.category,
-                    reason = null
-                ),
-            subCategory = SubCategory.entries.find { it.name == scheduleSeriesRequest.subCategory.name }
-                ?: throw InvalidValueException(
-                    valueName = "subCategory",
-                    value = scheduleSeriesRequest.subCategory,
                     reason = null
                 ),
             imageUrl = scheduleSeriesRequest.imageUrl,
@@ -187,132 +290,21 @@ class GatheringController(
         )
     }
 
-    override fun scrollFilteredGatherings(
-        size: Int,
-        uuid: UUID?,
-        score: Int?,
-        statuses: List<GatheringStatus>?,
-        categories: List<GatheringCategory>?,
-        guestCount: Int?,
-        dayOfWeek: GatheringDayOfWeek?,
-        startDate: LocalDate?,
-        endDate: LocalDate?,
-        location: String?,
-        startAge: Int?,
-        endAge: Int?,
-        genderRatioEnabled: Boolean?,
-        minCapacity: Int?,
-        maxCapacity: Int?,
-        minFee: Int?,
-        maxFee: Int?
-    ): ScrollFilteredGatheringsResponse {
-        val cursor = if (uuid != null && score != null) {
-            GatheringCursor(
-                uuid = uuid,
-                score = score
-            )
-        } else {
-            null
-        }
-
-        val filter = GatheringFilter(
-            statuses = statuses?.map { requestStatus ->
-                Status.entries.find { it.name == requestStatus.name } ?: throw InvalidValueException(
-                    valueName = "staus",
-                    value = requestStatus,
-                    reason = "존재하지 않는 모임 상태."
-                )
-            },
-            categories = categories?.map { requestCategory ->
-                Category.entries.find { it.name == requestCategory.name } ?: throw InvalidValueException(
-                    valueName = "category",
-                    value = requestCategory,
-                    reason = "존재하지 않는 모임 카테고리."
-                )
-            },
-            guestCount = guestCount,
-            dayOfWeek = dayOfWeek?.let { requestDayOfWeek ->
-                DayOfWeek.entries.find { it.name == requestDayOfWeek.name } ?: throw InvalidValueException(
-                    valueName = "dayOfWeek",
-                    value = requestDayOfWeek,
-                    reason = "존재하지 않는 요일."
-                )
-            },
-            startDate = startDate,
-            endDate = endDate,
-            location = location,
-            startAge = startAge,
-            endAge = endAge,
-            genderRatioEnabled = genderRatioEnabled,
-            minCapacity = minCapacity,
-            maxCapacity = maxCapacity,
-            minFee = minFee,
-            maxFee = maxFee
-        )
-        return gatheringApplicationService.scroll(
-            cursor = cursor,
-            size = size,
-            filter = filter,
-            mapper = { scrollResult: ScrollResult<GatheringEntity, GatheringCursor> ->
-                ScrollFilteredGatheringsResponse(
-                    hasNext = scrollResult.hasNext,
-                    gatherings = scrollResult.items.map { gatheringEntity ->
-                        Gathering(
-                            uuid = gatheringEntity.uuid,
-                            hostUuid = gatheringEntity.hostUuid,
-                            approveType = GatheringApproveType.entries.find { it.name == gatheringEntity.approveType.name }
-                                ?: throw InvalidValueException(
-                                    valueName = "approveType",
-                                    value = gatheringEntity.approveType,
-                                    reason = "존재하지 않는 approveType"
-                                ),
-                            minCapacity = gatheringEntity.minCapacity,
-                            maxCapacity = gatheringEntity.maxCapacity,
-                            genderRatioEnabled = gatheringEntity.genderRatioEnabled,
-                            minAge = gatheringEntity.minAge,
-                            maxAge = gatheringEntity.maxAge,
-                            totalGuests = gatheringEntity.totalGuests,
-                            fee = gatheringEntity.fee,
-                            discountEnabled = gatheringEntity.discountEnabled,
-                            offline = gatheringEntity.offline,
-                            place = gatheringEntity.place,
-                            category = GatheringCategory.entries.find { category -> category.name == gatheringEntity.category.name }
-                                ?: throw InvalidValueException(
-                                    valueName = "category",
-                                    value = gatheringEntity.category,
-                                    reason = "존재하지 않는 카테고리"
-                                ),
-                            subCategory = GatheringSubCategory.entries.find { it.name == gatheringEntity.subCategory.name }
-                                ?: throw InvalidValueException(
-                                    valueName = "subCategory",
-                                    value = gatheringEntity.subCategory,
-                                    reason = "존재하지 않는 서브카테고리"
-                                ),
-                            status = GatheringStatus.entries.find { it.name == gatheringEntity.status.name }
-                                ?: throw InvalidValueException(
-                                    valueName = "status",
-                                    value = gatheringEntity.status,
-                                    reason = "존재하지 않는 status"
-                                ),
-                            imageUrl = gatheringEntity.imageUrl,
-                            title = gatheringEntity.title,
-                            introduction = gatheringEntity.introduction,
-                            clickCount = gatheringEntity.clickCount,
-                            startDateTime = gatheringEntity.startDateTime,
-                            maxMaleCount = gatheringEntity.maxMaleCount,
-                            maxFemaleCount = gatheringEntity.maxFemaleCount,
-                            duration = gatheringEntity.duration.toHoursFloat()
-                        )
-                    },
-                    cursor = scrollResult.cursor?.let {
-                        ScrollFilteredGatheringsResponseCursor(
-                            score = it.score,
-                            uuid = it.uuid
-                        )
-                    }
-                )
-            }
+    private fun toHostResponse(user: UserEntity): ScrollFilteredGatheringsResponseListInnerHost {
+        return ScrollFilteredGatheringsResponseListInnerHost(
+            userUuid = user.uuid,
+            nickname = user.nickname,
+            gender = requireGender(user),
+            profileImageUrl = user.profileImageUrl?.let { URI(it) },
         )
     }
-}
 
+    private fun requireGender(user: UserEntity): Gender {
+        val domainGender = user.gender ?: throw DataIntegrityException(
+            tableName = "users",
+            resourceUuid = user.uuid,
+            cause = "gender must not be null"
+        )
+        return Gender.valueOf(domainGender.name)
+    }
+}

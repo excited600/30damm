@@ -107,12 +107,6 @@ class GatheringRepositoryImpl(
             filter.location?.let {
                 path(GatheringEntity::place).like("%$it%")
             },
-            filter.startAge?.let {
-                path(GatheringEntity::minAge).greaterThanOrEqualTo(it)
-            },
-            filter.endAge?.let {
-                path(GatheringEntity::maxAge).lessThanOrEqualTo(it)
-            },
             filter.genderRatioEnabled?.let {
                 path(GatheringEntity::genderRatioEnabled).eq(it)
             },

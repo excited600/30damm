@@ -17,18 +17,11 @@ class GatheringEntity(
     @Column(nullable = false)
     val hostUuid: UUID,
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val approveType: ApproveType,
-    @Column(nullable = false)
     val minCapacity: Int,
     @Column(nullable = false)
     val maxCapacity: Int,
     @Column(nullable = false)
     val genderRatioEnabled: Boolean,
-    @Column(nullable = false)
-    val minAge: Int,
-    @Column(nullable = false)
-    val maxAge: Int,
     @Column(nullable = true)
     val maxMaleCount: Int?,
     @Column(nullable = true)
@@ -37,37 +30,34 @@ class GatheringEntity(
     val totalGuests: Int,
     @Column(nullable = false)
     val fee: Int,
-    @Column(nullable = false)
-    val discountEnabled: Boolean,
-    @Column(nullable = false)
-    val offline: Boolean,
-    @Column(nullable = false)
-    val place: String,
+    @Column(name = "is_split", nullable = false)
+    val isSplit: Boolean,
+    @Column(nullable = true)
+    val place: String?,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val category: Category,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val subCategory: SubCategory,
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     var status: Status,
-    @Column(nullable = false)
-    val imageUrl: String,
+    @Column(name = "image_url", nullable = true)
+    val imageUrl: String?,
     @Column(nullable = false)
     val title: String,
-    @Column(nullable = false)
-    val introduction: String,
+    @Column(nullable = true)
+    val introduction: String?,
+    @Column(nullable = true)
+    val description: String?,
     @Column(nullable = false)
     var clickCount: Int,
-    @Column(nullable = false)
-    val startDateTime: LocalDateTime,
+    @Column(name = "start_date_time", nullable = true)
+    val startDateTime: LocalDateTime?,
     @Column(columnDefinition = "interval", nullable = true)
     @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     val duration: Duration?,
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Enumerated(EnumType.STRING)
-    val dayOfWeek: DayOfWeek,
+    val dayOfWeek: DayOfWeek?,
     @Column(nullable = false)
     val score: Int,
 ): BaseEntity(uuid = uuid) {
@@ -83,54 +73,46 @@ class GatheringEntity(
     companion object {
         fun open(
             hostUuid: UUID,
-            approveType: ApproveType,
+            title: String,
+            description: String?,
+            category: Category,
+            location: String?,
+            startDateTime: LocalDateTime?,
+            duration: Duration?,
             minCapacity: Int,
             maxCapacity: Int,
             genderRatioEnabled: Boolean,
-            minAge: Int,
-            maxAge: Int,
             maxMaleCount: Int?,
             maxFemaleCount: Int?,
-            fee: Int,
-            discountEnabled: Boolean,
-            offline: Boolean,
-            place: String,
-            category: Category,
-            subCategory: SubCategory,
-            imageUrl: String,
-            title: String,
-            introduction: String,
-            startDateTime: LocalDateTime,
-            score: Int,
-            duration: Duration?,
+            isFree: Boolean,
+            price: Int?,
+            isSplit: Boolean,
+            imageUrl: String?,
         ): GatheringEntity {
+            val fee = if (isFree) 0 else (price ?: 0)
             return GatheringEntity(
                 uuid = uuidV7(),
                 hostUuid = hostUuid,
-                approveType = approveType,
                 minCapacity = minCapacity,
                 maxCapacity = maxCapacity,
                 genderRatioEnabled = genderRatioEnabled,
-                minAge = minAge,
-                maxAge = maxAge,
                 maxMaleCount = maxMaleCount,
                 maxFemaleCount = maxFemaleCount,
                 totalGuests = INITIAL_TOTAL_GUESTS,
                 fee = fee,
-                discountEnabled = discountEnabled,
-                offline = offline,
-                place = place,
+                isSplit = isSplit,
+                place = location,
                 category = category,
-                subCategory = subCategory,
                 status = Status.OPEN,
                 imageUrl = imageUrl,
                 title = title,
-                introduction = introduction,
+                introduction = null,
+                description = description,
                 clickCount = INITIAL_CLICK_COUNT,
                 startDateTime = startDateTime,
                 duration = duration,
-                dayOfWeek = startDateTime.dayOfWeek,
-                score = score
+                dayOfWeek = startDateTime?.dayOfWeek,
+                score = 0,
             )
         }
 
@@ -139,9 +121,4 @@ class GatheringEntity(
         const val RESOURCE_NAME = "gatherings"
     }
 
-    enum class ApproveType {
-        FIRST_IN,
-        APPROVAL;
-
-    }
 }
