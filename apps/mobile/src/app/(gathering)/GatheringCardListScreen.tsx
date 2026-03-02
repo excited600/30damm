@@ -30,7 +30,7 @@ export default function GatheringCardListScreen() {
         <View style={styles.leftBlank} />
         <Pressable
           style={styles.plusButton}
-          onPress={() => router.push("/(gathering)/CreateGathering1")}
+          onPress={() => router.push("/(gathering)/CreateGatheringParticipant")}
         >
           <Ionicons name="add" size={30} color={colors.text.primary} />
         </Pressable>
