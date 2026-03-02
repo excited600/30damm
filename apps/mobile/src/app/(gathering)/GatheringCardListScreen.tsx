@@ -1,8 +1,11 @@
 import { View, StyleSheet, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { GatheringCard } from "@/features/gathering/components/GatheringCard";
+
+const MOCK_IMAGE = "https://picsum.photos/seed/gathering/400/300";
 
 const MOCK_GATHERINGS = Array.from({ length: 9 }, (_, i) => ({
   id: String(i),
@@ -13,10 +16,12 @@ const MOCK_GATHERINGS = Array.from({ length: 9 }, (_, i) => ({
   participants: "7:3",
   hostName: "루트",
   price: "20,000원",
+  thumbnailUri: i % 2 === 0 ? MOCK_IMAGE : undefined,
 }));
 
 export default function GatheringCardListScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View style={[styles.gatheringCardListScreen, { paddingTop: insets.top }]}>
@@ -24,7 +29,7 @@ export default function GatheringCardListScreen() {
       <View style={styles.buttonHeader}>
         <View style={styles.leftBlank} />
         <Pressable style={styles.plusButton}>
-          <Ionicons name="add" size={24} color={colors.text.primary} />
+          <Ionicons name="add" size={30} color={colors.text.primary} />
         </Pressable>
         <View style={styles.menuButton}>
           <Ionicons name="menu" size={28} color={colors.text.primary} />
@@ -46,6 +51,13 @@ export default function GatheringCardListScreen() {
             participants={item.participants}
             hostName={item.hostName}
             price={item.price}
+            thumbnailUri={item.thumbnailUri}
+            onPress={() =>
+              router.push({
+                pathname: "/(gathering)/GatheringDetailScreen",
+                params: item.thumbnailUri ? { imageUrl: item.thumbnailUri } : {},
+              })
+            }
           />
         ))}
       </ScrollView>
