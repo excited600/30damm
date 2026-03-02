@@ -79,7 +79,7 @@ export default function CreateProfileScreen() {
           label="시작하기"
           onPress={() => {
             setToken("mock-token");
-            router.replace("/(tabs)");
+            router.replace("/(gathering)/GatheringCardListScreen");
           }}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
