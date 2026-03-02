@@ -6,7 +6,6 @@ import beyondeyesight.domain.model.gathering.GatheringCursor
 import beyondeyesight.domain.model.gathering.GatheringEntity
 import beyondeyesight.domain.model.gathering.GatheringFilter
 import beyondeyesight.domain.model.gathering.Status
-import beyondeyesight.domain.model.gathering.SubCategory
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.infra.repository.gathering.GatheringRepositoryImpl
 import jakarta.persistence.EntityManager
@@ -36,8 +35,6 @@ class GatheringRepositoryTest {
         category: Category = Category.PARTY,
         startDateTime: LocalDateTime = LocalDateTime.of(2025, 1, 6, 14, 0), // Monday
         place: String = "서울 강남구",
-        minAge: Int = 20,
-        maxAge: Int = 40,
         genderRatioEnabled: Boolean = false,
         minCapacity: Int = 2,
         maxCapacity: Int = 10,
@@ -45,28 +42,29 @@ class GatheringRepositoryTest {
         score: Int = 0
     ): GatheringEntity {
         return gatheringRepository.save(
-            GatheringEntity.open(
+            GatheringEntity(
+                uuid = uuidV7(),
                 hostUuid = uuidV7(),
-                approveType = GatheringEntity.ApproveType.APPROVAL,
                 minCapacity = minCapacity,
                 maxCapacity = maxCapacity,
                 genderRatioEnabled = genderRatioEnabled,
-                minAge = minAge,
-                maxAge = maxAge,
                 maxMaleCount = null,
                 maxFemaleCount = null,
+                totalGuests = GatheringEntity.INITIAL_TOTAL_GUESTS,
                 fee = fee,
-                discountEnabled = false,
-                offline = true,
+                isSplit = false,
                 place = place,
                 category = category,
-                subCategory = SubCategory.HOME_PARTY,
+                status = Status.OPEN,
                 imageUrl = "image",
                 title = "title",
                 introduction = "introduction",
+                description = null,
+                clickCount = GatheringEntity.INITIAL_CLICK_COUNT,
                 startDateTime = startDateTime,
-                score = score,
                 duration = Duration.ofHours(2),
+                dayOfWeek = startDateTime.dayOfWeek,
+                score = score,
             )
         )
     }
@@ -205,8 +203,6 @@ class GatheringRepositoryTest {
             startDate: LocalDate? = null,
             endDate: LocalDate? = null,
             location: String? = null,
-            startAge: Int? = null,
-            endAge: Int? = null,
             genderRatioEnabled: Boolean? = null,
             minCapacity: Int? = null,
             maxCapacity: Int? = null,
@@ -220,8 +216,6 @@ class GatheringRepositoryTest {
             startDate = startDate,
             endDate = endDate,
             location = location,
-            startAge = startAge,
-            endAge = endAge,
             genderRatioEnabled = genderRatioEnabled,
             minCapacity = minCapacity,
             maxCapacity = maxCapacity,
@@ -255,7 +249,7 @@ class GatheringRepositoryTest {
                 gatheringSetup = { test ->
                     listOf(
                         test.createGathering(category = Category.PARTY, score = 100),
-                        test.createGathering(category = Category.STUDY, score = 90),
+                        test.createGathering(category = Category.FOOD_DRINK, score = 90),
                         test.createGathering(category = Category.PARTY, score = 80)
                     )
                 },
@@ -275,16 +269,16 @@ class GatheringRepositoryTest {
                 gatheringSetup = { test ->
                     listOf(
                         test.createGathering(category = Category.PARTY, score = 100),
-                        test.createGathering(category = Category.STUDY, score = 90),
-                        test.createGathering(category = Category.LANGUAGE, score = 80),
-                        test.createGathering(category = Category.FOOD_DRINK, score = 70)
+                        test.createGathering(category = Category.FOOD_DRINK, score = 90),
+                        test.createGathering(category = Category.ACTIVITY, score = 80),
+                        test.createGathering(category = Category.NONE, score = 70)
                     )
                 },
-                filter = filter(categories = listOf(Category.PARTY, Category.STUDY)),
+                filter = filter(categories = listOf(Category.PARTY, Category.FOOD_DRINK)),
                 cursor = null,
                 size = 10,
                 expectedUuids = { gatherings ->
-                    gatherings.filter { it.category in listOf(Category.PARTY, Category.STUDY) }
+                    gatherings.filter { it.category in listOf(Category.PARTY, Category.FOOD_DRINK) }
                         .sortedByDescending { it.score }
                         .map { it.uuid }
                 },
@@ -352,7 +346,7 @@ class GatheringRepositoryTest {
                 size = 10,
                 expectedUuids = { gatherings ->
                     gatherings.filter {
-                        val date = it.startDateTime.toLocalDate()
+                        val date = it.startDateTime!!.toLocalDate()
                         date >= LocalDate.of(2025, 1, 8) && date <= LocalDate.of(2025, 1, 16)
                     }.sortedByDescending { it.score }.map { it.uuid }
                 },
@@ -373,69 +367,7 @@ class GatheringRepositoryTest {
                 cursor = null,
                 size = 10,
                 expectedUuids = { gatherings ->
-                    gatherings.filter { it.place.contains("서울") }
-                        .sortedByDescending { it.score }
-                        .map { it.uuid }
-                },
-                expectedHasNext = false
-            ),
-
-            // age 필터
-            ScrollFilterCase(
-                name = "Filter by startAge",
-                gatheringSetup = { test ->
-                    listOf(
-                        test.createGathering(minAge = 20, maxAge = 40, score = 100),
-                        test.createGathering(minAge = 30, maxAge = 50, score = 90),
-                        test.createGathering(minAge = 25, maxAge = 45, score = 80)
-                    )
-                },
-                filter = filter(startAge = 25),
-                cursor = null,
-                size = 10,
-                expectedUuids = { gatherings ->
-                    gatherings.filter { it.minAge >= 25 }
-                        .sortedByDescending { it.score }
-                        .map { it.uuid }
-                },
-                expectedHasNext = false
-            ),
-
-            ScrollFilterCase(
-                name = "Filter by endAge",
-                gatheringSetup = { test ->
-                    listOf(
-                        test.createGathering(minAge = 20, maxAge = 40, score = 100),
-                        test.createGathering(minAge = 30, maxAge = 50, score = 90),
-                        test.createGathering(minAge = 25, maxAge = 35, score = 80)
-                    )
-                },
-                filter = filter(endAge = 40),
-                cursor = null,
-                size = 10,
-                expectedUuids = { gatherings ->
-                    gatherings.filter { it.maxAge <= 40 }
-                        .sortedByDescending { it.score }
-                        .map { it.uuid }
-                },
-                expectedHasNext = false
-            ),
-
-            ScrollFilterCase(
-                name = "Filter by age range (startAge and endAge)",
-                gatheringSetup = { test ->
-                    listOf(
-                        test.createGathering(minAge = 20, maxAge = 40, score = 100),
-                        test.createGathering(minAge = 30, maxAge = 50, score = 90),
-                        test.createGathering(minAge = 25, maxAge = 35, score = 80),
-                        test.createGathering(minAge = 18, maxAge = 60, score = 70)
-                    )
-                },
-                filter = filter(startAge = 25, endAge = 40),
-                cursor = null,
-                size = 10,
-                expectedUuids = { gatherings ->
-                    gatherings.filter { it.minAge >= 25 && it.maxAge <= 40 }
+                    gatherings.filter { it.place?.contains("서울") == true }
                         .sortedByDescending { it.score }
                         .map { it.uuid }
                 },
@@ -602,7 +534,7 @@ class GatheringRepositoryTest {
                             score = 90
                         ),
                         test.createGathering(
-                            category = Category.STUDY,
+                            category = Category.FOOD_DRINK,
                             startDateTime = LocalDateTime.of(2025, 1, 6, 14, 0), // Monday
                             score = 80
                         ),
@@ -645,7 +577,7 @@ class GatheringRepositoryTest {
                             score = 90
                         ),
                         test.createGathering(
-                            category = Category.STUDY,
+                            category = Category.FOOD_DRINK,
                             place = "서울 강남구",
                             fee = 10000,
                             score = 80
@@ -675,71 +607,52 @@ class GatheringRepositoryTest {
                 expectedUuids = { gatherings ->
                     gatherings.filter {
                         it.category == Category.PARTY &&
-                                it.place.contains("서울") &&
+                                it.place?.contains("서울") == true &&
                                 it.fee in 10000..15000
                     }.sortedByDescending { it.score }.map { it.uuid }
                 },
                 expectedHasNext = false
             ),
 
-            // 복합 필터: date range + age range + genderRatioEnabled
+            // 복합 필터: date range + genderRatioEnabled
             ScrollFilterCase(
-                name = "Filter by date range, age range and genderRatioEnabled",
+                name = "Filter by date range and genderRatioEnabled",
                 gatheringSetup = { test ->
                     listOf(
                         test.createGathering(
                             startDateTime = LocalDateTime.of(2025, 1, 10, 14, 0),
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = true,
                             score = 100
                         ),
                         test.createGathering(
                             startDateTime = LocalDateTime.of(2025, 1, 15, 14, 0),
-                            minAge = 30,
-                            maxAge = 40,
                             genderRatioEnabled = true,
                             score = 90
                         ),
                         test.createGathering(
                             startDateTime = LocalDateTime.of(2025, 1, 10, 14, 0),
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = false,
                             score = 80
                         ),
                         test.createGathering(
                             startDateTime = LocalDateTime.of(2025, 1, 5, 14, 0),
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = true,
                             score = 70
-                        ),
-                        test.createGathering(
-                            startDateTime = LocalDateTime.of(2025, 1, 12, 14, 0),
-                            minAge = 20,
-                            maxAge = 50,
-                            genderRatioEnabled = true,
-                            score = 60
                         )
                     )
                 },
                 filter = filter(
                     startDate = LocalDate.of(2025, 1, 8),
                     endDate = LocalDate.of(2025, 1, 20),
-                    startAge = 25,
-                    endAge = 40,
                     genderRatioEnabled = true
                 ),
                 cursor = null,
                 size = 10,
                 expectedUuids = { gatherings ->
                     gatherings.filter {
-                        val date = it.startDateTime.toLocalDate()
+                        val date = it.startDateTime!!.toLocalDate()
                         date >= LocalDate.of(2025, 1, 8) &&
                                 date <= LocalDate.of(2025, 1, 20) &&
-                                it.minAge >= 25 &&
-                                it.maxAge <= 40 &&
                                 it.genderRatioEnabled
                     }.sortedByDescending { it.score }.map { it.uuid }
                 },
@@ -753,7 +666,7 @@ class GatheringRepositoryTest {
                     listOf(
                         test.createGathering(category = Category.PARTY, score = 100),
                         test.createGathering(category = Category.PARTY, score = 90),
-                        test.createGathering(category = Category.STUDY, score = 85),
+                        test.createGathering(category = Category.FOOD_DRINK, score = 85),
                         test.createGathering(category = Category.PARTY, score = 80),
                         test.createGathering(category = Category.PARTY, score = 70)
                     )
@@ -776,10 +689,10 @@ class GatheringRepositoryTest {
                 gatheringSetup = { test ->
                     listOf(
                         test.createGathering(category = Category.PARTY, score = 100),
-                        test.createGathering(category = Category.STUDY, score = 90)
+                        test.createGathering(category = Category.FOOD_DRINK, score = 90)
                     )
                 },
-                filter = filter(categories = listOf(Category.LANGUAGE)),
+                filter = filter(categories = listOf(Category.ACTIVITY)),
                 cursor = null,
                 size = 10,
                 expectedUuids = { emptyList() },
@@ -796,8 +709,6 @@ class GatheringRepositoryTest {
                             category = Category.PARTY,
                             startDateTime = LocalDateTime.of(2025, 1, 6, 14, 0), // Monday
                             place = "서울 강남구",
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = true,
                             minCapacity = 5,
                             maxCapacity = 15,
@@ -806,11 +717,9 @@ class GatheringRepositoryTest {
                         ),
                         // category 불일치
                         test.createGathering(
-                            category = Category.STUDY,
+                            category = Category.FOOD_DRINK,
                             startDateTime = LocalDateTime.of(2025, 1, 6, 14, 0),
                             place = "서울 강남구",
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = true,
                             minCapacity = 5,
                             maxCapacity = 15,
@@ -822,8 +731,6 @@ class GatheringRepositoryTest {
                             category = Category.PARTY,
                             startDateTime = LocalDateTime.of(2025, 1, 7, 14, 0), // Tuesday
                             place = "서울 강남구",
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = true,
                             minCapacity = 5,
                             maxCapacity = 15,
@@ -835,8 +742,6 @@ class GatheringRepositoryTest {
                             category = Category.PARTY,
                             startDateTime = LocalDateTime.of(2025, 1, 6, 14, 0),
                             place = "부산 해운대구",
-                            minAge = 25,
-                            maxAge = 35,
                             genderRatioEnabled = true,
                             minCapacity = 5,
                             maxCapacity = 15,
@@ -848,8 +753,6 @@ class GatheringRepositoryTest {
                             category = Category.PARTY,
                             startDateTime = LocalDateTime.of(2025, 1, 13, 14, 0), // Monday
                             place = "서울 서초구",
-                            minAge = 28,
-                            maxAge = 32,
                             genderRatioEnabled = true,
                             minCapacity = 6,
                             maxCapacity = 12,
@@ -866,8 +769,6 @@ class GatheringRepositoryTest {
                     startDate = LocalDate.of(2025, 1, 1),
                     endDate = LocalDate.of(2025, 1, 31),
                     location = "서울",
-                    startAge = 25,
-                    endAge = 35,
                     genderRatioEnabled = true,
                     minCapacity = 5,
                     maxCapacity = 15,
@@ -878,14 +779,12 @@ class GatheringRepositoryTest {
                 size = 10,
                 expectedUuids = { gatherings ->
                     gatherings.filter {
-                        val date = it.startDateTime.toLocalDate()
+                        val date = it.startDateTime!!.toLocalDate()
                         it.category == Category.PARTY &&
                                 it.dayOfWeek == DayOfWeek.MONDAY &&
                                 date >= LocalDate.of(2025, 1, 1) &&
                                 date <= LocalDate.of(2025, 1, 31) &&
-                                it.place.contains("서울") &&
-                                it.minAge >= 25 &&
-                                it.maxAge <= 35 &&
+                                it.place?.contains("서울") == true &&
                                 it.genderRatioEnabled &&
                                 it.minCapacity >= 5 &&
                                 it.maxCapacity <= 15 &&

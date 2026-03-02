@@ -21,6 +21,11 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+jwt:
+  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi0zMDQw
+  access-token-expiry: 3600000
+  refresh-token-expiry: 604800000
+
 portone:
   api-secret: Na5vnSd3bSdBtded0DGBWxQbVD8u6oSMHzvvhr7ohSTNm8PyLvSFn4qQlYA2Fq9cVRnBgrf4N6JHGcs7
   store-id: store-c47dce95-6209-4f04-87f1-78914a40214a

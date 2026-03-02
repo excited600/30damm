@@ -1,6 +1,6 @@
 package beyondeyesight.e2e
 
-import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.model.ConfirmPaymentRequest
 import beyondeyesight.model.GatheringApproveType
 import beyondeyesight.model.GatheringCategory
 import beyondeyesight.model.GatheringDayOfWeek
@@ -9,42 +9,22 @@ import beyondeyesight.model.GatheringSubCategory
 import beyondeyesight.model.GatheringWeeklyScheduleSummary
 import beyondeyesight.model.JoinGatheringRequest
 import beyondeyesight.model.OpenGatheringRequest
+import beyondeyesight.model.OpenGatheringResponse
 import beyondeyesight.model.PreparePaymentRequest
 import beyondeyesight.model.PreparePaymentResponse
 import beyondeyesight.model.ProductType
-import beyondeyesight.model.ConfirmPaymentRequest
-import beyondeyesight.model.OpenGatheringResponse
 import beyondeyesight.model.WeeklyScheduleSeriesRequest
-import beyondeyesight.ui.UserController
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.UUID
 import kotlin.test.Test
 
 class GatheringControllerTest : EndToEndTestBase() {
 
     @Test
     fun `Schedule Series`() {
-        val signUpRequest = UserController.SignUpRequest(
-            email = "email",
-            nickname = "nickname",
-            age = 25,
-            gender = Gender.M,
-            introduction = "intro",
-            password = "password",
-            phoneNumber = "01012345671",
-            phoneAuthenticated = true
-        )
-
-        val host = webTestClient.post()
-            .uri("/users/")
-            .bodyValue(signUpRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful
-            .expectBody(UserController.SignUpResponse::class.java)
-            .returnResult()
-            .responseBody!!
+        val host = signUp(email = "host@email.com", nickname = "hostname", password = "password1234")
 
         val anyString = "string"
         val minFee = 1_000
@@ -61,7 +41,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             ),
             scheduleType = GatheringScheduleType.WEEKLY,
             gatheringDays = 7,
-            hostUuid = host.uuid,
+            hostUuid = host.userUuid,
             approveType = GatheringApproveType.FIRST_IN,
             minCapacity = 1,
             maxCapacity = 10,
@@ -82,7 +62,8 @@ class GatheringControllerTest : EndToEndTestBase() {
         )
 
         webTestClient.post()
-            .uri("/series")
+            .uri("/api/v1/series")
+            .header("Authorization", "Bearer ${host.accessToken}")
             .bodyValue(request)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -98,59 +79,32 @@ class GatheringControllerTest : EndToEndTestBase() {
 
         assertThat(seriesCount).isEqualTo(1L)
         assertThat(seriesScheduleCount).isEqualTo(1L)
-
     }
 
     @Test
     fun `Open Gathering`() {
-        val signUpRequest = UserController.SignUpRequest(
-            email = "email",
-            nickname = "nickname",
-            age = 25,
-            gender = Gender.M,
-            introduction = "intro",
-            password = "password",
-            phoneNumber = "01012345671",
-            phoneAuthenticated = true
-        )
+        val host = signUp(email = "host@email.com", nickname = "hostname", password = "password1234")
 
-        val host = webTestClient.post()
-            .uri("/users/")
-            .bodyValue(signUpRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful
-            .expectBody(UserController.SignUpResponse::class.java)
-            .returnResult()
-            .responseBody!!
-
-        val anyInt = 1
         val anyString = "string"
-        val minFee = 1_000
         val request = OpenGatheringRequest(
-            hostUuid = host.uuid,
-            approveType = GatheringApproveType.FIRST_IN,
-            minCapacity = anyInt,
-            maxCapacity = anyInt + 1,
-            genderRatioEnabled = false,
-            minAge = anyInt,
-            maxAge = anyInt + 1,
-            fee = minFee,
-            discountEnabled = false,
-            offline = true,
-            place = anyString,
-            category = GatheringCategory.ACTIVITY,
-            subCategory = GatheringSubCategory.HOME_PARTY,
-            imageUrl = anyString,
             title = anyString,
-            introduction = anyString,
-            startDateTime = LocalDateTime.now().plusDays(7),
-            maxMaleCount = null,
-            maxFemaleCount = null,
-            duration = 2.5f
+            description = anyString,
+            category = GatheringCategory.ACTIVITY,
+            minCapacity = 2,
+            maxCapacity = 10,
+            isGenderRatioEnabled = false,
+            isFree = false,
+            isSplit = false,
+            location = anyString,
+            date = LocalDate.now().plusDays(7),
+            startTime = "19:00",
+            duration = 120,
+            price = 1000,
         )
 
         webTestClient.post()
-            .uri("/gatherings")
+            .uri("/api/v1/gatherings")
+            .header("Authorization", "Bearer ${host.accessToken}")
             .bodyValue(request)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -162,82 +116,33 @@ class GatheringControllerTest : EndToEndTestBase() {
         )
 
         assertThat(count).isEqualTo(1L)
-
     }
 
     @Test
     fun `무료 모임 참여`() {
-        //given
-        // 호스트 생성
-        val hostSignUpRequest = UserController.SignUpRequest(
-            email = "host@email.com",
-            nickname = "host",
-            age = 30,
-            gender = Gender.M,
-            introduction = "host intro",
-            password = "password",
-            phoneNumber = "01012345671",
-            phoneAuthenticated = true
-        )
+        // given
+        val host = signUp(email = "host@email.com", nickname = "hostname", password = "password1234")
+        val guest = signUp(email = "guest@email.com", nickname = "guestnick", password = "password1234")
 
-        val host = webTestClient.post()
-            .uri("/users/")
-            .bodyValue(hostSignUpRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful
-            .expectBody(UserController.SignUpResponse::class.java)
-            .returnResult()
-            .responseBody!!
-
-        // 게스트 생성
-        val guestSignUpRequest = UserController.SignUpRequest(
-            email = "guest@email.com",
-            nickname = "guest",
-            age = 25,
-            gender = Gender.F,
-            introduction = "guest intro",
-            password = "password",
-            phoneNumber = "01012345672",
-            phoneAuthenticated = true
-        )
-
-        val guest = webTestClient.post()
-            .uri("/users/")
-            .bodyValue(guestSignUpRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful
-            .expectBody(UserController.SignUpResponse::class.java)
-            .returnResult()
-            .responseBody!!
-
-        // Gathering 생성
         val anyString = "string"
-        val fee = 0
         val openGatheringRequest = OpenGatheringRequest(
-            hostUuid = host.uuid,
-            approveType = GatheringApproveType.FIRST_IN,
-            minCapacity = 1,
-            maxCapacity = 10,
-            genderRatioEnabled = false,
-            minAge = 20,
-            maxAge = 40,
-            fee = fee,
-            discountEnabled = false,
-            offline = true,
-            place = anyString,
-            category = GatheringCategory.ACTIVITY,
-            subCategory = GatheringSubCategory.HOME_PARTY,
-            imageUrl = anyString,
             title = anyString,
-            introduction = anyString,
-            startDateTime = LocalDateTime.now().plusDays(7),
-            maxMaleCount = null,
-            maxFemaleCount = null,
-            duration = 2.5f
+            description = anyString,
+            category = GatheringCategory.ACTIVITY,
+            minCapacity = 2,
+            maxCapacity = 10,
+            isGenderRatioEnabled = false,
+            isFree = true,
+            isSplit = false,
+            location = anyString,
+            date = LocalDate.now().plusDays(7),
+            startTime = "19:00",
+            duration = 120,
         )
 
         val gathering = webTestClient.post()
-            .uri("/gatherings")
+            .uri("/api/v1/gatherings")
+            .header("Authorization", "Bearer ${host.accessToken}")
             .bodyValue(openGatheringRequest)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -246,10 +151,11 @@ class GatheringControllerTest : EndToEndTestBase() {
             .responseBody!!
 
         // when
-        val joinRequest = JoinGatheringRequest(userUuid = guest.uuid)
+        val joinRequest = JoinGatheringRequest(userUuid = guest.userUuid)
 
         webTestClient.post()
-            .uri("/gatherings/${gathering.uuid}/join")
+            .uri("/api/v1/gatherings/${gathering.gatheringUuid}/join")
+            .header("Authorization", "Bearer ${guest.accessToken}")
             .bodyValue(joinRequest)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -258,7 +164,7 @@ class GatheringControllerTest : EndToEndTestBase() {
         val guestCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM guests WHERE gathering_uuid = ?",
             Long::class.java,
-            gathering.uuid
+            gathering.gatheringUuid
         )
 
         assertThat(guestCount).isEqualTo(1L)
@@ -267,76 +173,30 @@ class GatheringControllerTest : EndToEndTestBase() {
     @Test
     fun `유료 모임 참여`() {
         // given
-        // 호스트 생성
-        val hostSignUpRequest = UserController.SignUpRequest(
-            email = "host@email.com",
-            nickname = "host",
-            age = 30,
-            gender = Gender.M,
-            introduction = "host intro",
-            password = "password",
-            phoneNumber = "01012345671",
-            phoneAuthenticated = true
-        )
+        val host = signUp(email = "host@email.com", nickname = "hostname", password = "password1234")
+        val guest = signUp(email = "guest@email.com", nickname = "guestnick", password = "password1234")
 
-        val host = webTestClient.post()
-            .uri("/users/")
-            .bodyValue(hostSignUpRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful
-            .expectBody(UserController.SignUpResponse::class.java)
-            .returnResult()
-            .responseBody!!
-
-        // 게스트 생성
-        val guestSignUpRequest = UserController.SignUpRequest(
-            email = "guest@email.com",
-            nickname = "guest",
-            age = 25,
-            gender = Gender.F,
-            introduction = "guest intro",
-            password = "password",
-            phoneNumber = "01012345672",
-            phoneAuthenticated = true
-        )
-
-        val guest = webTestClient.post()
-            .uri("/users/")
-            .bodyValue(guestSignUpRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful
-            .expectBody(UserController.SignUpResponse::class.java)
-            .returnResult()
-            .responseBody!!
-
-        // 유료 Gathering 열기
         val anyString = "string"
         val fee = 10000
         val openGatheringRequest = OpenGatheringRequest(
-            hostUuid = host.uuid,
-            approveType = GatheringApproveType.FIRST_IN,
-            minCapacity = 1,
-            maxCapacity = 10,
-            genderRatioEnabled = false,
-            minAge = 20,
-            maxAge = 40,
-            fee = fee,
-            discountEnabled = false,
-            offline = true,
-            place = anyString,
-            category = GatheringCategory.ACTIVITY,
-            subCategory = GatheringSubCategory.HOME_PARTY,
-            imageUrl = anyString,
             title = anyString,
-            introduction = anyString,
-            startDateTime = LocalDateTime.now().plusDays(7),
-            maxMaleCount = null,
-            maxFemaleCount = null,
-            duration = 2.5f
+            description = anyString,
+            category = GatheringCategory.ACTIVITY,
+            minCapacity = 2,
+            maxCapacity = 10,
+            isGenderRatioEnabled = false,
+            isFree = false,
+            isSplit = false,
+            location = anyString,
+            date = LocalDate.now().plusDays(7),
+            startTime = "19:00",
+            duration = 120,
+            price = fee,
         )
 
         val gathering = webTestClient.post()
-            .uri("/gatherings")
+            .uri("/api/v1/gatherings")
+            .header("Authorization", "Bearer ${host.accessToken}")
             .bodyValue(openGatheringRequest)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -348,17 +208,18 @@ class GatheringControllerTest : EndToEndTestBase() {
         val paymentId = "test-payment-${System.currentTimeMillis()}"
         val preparePaymentRequest = PreparePaymentRequest(
             productType = ProductType.GATHERING,
-            productUuid = gathering.uuid,
+            productUuid = gathering.gatheringUuid,
             amount = fee,
             productName = "테스트 모임",
-            buyerUuid = guest.uuid,
+            buyerUuid = guest.userUuid,
             buyerEmail = "guest@email.com",
-            buyerName = "guest",
+            buyerName = "guestnick",
             buyerPhone = "01012345672"
         )
 
         webTestClient.post()
-            .uri("/payments/{paymentId}/prepare", paymentId)
+            .uri("/api/v1/payments/{paymentId}/prepare", paymentId)
+            .header("Authorization", "Bearer ${guest.accessToken}")
             .bodyValue(preparePaymentRequest)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -366,7 +227,7 @@ class GatheringControllerTest : EndToEndTestBase() {
 
         // when
         val joinRequest = JoinGatheringRequest(
-            userUuid = guest.uuid,
+            userUuid = guest.userUuid,
             confirmPaymentRequest = ConfirmPaymentRequest(
                 paymentId = paymentId,
                 paymentToken = "test-token",
@@ -376,7 +237,8 @@ class GatheringControllerTest : EndToEndTestBase() {
         )
 
         webTestClient.post()
-            .uri("/gatherings/${gathering.uuid}/join")
+            .uri("/api/v1/gatherings/${gathering.gatheringUuid}/join")
+            .header("Authorization", "Bearer ${guest.accessToken}")
             .bodyValue(joinRequest)
             .exchange()
             .expectStatus().is2xxSuccessful
@@ -385,7 +247,7 @@ class GatheringControllerTest : EndToEndTestBase() {
         val guestCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM guests WHERE gathering_uuid = ?",
             Long::class.java,
-            gathering.uuid
+            gathering.gatheringUuid
         )
         assertThat(guestCount).isEqualTo(1L)
 

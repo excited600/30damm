@@ -1,6 +1,8 @@
 package beyondeyesight.e2e
 
 import beyondeyesight.TestConfig
+import beyondeyesight.model.SignupRequest
+import beyondeyesight.model.SignupResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -47,6 +49,17 @@ abstract class EndToEndTestBase {
     @AfterEach
     fun cleanUp() {
         cleanDatabase()
+    }
+
+    protected fun signUp(email: String, nickname: String, password: String): SignupResponse {
+        return webTestClient.post()
+            .uri("/api/v1/users/signup")
+            .bodyValue(SignupRequest(email = email, password = password, nickname = nickname))
+            .exchange()
+            .expectStatus().is2xxSuccessful
+            .expectBody(SignupResponse::class.java)
+            .returnResult()
+            .responseBody!!
     }
 
     private fun cleanDatabase() {
