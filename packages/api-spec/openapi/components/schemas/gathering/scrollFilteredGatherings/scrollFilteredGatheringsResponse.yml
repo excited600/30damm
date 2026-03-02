@@ -2,7 +2,7 @@ ScrollFilteredGatheringsResponse:
   type: object
   required:
     - hasNext
-    - gatherings
+    - list
   properties:
     cursor:
       type: object
@@ -14,7 +14,83 @@ ScrollFilteredGatheringsResponse:
           format: uuid
     hasNext:
       type: boolean
-    gatherings:
+    list:
       type: array
       items:
-        $ref: '../gathering.yml#/Gathering'
+        type: object
+        required:
+          - gatheringUuid
+          - title
+          - maleCount
+          - femaleCount
+          - host
+          - isFree
+          - isSplit
+        properties:
+          gatheringUuid:
+            type: string
+            format: uuid
+            description: 모임 UUID (UUIDv7)
+          imgUrl:
+            type: string
+            format: uri
+            nullable: true
+            description: 대표 이미지 URL
+          title:
+            type: string
+            description: 모임 제목
+          location:
+            type: string
+            nullable: true
+            description: 장소
+          date:
+            type: string
+            format: date
+            nullable: true
+            description: 날짜 (YYYY-MM-DD)
+          startTime:
+            type: string
+            nullable: true
+            description: 시작 시간 (HH:mm, 24시간제)
+            example: "19:00"
+          duration:
+            type: integer
+            nullable: true
+            description: 소요 시간 (시간 단위)
+          maleCount:
+            type: integer
+            description: 현재 남성 참여 수
+          femaleCount:
+            type: integer
+            description: 현재 여성 참여 수
+          host:
+            type: object
+            required:
+              - userUuid
+              - nickname
+              - gender
+            properties:
+              userUuid:
+                type: string
+                format: uuid
+                description: 호스트 UUID
+              nickname:
+                type: string
+                description: 호스트 닉네임
+              profileImageUrl:
+                type: string
+                format: uri
+                nullable: true
+                description: 호스트 프로필 이미지 URL
+              gender:
+                $ref: '../../shared.yml#/Gender'
+          isFree:
+            type: boolean
+            description: 무료 여부
+          isSplit:
+            type: boolean
+            description: 더치페이 여부
+          price:
+            type: integer
+            nullable: true
+            description: 가격 (원 단위)

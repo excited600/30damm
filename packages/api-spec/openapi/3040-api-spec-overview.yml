@@ -19,24 +19,49 @@ tags:
     description: 사용자
 
 paths:
+  # Users
+  /api/v1/users/signup:
+    $ref: './paths/users.yml#/~1users~1signup'
+  /api/v1/users/login:
+    $ref: './paths/users.yml#/~1users~1login'
+
   # Gatherings
-  /gatherings:
+  /api/v1/gatherings:
     $ref: './paths/gatherings.yml#/~1gatherings'
-  /series:
+  /api/v1/gatherings/{gatheringId}:
+    $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringId}'
+  /api/v1/series:
     $ref: './paths/gatherings.yml#/~1series'
-  /gatherings/{gatheringUuid}/join:
+  /api/v1/gatherings/{gatheringUuid}/join:
     $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1join'
-  /gatherings/{gatheringUuid}/leave:
+  /api/v1/gatherings/{gatheringUuid}/leave:
     $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1leave'
 
   # Payments
-  /payments/{paymentId}/prepare:
+  /api/v1/payments/{paymentId}/prepare:
     $ref: './paths/payments.yml#/~1payments~1{paymentId}~1prepare'
-  /payments/webhook:
+  /api/v1/payments/webhook:
     $ref: './paths/payments.yml#/~1payments~1webhook'
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer 토큰 인증
+
   schemas:
+    # Users
+    SignupRequest:
+      $ref: './components/schemas/user/signupRequest.yml#/SignupRequest'
+    SignupResponse:
+      $ref: './components/schemas/user/signupResponse.yml#/SignupResponse'
+    LoginRequest:
+      $ref: './components/schemas/user/loginRequest.yml#/LoginRequest'
+    LoginResponse:
+      $ref: './components/schemas/user/loginResponse.yml#/LoginResponse'
+
     # Gatherings
     OpenGatheringRequest:
       $ref: './components/schemas/gathering/openGathering/openGatheringRequest.yml#/OpenGatheringRequest'
@@ -52,6 +77,8 @@ components:
       $ref: './components/schemas/gathering/gathering.yml#/Gathering'
     ScrollFilteredGatheringsResponse:
       $ref: './components/schemas/gathering/scrollFilteredGatherings/scrollFilteredGatheringsResponse.yml#/ScrollFilteredGatheringsResponse'
+    GetGatheringDetailResponse:
+      $ref: './components/schemas/gathering/getGatheringDetail/getGatheringDetailResponse.yml#/GetGatheringDetailResponse'
     JoinGatheringRequest:
       $ref: './components/schemas/gathering/joinGathering/joinGatheringRequest.yml#/JoinGatheringRequest'
 
@@ -62,9 +89,3 @@ components:
       $ref: './components/schemas/payment/preparePayment/preparePaymentResponse.yml#/PreparePaymentResponse'
     PaymentWebhook:
       $ref: './components/schemas/payment/webhook/paymentWebhook.yml#/PaymentWebhook'
-
-#    # Users
-#    SignUpRequest:
-#      $ref: './components/schemas/users.yml#/SignUpRequest'
-#    SignUpResponse:
-#      $ref: './components/schemas/users.yml#/SignUpResponse'

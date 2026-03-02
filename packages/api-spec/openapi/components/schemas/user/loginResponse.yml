@@ -1,0 +1,17 @@
+LoginResponse:
+  type: object
+  required:
+    - userUuid
+    - accessToken
+    - refreshToken
+  properties:
+    userUuid:
+      type: string
+      format: uuid
+      description: 사용자 UUID (UUIDv7)
+    accessToken:
+      type: string
+      description: JWT 액세스 토큰
+    refreshToken:
+      type: string
+      description: JWT 리프레시 토큰

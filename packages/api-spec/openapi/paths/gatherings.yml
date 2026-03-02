@@ -1,9 +1,41 @@
+/gatherings/{gatheringId}:
+  get:
+    operationId: getGatheringDetail
+    tags:
+      - Gatherings
+    summary: 모임 상세 조회
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: gatheringId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 모임 ID (UUIDv7)
+    responses:
+      '200':
+        description: 모임 상세 조회 성공
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/gathering/getGatheringDetail/getGatheringDetailResponse.yml#/GetGatheringDetailResponse'
+      '400':
+        description: 유효성 검사 실패
+      '401':
+        description: 미인증
+      '404':
+        description: 모임을 찾을 수 없음
+
 /gatherings/{gatheringUuid}/join:
   post:
     operationId: joinGathering
     tags:
       - Gatherings
     summary: Join the gathering as a guest
+    security:
+      - BearerAuth: []
     parameters:
       - name: gatheringUuid
         in: path
@@ -21,14 +53,17 @@
     responses:
       '201':
         description: Joined gathering successfully
-
+      '401':
+        description: 미인증
 
 /gatherings:
   get:
     operationId: scrollFilteredGatherings
     tags:
       - Gatherings
-    summary: Scroll filtered gatherings with cursor-based pagination
+    summary: 모임 목록 조회 (커서 기반 페이지네이션)
+    security:
+      - BearerAuth: []
     parameters:
       - name: uuid
         in: query
@@ -143,16 +178,22 @@
         description: Filter gatherings by maximum fee
     responses:
       '200':
-        description: Gatherings retrieved successfully
+        description: 모임 목록 조회 성공
         content:
           application/json:
             schema:
               $ref: '../components/schemas/gathering/scrollFilteredGatherings/scrollFilteredGatheringsResponse.yml#/ScrollFilteredGatheringsResponse'
+      '400':
+        description: 유효성 검사 실패
+      '401':
+        description: 미인증
   post:
     operationId: openGathering
     tags:
       - Gatherings
-    summary: Open a new gathering
+    summary: 모임 생성
+    security:
+      - BearerAuth: []
     requestBody:
       required: true
       content:
@@ -161,11 +202,15 @@
             $ref: '../3040-api-spec-overview.yml#/components/schemas/OpenGatheringRequest'
     responses:
       '201':
-        description: Gathering open successfully
+        description: 모임 생성 성공
         content:
           application/json:
             schema:
               $ref: '../3040-api-spec-overview.yml#/components/schemas/OpenGatheringResponse'
+      '400':
+        description: 유효성 검사 실패
+      '401':
+        description: 미인증
 
 /gatherings/{gatheringUuid}/leave:
   post:
@@ -173,6 +218,8 @@
     tags:
       - Gatherings
     summary: Leave a gathering as a guest
+    security:
+      - BearerAuth: []
     parameters:
       - name: gatheringUuid
         in: path
@@ -201,12 +248,17 @@
     responses:
       '204':
         description: Left gathering successfully
+      '401':
+        description: 미인증
+
 /series:
   post:
     operationId: scheduleSeries
     tags:
       - Gatherings
     summary: Schedule gatherings based on host setting
+    security:
+      - BearerAuth: []
     requestBody:
       required: true
       content:
@@ -216,23 +268,5 @@
     responses:
       '201':
         description: Gatherings scheduled successfully
-
-
-
-
-#  delete:
-#    operationId: closeGathering
-#    tags:
-#      - Gatherings
-#    summary: Close an gathering
-#    parameters:
-#      - name: gatheringId
-#        in: query
-#        required: true
-#        schema:
-#          type: string
-#          format: uuid
-#        description: The UUID of the gathering to be closed
-#    responses:
-#      '204':
-#        description: Gathering closed successfully
+      '401':
+        description: 미인증

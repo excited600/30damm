@@ -1,0 +1,47 @@
+/users/signup:
+  post:
+    operationId: signup
+    tags:
+      - Users
+    summary: 이메일 회원가입
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user/signupRequest.yml#/SignupRequest'
+    responses:
+      '201':
+        description: 회원가입 성공
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user/signupResponse.yml#/SignupResponse'
+      '400':
+        description: 유효성 검사 실패
+      '409':
+        description: 이메일 중복
+
+/users/login:
+  post:
+    operationId: login
+    tags:
+      - Users
+    summary: 로그인
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user/loginRequest.yml#/LoginRequest'
+    responses:
+      '200':
+        description: 로그인 성공
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user/loginResponse.yml#/LoginResponse'
+      '400':
+        description: 유효성 검사 실패
+      '401':
+        description: 이메일 또는 비밀번호 불일치

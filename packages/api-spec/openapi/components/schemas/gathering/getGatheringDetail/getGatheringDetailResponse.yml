@@ -1,0 +1,130 @@
+GetGatheringDetailResponse:
+  type: object
+  required:
+    - gatheringUuid
+    - title
+    - description
+    - host
+    - guests
+    - category
+    - minCapacity
+    - maxCapacity
+    - isGenderRatioEnabled
+    - currentMaleCount
+    - currentFemaleCount
+    - isFree
+    - isSplit
+  properties:
+    gatheringUuid:
+      type: string
+      format: uuid
+      description: 모임 UUID (UUIDv7)
+    imgUrl:
+      type: string
+      format: uri
+      nullable: true
+      description: 대표 이미지 URL
+    title:
+      type: string
+      description: 모임 제목
+    description:
+      type: string
+      description: 모임 설명
+    host:
+      type: object
+      required:
+        - userUuid
+        - nickname
+        - gender
+      properties:
+        userUuid:
+          type: string
+          format: uuid
+          description: 호스트 UUID
+        nickname:
+          type: string
+          description: 호스트 닉네임
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: 호스트 프로필 이미지 URL
+        gender:
+          $ref: '../../shared.yml#/Gender'
+    guests:
+      type: array
+      description: 참여 게스트 목록 (빈 배열 가능)
+      items:
+        type: object
+        required:
+          - userUuid
+          - nickname
+          - gender
+        properties:
+          userUuid:
+            type: string
+            format: uuid
+            description: 게스트 UUID
+          nickname:
+            type: string
+            description: 닉네임
+          profileImageUrl:
+            type: string
+            format: uri
+            nullable: true
+            description: 프로필 이미지 URL
+          gender:
+            $ref: '../../shared.yml#/Gender'
+    category:
+      $ref: '../../shared.yml#/Gathering_Category'
+    minCapacity:
+      type: integer
+      description: 최소 인원
+    maxCapacity:
+      type: integer
+      description: 최대 인원
+    isGenderRatioEnabled:
+      type: boolean
+      description: 성비 제한 활성화 여부
+    maxMaleCapacity:
+      type: integer
+      nullable: true
+      description: 최대 남성 인원
+    maxFemaleCapacity:
+      type: integer
+      nullable: true
+      description: 최대 여성 인원
+    currentMaleCount:
+      type: integer
+      description: 현재 남성 참여 수
+    currentFemaleCount:
+      type: integer
+      description: 현재 여성 참여 수
+    date:
+      type: string
+      format: date
+      nullable: true
+      description: 날짜 (YYYY-MM-DD)
+    startTime:
+      type: string
+      nullable: true
+      description: 시작 시간 (HH:mm, 24시간제)
+      example: "19:00"
+    duration:
+      type: integer
+      nullable: true
+      description: 소요 시간 (시간 단위)
+    location:
+      type: string
+      nullable: true
+      description: 장소
+    isFree:
+      type: boolean
+      description: 무료 여부
+    isSplit:
+      type: boolean
+      description: 더치페이 여부
+    price:
+      type: integer
+      nullable: true
+      description: 가격 (원 단위)

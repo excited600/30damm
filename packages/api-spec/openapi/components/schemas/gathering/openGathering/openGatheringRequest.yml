@@ -1,81 +1,69 @@
 OpenGatheringRequest:
   type: object
   required:
-    - hostUuid
-    - approveType
+    - title
+    - description
+    - category
     - minCapacity
     - maxCapacity
-    - genderRatioEnabled
-    - minAge
-    - maxAge
-    - fee
-    - discountEnabled
-    - offline
-    - place
-    - category
-    - subCategory
-    - imageUrl
-    - title
-    - introduction
-    - startDateTime
+    - isGenderRatioEnabled
+    - isFree
+    - isSplit
   properties:
-    hostUuid:
-      type: string
-      format: uuid
-      description: UUID of the host. tmp property
-    approveType:
-      $ref: '../../shared.yml#/Gathering_ApproveType'
-    minCapacity:
-      type: integer
-      description: Minimum capacity of the gathering
-    maxCapacity:
-      type: integer
-      description: Maximum capacity of the gathering
-    maxMaleCount:
-      type: integer
-      description: Maximum number of male guests
-    maxFemaleCount:
-      type: integer
-      description: Maximum number of female guests
-    genderRatioEnabled:
-      type: boolean
-      description: If host can set gender ratio for the gathering
-    minAge:
-      type: integer
-      description: Minimum age of guests
-    maxAge:
-      type: integer
-      description: Maximum age of guests
-    fee:
-      type: integer
-      description: Fee to join the gathering
-    discountEnabled:
-      type: boolean
-      description: If host can set discount strategy for the gathering
-    offline:
-      type: boolean
-      description: If the gathering is offline
-    place:
-      type: string
-      description: Place where the gathering will be held
-    category:
-      $ref: '../../shared.yml#/Gathering_Category'
-    subCategory:
-      $ref: '../../shared.yml#/Gathering_SubCategory'
-    imageUrl:
-      type: string
-      description: URL of the gathering image
     title:
       type: string
-      description: Title of the gathering
-    introduction:
+      maxLength: 20
+      description: 모임 제목 (최대 20자)
+    description:
       type: string
-      description: Introduction of the gathering
-    startDateTime:
+      maxLength: 200
+      description: 모임 설명 (최대 200자)
+    category:
+      $ref: '../../shared.yml#/Gathering_Category'
+    location:
       type: string
-      format: date-time
-      description: Start date and time of the gathering
+      nullable: true
+      description: 장소
+    date:
+      type: string
+      format: date
+      nullable: true
+      description: 날짜 (미래 날짜만 가능)
+    startTime:
+      type: string
+      nullable: true
+      description: 시작 시간 (HH:mm, 24시간제)
+      example: "19:00"
     duration:
-      type: number
-      format: float
-      description: Duration of the gathering in hours (can contain decimals)
+      type: integer
+      nullable: true
+      minimum: 30
+      description: 소요 시간 (분 단위, 최소 30분)
+    minCapacity:
+      type: integer
+      minimum: 2
+      description: 최소 인원 (최소 2명)
+    maxCapacity:
+      type: integer
+      description: 최대 인원 (minCapacity 이상)
+    isGenderRatioEnabled:
+      type: boolean
+      description: 성비 제한 활성화 여부
+    maxMaleCapacity:
+      type: integer
+      nullable: true
+      description: 최대 남성 인원 (isGenderRatioEnabled=true일 때만)
+    maxFemaleCapacity:
+      type: integer
+      nullable: true
+      description: 최대 여성 인원 (isGenderRatioEnabled=true일 때만)
+    isFree:
+      type: boolean
+      description: 무료 여부
+    price:
+      type: integer
+      nullable: true
+      description: 가격 (원 단위, isFree=false일 때 필수)
+    isSplit:
+      type: boolean
+      description: 더치페이 여부

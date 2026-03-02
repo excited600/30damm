@@ -8,15 +8,18 @@ Gathering_ApproveType:
 Gathering_Category:
   type: string
   enum:
+    - NONE
     - PARTY
     - FOOD_DRINK
-    - STUDY
-    - INVEST
-    - LANGUAGE
     - ACTIVITY
-    - CULTURE
-    - LOVE
   description: Category of the gathering
+
+Gender:
+  type: string
+  enum:
+    - MALE
+    - FEMALE
+  description: Gender of the user
 
 Gathering_SubCategory:
   type: string

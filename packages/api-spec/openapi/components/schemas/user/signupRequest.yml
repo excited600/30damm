@@ -1,0 +1,21 @@
+SignupRequest:
+  type: object
+  required:
+    - email
+    - password
+    - nickname
+  properties:
+    email:
+      type: string
+      format: email
+      description: 유효한 이메일 주소
+    password:
+      type: string
+      minLength: 8
+      maxLength: 20
+      description: 비밀번호 (8~20자)
+    nickname:
+      type: string
+      minLength: 2
+      maxLength: 10
+      description: 닉네임 (2~10자)
