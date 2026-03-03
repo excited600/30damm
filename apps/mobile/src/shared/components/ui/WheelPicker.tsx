@@ -56,6 +56,21 @@ export function WheelPicker(props: WheelPickerProps) {
     [itemList],
   );
 
+  const currentIndexRef = useRef(currentIndex);
+  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+
+  const itemListRef = useRef(itemList);
+  useEffect(() => { itemListRef.current = itemList; }, [itemList]);
+
+  const clampIndexRef = useRef(clampIndex);
+  useEffect(() => { clampIndexRef.current = clampIndex; }, [clampIndex]);
+
+  const onChangeRef = useRef(onChange);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+
+  const valueRef = useRef(value);
+  useEffect(() => { valueRef.current = value; }, [value]);
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -65,8 +80,8 @@ export function WheelPicker(props: WheelPickerProps) {
       },
       onPanResponderRelease: (_, gestureState) => {
         const steps = Math.round(-gestureState.dy / ITEM_HEIGHT);
-        const newIndex = clampIndex(currentIndex + steps);
-        const newValue = itemList[newIndex];
+        const newIndex = clampIndexRef.current(currentIndexRef.current + steps);
+        const newValue = itemListRef.current[newIndex];
 
         Animated.spring(translateY, {
           toValue: 0,
@@ -75,8 +90,8 @@ export function WheelPicker(props: WheelPickerProps) {
           friction: 12,
         }).start();
 
-        if (newValue !== value) {
-          onChange(newValue);
+        if (newValue !== valueRef.current) {
+          onChangeRef.current(newValue);
         }
       },
     }),

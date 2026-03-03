@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { colors } from "@/shared/constants/colors";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
@@ -15,6 +15,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
+  const navigatingRef = useRef(false);
 
   const handleNext = () => {
     if (!email.trim() || !password.trim()) {
@@ -33,9 +34,12 @@ export default function RegisterScreen() {
       setError("비밀번호는 8~20자로 입력해주세요.");
       return;
     }
+    if (navigatingRef.current) return;
+    navigatingRef.current = true;
     setError("");
     setCredentials(email, password);
     router.push("/(auth)/create-profile");
+    setTimeout(() => { navigatingRef.current = false; }, 1000);
   };
 
   return (

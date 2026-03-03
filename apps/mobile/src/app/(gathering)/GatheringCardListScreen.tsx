@@ -60,11 +60,11 @@ export default function GatheringCardListScreen() {
 
   const gatherings = data?.pages.flatMap((page) => page.list) ?? [];
 
-  const handleEndReached = () => {
+  const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
     ({ item }: { item: GatheringListItem }) => {

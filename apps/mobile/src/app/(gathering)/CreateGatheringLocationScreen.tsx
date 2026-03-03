@@ -21,6 +21,7 @@ export default function CreateGatheringLocationScreen() {
   const locationOverflow = location.length > LOCATION_MAX;
 
   const handleNext = () => {
+    if (locationOverflow) return;
     store.setLocation(location || null);
     router.push("/(gathering)/CreateGatheringWhenScreen");
   };

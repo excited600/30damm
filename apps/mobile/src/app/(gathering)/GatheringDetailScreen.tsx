@@ -141,7 +141,7 @@ export default function GatheringDetailScreen() {
           </View>
           <View style={styles.detailInfo}>
             {detailInfo.map((info, i) => (
-              <Text key={i} style={styles.detailInfoText}>
+              <Text key={`detail-${i}`} style={styles.detailInfoText}>
                 {info}
               </Text>
             ))}

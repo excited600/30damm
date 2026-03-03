@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { useRegisterStore } from "@/store/useRegisterStore";
@@ -25,6 +26,11 @@ export default function CreateProfileScreen() {
   const [nickname, setNickname] = useState("");
 
   const handleSignup = () => {
+    if (!email || !password) {
+      Alert.alert("오류", "처음부터 다시 시도해주세요.");
+      router.replace("/(auth)/register");
+      return;
+    }
     if (nickname.length < 2 || nickname.length > 10) {
       Alert.alert("알림", "닉네임은 2~10자로 입력해주세요.");
       return;
@@ -79,10 +85,10 @@ export default function CreateProfileScreen() {
         {/* Profile Image */}
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImage}>
-            <Text style={styles.profileIcon}>👤</Text>
+            <Ionicons name="person" size={48} color={colors.text.tertiary} />
           </View>
           <View style={styles.cameraIcon}>
-            <Text style={styles.cameraEmoji}>📷</Text>
+            <Ionicons name="camera" size={18} color={colors.text.primary} />
           </View>
         </View>
 
@@ -180,7 +186,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   profileIcon: {
-    fontSize: 48,
     opacity: 0.5,
   },
   cameraIcon: {
@@ -195,7 +200,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cameraEmoji: {
-    fontSize: 18,
   },
   inputContainer: {
     borderWidth: 2,

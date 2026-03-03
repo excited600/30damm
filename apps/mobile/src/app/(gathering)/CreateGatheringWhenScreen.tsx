@@ -66,9 +66,8 @@ export default function CreateGatheringWhenScreen() {
 
   const formatDate = () => {
     if (!selectedDate) return "- 월 - 일 (- 요일)";
-    const d = new Date(selectedDate);
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
+    const [, month, day] = selectedDate.split("-").map(Number);
+    const d = new Date(Number(selectedDate.split("-")[0]), month - 1, day);
     const dayOfWeek = DAY_NAMES[d.getDay()];
     return `${month}월 ${day}일 (${dayOfWeek})`;
   };
