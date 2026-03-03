@@ -1,4 +1,5 @@
-import { View, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
+import { useCallback } from "react";
+import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -8,13 +9,38 @@ import { GatheringCard } from "@/features/gathering/components/GatheringCard";
 import { gatheringClient } from "@/api/clients/gatheringClient";
 import type { GatheringListItem } from "@/api/types/gathering";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
+
+function formatGatheringCard(item: GatheringListItem) {
+  const dateTime = item.date
+    ? `${item.date}${item.startTime ? ` ${item.startTime}` : ""}`
+    : "";
+  const duration = item.duration ? `${item.duration}시간` : "";
+  const participants = `${item.maleCount}:${item.femaleCount}`;
+  const price = item.isFree
+    ? "무료"
+    : item.price
+      ? `${item.price.toLocaleString()}원`
+      : "";
+
+  return {
+    title: item.title,
+    location: item.location ?? "",
+    dateTime,
+    duration,
+    participants,
+    hostName: item.host.nickname,
+    hostAvatarUri: item.host.profileImageUrl ?? undefined,
+    price,
+    thumbnailUri: item.imgUrl ?? undefined,
+  };
+}
 
 export default function GatheringCardListScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
     useInfiniteQuery({
       queryKey: ["gatherings"],
       queryFn: ({ pageParam }) =>
@@ -34,36 +60,29 @@ export default function GatheringCardListScreen() {
 
   const gatherings = data?.pages.flatMap((page) => page.list) ?? [];
 
-  const formatGatheringCard = (item: GatheringListItem) => {
-    const dateTime = item.date
-      ? `${item.date}${item.startTime ? ` ${item.startTime}` : ""}`
-      : "";
-    const duration = item.duration ? `${item.duration}시간` : "";
-    const participants = `${item.maleCount}:${item.femaleCount}`;
-    const price = item.isFree
-      ? "무료"
-      : item.price
-        ? `${item.price.toLocaleString()}원`
-        : "";
-
-    return {
-      title: item.title,
-      location: item.location ?? "",
-      dateTime,
-      duration,
-      participants,
-      hostName: item.host.nickname,
-      hostAvatarUri: item.host.profileImageUrl ?? undefined,
-      price,
-      thumbnailUri: item.imgUrl ?? undefined,
-    };
-  };
-
   const handleEndReached = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
+
+  const renderItem = useCallback(
+    ({ item }: { item: GatheringListItem }) => {
+      const cardProps = formatGatheringCard(item);
+      return (
+        <GatheringCard
+          {...cardProps}
+          onPress={() =>
+            router.push({
+              pathname: "/(gathering)/GatheringDetailScreen",
+              params: { gatheringUuid: item.gatheringUuid },
+            })
+          }
+        />
+      );
+    },
+    [router],
+  );
 
   return (
     <View style={[styles.gatheringCardListScreen, { paddingTop: insets.top }]}>
@@ -86,28 +105,27 @@ export default function GatheringCardListScreen() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.accent.primary} />
         </View>
+      ) : isError ? (
+        <View style={styles.centeredContainer}>
+          <Text style={styles.stateText}>모임을 불러오지 못했습니다.</Text>
+          <Pressable style={styles.retryButton} onPress={() => refetch()}>
+            <Text style={styles.retryButtonText}>다시 시도</Text>
+          </Pressable>
+        </View>
       ) : (
         <FlatList
           data={gatherings}
           keyExtractor={(item) => item.gatheringUuid}
-          renderItem={({ item }) => {
-            const cardProps = formatGatheringCard(item);
-            return (
-              <GatheringCard
-                {...cardProps}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(gathering)/GatheringDetailScreen",
-                    params: { gatheringUuid: item.gatheringUuid },
-                  })
-                }
-              />
-            );
-          }}
+          renderItem={renderItem}
           style={styles.gatheringCardList}
           showsVerticalScrollIndicator={false}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.5}
+          ListEmptyComponent={
+            <View style={styles.centeredContainer}>
+              <Text style={styles.stateText}>아직 모임이 없습니다.</Text>
+            </View>
+          }
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footer}>
@@ -168,6 +186,29 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  centeredContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    gap: 16,
+  },
+  stateText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: colors.accent.primary,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text.primary,
   },
   gatheringCardList: {
     flex: 1,

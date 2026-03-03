@@ -54,16 +54,30 @@ export default function GatheringDetailScreen() {
   }>();
   const [toastVisible, setToastVisible] = useState(showToast === "true");
 
-  const { data: detail, isLoading } = useQuery({
+  const { data: detail, isLoading, isError, refetch } = useQuery({
     queryKey: ["gathering", gatheringUuid],
     queryFn: () => gatheringClient.getDetail(gatheringUuid!),
     enabled: !!gatheringUuid,
   });
 
-  if (isLoading || !detail) {
+  if (isLoading) {
     return (
       <View style={[styles.gatheringDetailScreen, styles.centered, { paddingTop: insets.top }]}>
         <ActivityIndicator size="large" color={colors.accent.primary} />
+      </View>
+    );
+  }
+
+  if (isError || !detail) {
+    return (
+      <View style={[styles.gatheringDetailScreen, styles.centered, { paddingTop: insets.top }]}>
+        <Pressable onPress={() => router.back()} style={styles.errorBackButton} hitSlop={8}>
+          <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
+        </Pressable>
+        <Text style={styles.errorText}>모임 정보를 불러오지 못했습니다.</Text>
+        <Pressable style={styles.retryButton} onPress={() => refetch()}>
+          <Text style={styles.retryButtonText}>다시 시도</Text>
+        </Pressable>
       </View>
     );
   }
@@ -282,5 +296,27 @@ const styles = StyleSheet.create({
   headerBlank: {
     width: 24,
     height: 24,
+  },
+  errorBackButton: {
+    position: "absolute",
+    top: 16,
+    left: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  retryButton: {
+    backgroundColor: colors.accent.primary,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text.primary,
   },
 });

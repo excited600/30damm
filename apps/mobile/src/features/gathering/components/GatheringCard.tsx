@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { colors } from "@/shared/constants/colors";
 import { spacing } from "@/shared/constants/spacing";
@@ -16,7 +17,7 @@ interface GatheringCardProps {
   onPress?: () => void;
 }
 
-export function GatheringCard({
+export const GatheringCard = memo(function GatheringCard({
   title,
   location,
   dateTime,
@@ -63,7 +64,7 @@ export function GatheringCard({
       <View style={styles.divider} />
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

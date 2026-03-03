@@ -14,17 +14,23 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data ?? "");
+  if (__DEV__) {
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data ?? "");
+  }
   return config;
 });
 
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`[API] ${response.status} ${response.config.url}`);
+    if (__DEV__) {
+      console.log(`[API] ${response.status} ${response.config.url}`);
+    }
     return response;
   },
   (error) => {
-    console.error(`[API ERROR] ${error.config?.url}`, error.response?.status, error.response?.data ?? error.message);
+    if (__DEV__) {
+      console.error(`[API ERROR] ${error.config?.url}`, error.response?.status, error.response?.data ?? error.message);
+    }
     return Promise.reject(error);
   },
 );

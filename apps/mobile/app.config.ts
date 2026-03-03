@@ -19,7 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: "com.beyondeyesight.app3040",
     infoPlist: {
       NSAppTransportSecurity: {
-        NSAllowsArbitraryLoads: true,
+        NSAllowsArbitraryLoads: process.env.APP_ENV !== "production",
         NSAllowsLocalNetworking: true,
       },
     },
