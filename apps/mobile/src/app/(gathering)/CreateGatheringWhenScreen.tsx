@@ -322,10 +322,11 @@ export default function CreateGatheringWhenScreen() {
       >
         <Button
           label={openGathering.isPending ? "생성 중..." : "모임 열기"}
+          onPress={handleOpenGathering}
+          disabled={openGathering.isPending}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}
-          onPress={handleOpenGathering}
         />
       </View>
     </View>

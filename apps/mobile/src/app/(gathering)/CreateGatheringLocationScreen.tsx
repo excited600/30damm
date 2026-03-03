@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -26,7 +26,10 @@ export default function CreateGatheringLocationScreen() {
   };
 
   return (
-    <View style={[styles.createGatheringLocation, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      style={[styles.createGatheringLocation, { paddingTop: insets.top }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       {/* ProgressBar */}
       <View style={styles.progressBar}>
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -55,7 +58,11 @@ export default function CreateGatheringLocationScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Title */}
         <View style={styles.title}>
           <Text style={styles.titleText}>어디서 만날까요?</Text>
@@ -71,7 +78,7 @@ export default function CreateGatheringLocationScreen() {
           }
           error={locationOverflow ? "글자수(20자)를 초과했습니다" : undefined}
         />
-      </View>
+      </ScrollView>
 
       {/* BottomCTAOnlyButton */}
       <View
@@ -85,7 +92,7 @@ export default function CreateGatheringLocationScreen() {
           onPress={handleNext}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -127,8 +134,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    gap: 10,
-    overflow: "hidden",
   },
   title: {
     paddingVertical: 20,

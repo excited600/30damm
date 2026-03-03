@@ -71,7 +71,7 @@ export default function GatheringDetailScreen() {
   if (isError || !detail) {
     return (
       <View style={[styles.gatheringDetailScreen, styles.centered, { paddingTop: insets.top }]}>
-        <Pressable onPress={() => router.back()} style={styles.errorBackButton} hitSlop={8}>
+        <Pressable onPress={() => router.back()} style={[styles.errorBackButton, { top: insets.top + 12 }]} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
         <Text style={styles.errorText}>모임 정보를 불러오지 못했습니다.</Text>
@@ -299,7 +299,6 @@ const styles = StyleSheet.create({
   },
   errorBackButton: {
     position: "absolute",
-    top: 16,
     left: 20,
   },
   errorText: {

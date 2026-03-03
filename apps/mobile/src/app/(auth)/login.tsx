@@ -15,6 +15,14 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("알림", "이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert("알림", "올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
     login.mutate(
       { email, password },
       {
@@ -70,6 +78,7 @@ export default function LoginScreen() {
         <Button
           label={login.isPending ? "로그인 중..." : "시작하기"}
           onPress={handleLogin}
+          disabled={login.isPending}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -24,12 +24,22 @@ export default function CreateGatheringIntroductionScreen() {
   const detailOverflow = detail.length > DETAIL_MAX;
 
   const handleNext = () => {
+    if (!title.trim()) {
+      Alert.alert("알림", "제목을 입력해주세요.");
+      return;
+    }
+    if (titleOverflow || detailOverflow) {
+      return;
+    }
     store.setIntroduction(title, detail);
     router.push("/(gathering)/CreateGatheringLocationScreen");
   };
 
   return (
-    <View style={[styles.createGatheringIntroduction, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      style={[styles.createGatheringIntroduction, { paddingTop: insets.top }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       {/* ProgressBar */}
       <View style={styles.progressBar}>
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -58,7 +68,11 @@ export default function CreateGatheringIntroductionScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Title */}
         <View style={styles.titleSection}>
           <Text style={styles.titleText}>모임을 소개해주세요</Text>
@@ -82,7 +96,7 @@ export default function CreateGatheringIntroductionScreen() {
             error={detailOverflow ? "글자수(200자)를 초과했습니다" : undefined}
           />
         </View>
-      </View>
+      </ScrollView>
 
       {/* BottomCTAOnlyButton */}
       <View
@@ -96,7 +110,7 @@ export default function CreateGatheringIntroductionScreen() {
           onPress={handleNext}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -138,8 +152,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    gap: 10,
-    overflow: "hidden",
   },
   titleSection: {
     paddingVertical: 20,

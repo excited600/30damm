@@ -104,6 +104,7 @@ export default function CreateProfileScreen() {
         <Button
           label={signup.isPending ? "가입 중..." : "시작하기"}
           onPress={handleSignup}
+          disabled={signup.isPending}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}

@@ -5,6 +5,10 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -26,13 +30,20 @@ export default function CreateGatheringPriceScreen() {
 
   const handleNext = () => {
     const isFree = !isPaid;
+    if (isPaid && (!price.trim() || isNaN(parseInt(price, 10)) || parseInt(price, 10) <= 0)) {
+      Alert.alert("알림", "가격을 입력해주세요.");
+      return;
+    }
     const parsedPrice = isPaid ? parseInt(price, 10) || null : null;
     store.setPrice(isFree, parsedPrice, splitByN);
     router.push("/(gathering)/CreateGatheringCategoryScreen");
   };
 
   return (
-    <View style={[styles.createGatheringPrice, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      style={[styles.createGatheringPrice, { paddingTop: insets.top }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       {/* ProgressBar */}
       <View style={styles.progressBar}>
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -61,7 +72,11 @@ export default function CreateGatheringPriceScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Title */}
         <View style={styles.title}>
           <Text style={styles.titleText}>모임에 비용이 드나요?</Text>
@@ -151,7 +166,7 @@ export default function CreateGatheringPriceScreen() {
             </View>
           </>
         )}
-      </View>
+      </ScrollView>
 
       {/* BottomCTAOnlyButton */}
       <View
@@ -165,7 +180,7 @@ export default function CreateGatheringPriceScreen() {
           onPress={handleNext}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -207,8 +222,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    gap: 10,
-    overflow: "hidden",
   },
   title: {
     paddingVertical: 20,

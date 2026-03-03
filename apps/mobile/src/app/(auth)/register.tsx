@@ -17,6 +17,14 @@ export default function RegisterScreen() {
   const [error, setError] = useState("");
 
   const handleNext = () => {
+    if (!email.trim() || !password.trim()) {
+      setError("이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
     if (password !== passwordConfirm) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
