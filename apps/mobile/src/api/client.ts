@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 const apiClient = axios.create({
   baseURL: Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:8080",
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
