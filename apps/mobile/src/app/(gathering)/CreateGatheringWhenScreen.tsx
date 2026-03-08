@@ -59,9 +59,15 @@ export default function CreateGatheringWhenScreen() {
 
   const toggleSection = useCallback(
     (section: ExpandedSection) => {
-      setExpandedSection((prev) => (prev === section ? null : section));
+      setExpandedSection((prev) => {
+        if (prev === section) return null;
+        if (section === "duration" && durationHour === 0 && durationMinute === 0) {
+          setDurationHour(2);
+        }
+        return section;
+      });
     },
-    [],
+    [durationHour, durationMinute],
   );
 
   const formatDate = () => {

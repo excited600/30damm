@@ -8,6 +8,7 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -24,7 +25,7 @@ export default function CreateProfileScreen() {
   const { email, password, reset } = useRegisterStore();
   const signup = useSignup();
   const [nickname, setNickname] = useState("");
-  const [gender, setGender] = useState<"MALE" | "FEMALE" | null>(null);
+  const { height } = useWindowDimensions();
 
   const handleSignup = () => {
     if (!email || !password) {
@@ -36,12 +37,8 @@ export default function CreateProfileScreen() {
       Alert.alert("알림", "닉네임은 2~10자로 입력해주세요.");
       return;
     }
-    if (!gender) {
-      Alert.alert("알림", "성별을 선택해주세요.");
-      return;
-    }
     signup.mutate(
-      { email, password, nickname, gender },
+      { email, password, nickname },
       {
         onSuccess: () => {
           reset();
@@ -85,7 +82,7 @@ export default function CreateProfileScreen() {
           <Text style={styles.noticeSubtitle}>회원가입의 마지막 절차예요</Text>
         </View>
 
-        <View style={styles.spacer} />
+        <View style={{ height: height * 0.08 }} />
 
         {/* Nickname Input */}
         <View style={styles.inputContainer}>
@@ -97,25 +94,6 @@ export default function CreateProfileScreen() {
             onChangeText={setNickname}
             autoFocus
           />
-        </View>
-
-        {/* Gender Selector */}
-        <View style={styles.genderSection}>
-          <Text style={styles.genderLabel}>성별</Text>
-          <View style={styles.genderRow}>
-            <Pressable
-              style={[styles.genderOption, gender === "MALE" && styles.genderOptionSelected]}
-              onPress={() => setGender("MALE")}
-            >
-              <Text style={[styles.genderText, gender === "MALE" && styles.genderTextSelected]}>남</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.genderOption, gender === "FEMALE" && styles.genderOptionSelected]}
-              onPress={() => setGender("FEMALE")}
-            >
-              <Text style={[styles.genderText, gender === "FEMALE" && styles.genderTextSelected]}>여</Text>
-            </Pressable>
-          </View>
         </View>
 
         <View style={styles.spacer} />
