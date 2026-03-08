@@ -58,7 +58,6 @@ class GatheringRepositoryTest {
                 status = Status.OPEN,
                 imageUrl = "image",
                 title = "title",
-                introduction = "introduction",
                 description = null,
                 clickCount = GatheringEntity.INITIAL_CLICK_COUNT,
                 startDateTime = startDateTime,

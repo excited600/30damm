@@ -45,8 +45,6 @@ class GatheringEntity(
     @Column(nullable = false)
     val title: String,
     @Column(nullable = true)
-    val introduction: String?,
-    @Column(nullable = true)
     val description: String?,
     @Column(nullable = false)
     var clickCount: Int,
@@ -106,7 +104,6 @@ class GatheringEntity(
                 status = Status.OPEN,
                 imageUrl = imageUrl,
                 title = title,
-                introduction = null,
                 description = description,
                 clickCount = INITIAL_CLICK_COUNT,
                 startDateTime = startDateTime,

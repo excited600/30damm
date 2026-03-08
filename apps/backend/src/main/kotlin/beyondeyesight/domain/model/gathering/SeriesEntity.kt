@@ -34,8 +34,6 @@ class SeriesEntity(
     @Column(nullable = false)
     val title: String,
     @Column(nullable = true)
-    val introduction: String?,
-    @Column(nullable = true)
     val description: String?,
 
 ) : BaseEntity(uuid = uuid) {

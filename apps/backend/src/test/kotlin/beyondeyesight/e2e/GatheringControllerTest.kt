@@ -59,7 +59,6 @@ class GatheringControllerTest : EndToEndTestBase() {
             subCategory = GatheringSubCategory.HOME_PARTY,
             imageUrl = anyString,
             title = anyString,
-            introduction = anyString,
             maxMaleCount = 5,
             maxFemaleCount = 5
         )

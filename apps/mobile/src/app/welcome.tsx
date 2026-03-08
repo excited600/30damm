@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/shared/constants/colors";
@@ -13,7 +13,7 @@ export default function WelcomeScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.spacer} />
       <View style={styles.centerContent}>
-        <View style={styles.logo} />
+        <Image source={require("../../assets/appicon-removebg.png")} style={styles.logo} />
         <Text style={styles.title}>
           <Text style={styles.titleWhite}>서티</Text>
           <Text style={styles.titleAccent}>담</Text>
@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
   },
-  logo: {
+logo: {
     width: 118,
     height: 118,
-    backgroundColor: "#D9D9D9",
+    borderRadius: 24,
   },
   title: {
     fontSize: 32,

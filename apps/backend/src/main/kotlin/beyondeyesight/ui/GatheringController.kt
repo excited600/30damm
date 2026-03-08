@@ -67,7 +67,7 @@ class GatheringController(
                 GetGatheringDetailResponse(
                     gatheringUuid = gathering.uuid,
                     title = gathering.title,
-                    description = gathering.description ?: gathering.introduction ?: "",
+                    description = gathering.description ?: "",
                     host = toHostResponse(host),
                     guests = detail.guestsWithUsers.map { guestWithUser ->
                         GetGatheringDetailResponseGuestsInner(
@@ -248,7 +248,6 @@ class GatheringController(
                 ),
             imageUrl = scheduleSeriesRequest.imageUrl,
             title = scheduleSeriesRequest.title,
-            introduction = scheduleSeriesRequest.introduction,
             scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name }
                 ?: throw InvalidValueException(
                     valueName = "scheduleType",
