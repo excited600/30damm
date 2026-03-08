@@ -32,6 +32,12 @@ apiClient.interceptors.response.use(
     if (__DEV__) {
       console.error(`[API ERROR] ${error.config?.url}`, error.response?.status, error.response?.data ?? error.message);
     }
+
+    // 401 Unauthorized → auto-logout
+    if (error.response?.status === 401) {
+      useAuthStore.getState().logout();
+    }
+
     return Promise.reject(error);
   },
 );
