@@ -12,9 +12,8 @@ import type { GatheringListItem } from "@/api/types/gathering";
 const PAGE_SIZE = 20;
 
 function formatGatheringCard(item: GatheringListItem) {
-  const dateTime = item.date
-    ? `${item.date}${item.startTime ? ` ${item.startTime}` : ""}`
-    : "";
+  const date = item.date ?? "";
+  const time = item.startTime ?? "";
   const duration = item.duration ? `${item.duration}시간` : "";
   const participants = `${item.maleCount}:${item.femaleCount}`;
   const price = item.isFree
@@ -26,7 +25,8 @@ function formatGatheringCard(item: GatheringListItem) {
   return {
     title: item.title,
     location: item.location ?? "",
-    dateTime,
+    date,
+    time,
     duration,
     participants,
     hostName: item.host.nickname,

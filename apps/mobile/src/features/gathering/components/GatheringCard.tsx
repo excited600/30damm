@@ -17,7 +17,8 @@ function getRandomEmoji(seed: string): string {
 interface GatheringCardProps {
   title: string;
   location: string;
-  dateTime: string;
+  date: string;
+  time: string;
   duration: string;
   participants: string;
   hostName: string;
@@ -30,7 +31,8 @@ interface GatheringCardProps {
 export const GatheringCard = memo(function GatheringCard({
   title,
   location,
-  dateTime,
+  date,
+  time,
   duration,
   participants,
   hostName,
@@ -39,7 +41,8 @@ export const GatheringCard = memo(function GatheringCard({
   thumbnailUri,
   onPress,
 }: GatheringCardProps) {
-  const subtitle = `${location} · ${dateTime} ${duration} ${participants}`;
+  const truncate = (s: string, max = 10) => s.length > max ? s.slice(0, max) + "\u22EF" : s;
+  const subtitle = [truncate(location), truncate(date), truncate(time), truncate(duration), truncate(participants)].filter(Boolean).join(" \u00B7 ");
   const thumbnailEmoji = useMemo(() => getRandomEmoji(title), [title]);
   const hostEmoji = useMemo(() => getRandomEmoji(hostName), [hostName]);
 
