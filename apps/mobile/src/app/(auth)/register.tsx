@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState, useRef } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
@@ -54,6 +55,13 @@ export default function RegisterScreen() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
+          </Pressable>
+          <View style={styles.headerSpacer} />
+        </View>
         <View style={styles.spacer} />
         <Text style={styles.title}>
           <Text style={styles.titleWhite}>서티</Text>
@@ -141,5 +149,15 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
+  },
+  header: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  headerSpacer: {
+    width: 24,
+    height: 24,
   },
 });

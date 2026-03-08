@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
@@ -58,6 +58,12 @@ export default function GatheringCardListScreen() {
           : undefined,
     });
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
   const gatherings = data?.pages.flatMap((page) => page.list) ?? [];
 
   const handleEndReached = useCallback(() => {
@@ -95,9 +101,7 @@ export default function GatheringCardListScreen() {
         >
           <Ionicons name="add" size={30} color={colors.text.primary} />
         </Pressable>
-        <View style={styles.menuButton}>
-          <Ionicons name="menu" size={28} color={colors.text.primary} />
-        </View>
+        <View style={styles.menuButton} />
       </View>
 
       {/* GatheringCardList */}
@@ -136,18 +140,7 @@ export default function GatheringCardListScreen() {
         />
       )}
 
-      {/* BottomTabBar */}
-      <View style={[styles.bottomTabBar, { paddingBottom: Math.max(insets.bottom, 24) }]}>
-        <Pressable style={styles.tabItem}>
-          <Ionicons name="home" size={21} color={colors.text.primary} />
-        </Pressable>
-        <Pressable style={styles.tabItem}>
-          <Ionicons name="chatbubble" size={21} color={colors.text.primary} />
-        </Pressable>
-        <Pressable style={styles.tabItem}>
-          <Ionicons name="person" size={21} color={colors.text.primary} />
-        </Pressable>
-      </View>
+      {/* BottomTabBar - temporarily hidden */}
     </View>
   );
 }

@@ -24,6 +24,7 @@ export default function CreateProfileScreen() {
   const { email, password, reset } = useRegisterStore();
   const signup = useSignup();
   const [nickname, setNickname] = useState("");
+  const [gender, setGender] = useState<"MALE" | "FEMALE" | null>(null);
 
   const handleSignup = () => {
     if (!email || !password) {
@@ -35,8 +36,12 @@ export default function CreateProfileScreen() {
       Alert.alert("알림", "닉네임은 2~10자로 입력해주세요.");
       return;
     }
+    if (!gender) {
+      Alert.alert("알림", "성별을 선택해주세요.");
+      return;
+    }
     signup.mutate(
-      { email, password, nickname },
+      { email, password, nickname, gender },
       {
         onSuccess: () => {
           reset();
@@ -68,7 +73,7 @@ export default function CreateProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} hitSlop={8}>
-            <Text style={styles.closeIcon}>✕</Text>
+            <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
           </Pressable>
           <Text style={styles.headerTitle}>프로필 생성</Text>
           <View style={styles.headerSpacer} />
@@ -82,16 +87,6 @@ export default function CreateProfileScreen() {
 
         <View style={styles.spacer} />
 
-        {/* Profile Image */}
-        <View style={styles.profileImageContainer}>
-          <View style={styles.profileImage}>
-            <Ionicons name="person" size={48} color={colors.text.tertiary} />
-          </View>
-          <View style={styles.cameraIcon}>
-            <Ionicons name="camera" size={18} color={colors.text.primary} />
-          </View>
-        </View>
-
         {/* Nickname Input */}
         <View style={styles.inputContainer}>
           <TextInput
@@ -102,6 +97,25 @@ export default function CreateProfileScreen() {
             onChangeText={setNickname}
             autoFocus
           />
+        </View>
+
+        {/* Gender Selector */}
+        <View style={styles.genderSection}>
+          <Text style={styles.genderLabel}>성별</Text>
+          <View style={styles.genderRow}>
+            <Pressable
+              style={[styles.genderOption, gender === "MALE" && styles.genderOptionSelected]}
+              onPress={() => setGender("MALE")}
+            >
+              <Text style={[styles.genderText, gender === "MALE" && styles.genderTextSelected]}>남</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.genderOption, gender === "FEMALE" && styles.genderOptionSelected]}
+              onPress={() => setGender("FEMALE")}
+            >
+              <Text style={[styles.genderText, gender === "FEMALE" && styles.genderTextSelected]}>여</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.spacer} />
@@ -214,6 +228,40 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: colors.text.primary,
     padding: 0,
+  },
+  genderSection: {
+    width: "100%",
+    gap: 8,
+  },
+  genderLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text.secondary,
+  },
+  genderRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  genderOption: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#2C2C2C",
+  },
+  genderOptionSelected: {
+    borderColor: colors.accent.primary,
+    backgroundColor: colors.accent.primary,
+  },
+  genderText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text.secondary,
+  },
+  genderTextSelected: {
+    color: colors.text.primary,
   },
   button: {
     width: "100%",

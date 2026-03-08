@@ -52,6 +52,7 @@ export default function CreateGatheringWhenScreen() {
   const [minute, setMinute] = useState(0);
   const [durationHour, setDurationHour] = useState(2);
   const [durationMinute, setDurationMinute] = useState(0);
+  const [durationUndecided, setDurationUndecided] = useState(false);
 
   const openGathering = useMutation({
     mutationFn: (request: OpenGatheringRequest) => gatheringClient.open(request),
@@ -82,6 +83,7 @@ export default function CreateGatheringWhenScreen() {
   };
 
   const formatDuration = () => {
+    if (durationUndecided) return "미정";
     if (durationHour === 0 && durationMinute === 0) return "미정";
     const parts = [];
     if (durationHour > 0) parts.push(`${durationHour}시간`);
@@ -101,7 +103,7 @@ export default function CreateGatheringWhenScreen() {
 
   const handleOpenGathering = () => {
     const startTime = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-    const durationMinutes = durationHour * 60 + durationMinute;
+    const durationMinutes = durationUndecided ? 0 : durationHour * 60 + durationMinute;
 
     store.setWhen(
       selectedDate,
@@ -274,26 +276,47 @@ export default function CreateGatheringWhenScreen() {
         {/* Duration Field */}
         <Pressable
           style={styles.formField}
-          onPress={() => toggleSection("duration")}
+          onPress={() => !durationUndecided && toggleSection("duration")}
         >
-          <Text style={styles.fieldLabel}>얼마나 오래 모일까요?</Text>
-          <View style={styles.valueRow}>
-            <Ionicons name="hourglass-outline" size={22} color={colors.text.primary} />
-            <Text
-              style={[
-                styles.fieldValue,
-                (durationHour > 0 || durationMinute > 0) &&
-                  styles.fieldValueFilled,
-              ]}
+          <View style={styles.durationLabelRow}>
+            <Text style={styles.fieldLabel}>얼마나 오래 모일까요?</Text>
+            <Pressable
+              style={styles.undecidedCheckboxRow}
+              onPress={() => setDurationUndecided((v) => !v)}
             >
-              {formatDuration()}
-            </Text>
+              <View
+                style={[
+                  styles.undecidedCheckbox,
+                  durationUndecided && styles.undecidedCheckboxChecked,
+                ]}
+              >
+                {durationUndecided && (
+                  <Ionicons name="checkmark" size={14} color={colors.text.primary} />
+                )}
+              </View>
+              <Text style={styles.undecidedLabel}>미정</Text>
+            </Pressable>
+          </View>
+          <View style={durationUndecided ? styles.strikethroughContainer : undefined}>
+            <View style={styles.valueRow}>
+              <Ionicons name="hourglass-outline" size={22} color={durationUndecided ? colors.text.tertiary : colors.text.primary} />
+              <Text
+                style={[
+                  styles.fieldValue,
+                  !durationUndecided && (durationHour > 0 || durationMinute > 0) &&
+                    styles.fieldValueFilled,
+                ]}
+              >
+                {formatDuration()}
+              </Text>
+            </View>
+            {durationUndecided && <View style={styles.strikethrough} />}
           </View>
           <View style={styles.underline} />
         </Pressable>
 
         {/* Duration Pickers */}
-        {expandedSection === "duration" && (
+        {expandedSection === "duration" && !durationUndecided && (
           <View style={styles.pickersRow}>
             <WheelPicker
               title="시간"
@@ -423,6 +446,44 @@ const styles = StyleSheet.create({
     gap: 33,
     paddingVertical: 10,
     marginBottom: 10,
+  },
+  durationLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  undecidedCheckboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  undecidedCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.accent.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  undecidedCheckboxChecked: {
+    backgroundColor: colors.accent.primary,
+  },
+  undecidedLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text.primary,
+  },
+  strikethroughContainer: {
+    position: "relative",
+    justifyContent: "center",
+  },
+  strikethrough: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: colors.text.tertiary,
   },
   scrollSpacer: {
     height: 20,

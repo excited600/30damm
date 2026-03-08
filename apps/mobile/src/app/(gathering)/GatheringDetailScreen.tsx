@@ -10,6 +10,16 @@ import { Toast } from "@/shared/components/ui/Toast";
 import { gatheringClient } from "@/api/clients/gatheringClient";
 import type { GatheringDetailResponse } from "@/api/types/gathering";
 
+const EMOJIS = ["😀", "😎", "🤩", "🥳", "😺", "🐶", "🐱", "🦊", "🐻", "🐼", "🐸", "🐵", "🦁", "🐯", "🐰", "🐨", "🐷", "🌸", "🌺", "🍀", "🔥", "⭐", "🎉", "🎈", "🍕", "🎸", "🏀", "⚽", "🎮", "🚀"];
+
+function getRandomEmoji(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  return EMOJIS[Math.abs(hash) % EMOJIS.length];
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   NONE: "없음",
   PARTY: "파티",
@@ -96,7 +106,9 @@ export default function GatheringDetailScreen() {
         {hasImage ? (
           <Image source={{ uri: detail.imgUrl! }} style={styles.gatheringPicture} />
         ) : (
-          <View style={styles.space} />
+          <View style={styles.gatheringPictureEmpty}>
+            <Text style={styles.gatheringPictureEmoji}>{getRandomEmoji(detail.title)}</Text>
+          </View>
         )}
 
         {/* BodySection */}
@@ -120,7 +132,9 @@ export default function GatheringDetailScreen() {
                       style={styles.profileImage}
                     />
                   ) : (
-                    <View style={styles.profilePlaceholder} />
+                    <View style={styles.profilePlaceholder}>
+                      <Text style={styles.profileEmoji}>{getRandomEmoji(p.nickname)}</Text>
+                    </View>
                   )}
                 </View>
                 <Text style={styles.participantName}>{p.nickname}</Text>
@@ -169,7 +183,7 @@ export default function GatheringDetailScreen() {
 
       {/* Header (absolute, overlaps image when hasImage=true) */}
       <View style={[styles.header, { top: insets.top }]}>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
+        <Pressable onPress={() => router.replace("/(gathering)/GatheringCardListScreen")} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
         <View style={styles.headerBlank} />
@@ -197,6 +211,16 @@ const styles = StyleSheet.create({
   },
   space: {
     height: 56,
+  },
+  gatheringPictureEmpty: {
+    width: "100%",
+    aspectRatio: 390 / 210,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gatheringPictureEmoji: {
+    fontSize: 64,
   },
   bodySection: {
     paddingHorizontal: 10,
@@ -251,6 +275,11 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 27,
     backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileEmoji: {
+    fontSize: 28,
   },
   participantName: {
     fontSize: 16,

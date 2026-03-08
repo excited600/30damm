@@ -1,8 +1,18 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { colors } from "@/shared/constants/colors";
 import { spacing } from "@/shared/constants/spacing";
 import { typography } from "@/shared/constants/typography";
+
+const EMOJIS = ["😀", "😎", "🤩", "🥳", "😺", "🐶", "🐱", "🦊", "🐻", "🐼", "🐸", "🐵", "🦁", "🐯", "🐰", "🐨", "🐷", "🌸", "🌺", "🍀", "🔥", "⭐", "🎉", "🎈", "🍕", "🎸", "🏀", "⚽", "🎮", "🚀"];
+
+function getRandomEmoji(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  return EMOJIS[Math.abs(hash) % EMOJIS.length];
+}
 
 interface GatheringCardProps {
   title: string;
@@ -30,13 +40,17 @@ export const GatheringCard = memo(function GatheringCard({
   onPress,
 }: GatheringCardProps) {
   const subtitle = `${location} · ${dateTime} ${duration} ${participants}`;
+  const thumbnailEmoji = useMemo(() => getRandomEmoji(title), [title]);
+  const hostEmoji = useMemo(() => getRandomEmoji(hostName), [hostName]);
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.container, pressed && styles.pressed]}>
       <View style={styles.content}>
         <View style={styles.thumbnail}>
-          {thumbnailUri && (
+          {thumbnailUri ? (
             <Image source={{ uri: thumbnailUri }} style={styles.thumbnailImage} />
+          ) : (
+            <Text style={styles.thumbnailEmoji}>{thumbnailEmoji}</Text>
           )}
         </View>
         <View style={styles.textGroup}>
@@ -51,12 +65,14 @@ export const GatheringCard = memo(function GatheringCard({
               {hostAvatarUri ? (
                 <Image source={{ uri: hostAvatarUri }} style={styles.avatar} />
               ) : (
-                <View style={[styles.avatar, styles.avatarPlaceholder]} />
+                <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                  <Text style={styles.avatarEmoji}>{hostEmoji}</Text>
+                </View>
               )}
-              <Text style={styles.hostName}>{hostName}</Text>
+              <Text style={styles.hostName} numberOfLines={1}>{hostName}</Text>
             </View>
             <View style={styles.priceBadge}>
-              <Text style={styles.price}>{price}</Text>
+              <Text style={styles.price} numberOfLines={1}>{price}</Text>
             </View>
           </View>
         </View>
@@ -91,6 +107,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  thumbnailEmoji: {
+    fontSize: 36,
+    textAlign: "center",
+    lineHeight: 80,
+  },
   textGroup: {
     flex: 1,
     gap: 10,
@@ -112,6 +133,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
+    flex: 1,
+    minWidth: 0,
   },
   avatar: {
     width: 20,
@@ -121,10 +144,16 @@ const styles = StyleSheet.create({
   },
   avatarPlaceholder: {
     backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarEmoji: {
+    fontSize: 14,
   },
   hostName: {
     ...typography.label.sm,
     color: colors.text.primary,
+    flexShrink: 1,
   },
   priceBadge: {
     backgroundColor: colors.text.secondary,

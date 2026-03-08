@@ -2,6 +2,7 @@ export interface SignupRequest {
   email: string;
   password: string;
   nickname: string;
+  gender: "MALE" | "FEMALE";
 }
 
 export interface SignupResponse {

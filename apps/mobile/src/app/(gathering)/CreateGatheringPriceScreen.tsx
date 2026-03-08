@@ -28,13 +28,28 @@ export default function CreateGatheringPriceScreen() {
   const [price, setPrice] = useState(store.price ? String(store.price) : "");
   const [splitByN, setSplitByN] = useState(store.isSplit);
 
+  const [priceError, setPriceError] = useState("");
+
+  const handleToggleSplit = () => {
+    setSplitByN((v) => {
+      if (!v) {
+        setPrice("");
+        setPriceError("");
+      }
+      return !v;
+    });
+  };
+
   const handleNext = () => {
     const isFree = !isPaid;
-    if (isPaid && (!price.trim() || isNaN(parseInt(price, 10)) || parseInt(price, 10) <= 0)) {
-      Alert.alert("알림", "가격을 입력해주세요.");
-      return;
+    if (isPaid && !splitByN) {
+      if (!price.trim() || isNaN(parseInt(price, 10)) || parseInt(price, 10) <= 0) {
+        setPriceError("가격을 입력해주세요.");
+        return;
+      }
     }
-    const parsedPrice = isPaid ? parseInt(price, 10) || null : null;
+    setPriceError("");
+    const parsedPrice = isPaid && !splitByN ? parseInt(price, 10) || null : null;
     store.setPrice(isFree, parsedPrice, splitByN);
     router.push("/(gathering)/CreateGatheringCategoryScreen");
   };
@@ -129,21 +144,29 @@ export default function CreateGatheringPriceScreen() {
             <View style={styles.priceSection}>
               {/* UnderlineInput */}
               <View style={styles.underlineInput}>
-                <TextInput
-                  style={styles.priceInput}
-                  placeholder="₩ 가격을 입력해주세요."
-                  placeholderTextColor={colors.text.tertiary}
-                  keyboardType="number-pad"
-                  value={price}
-                  onChangeText={setPrice}
-                />
+                <View style={splitByN ? styles.strikethroughContainer : undefined}>
+                  <TextInput
+                    style={[styles.priceInput, splitByN && styles.priceInputDisabled]}
+                    placeholder="₩ 가격을 입력해주세요."
+                    placeholderTextColor={colors.text.tertiary}
+                    keyboardType="number-pad"
+                    value={price}
+                    onChangeText={(text) => {
+                      setPrice(text);
+                      setPriceError("");
+                    }}
+                    editable={!splitByN}
+                  />
+                  {splitByN && <View style={styles.strikethrough} />}
+                </View>
                 <View style={styles.underline} />
+                {priceError !== "" && <Text style={styles.priceErrorText}>{priceError}</Text>}
               </View>
 
               {/* Checkbox */}
               <Pressable
                 style={styles.checkboxRow}
-                onPress={() => setSplitByN((v) => !v)}
+                onPress={handleToggleSplit}
               >
                 <View
                   style={[
@@ -271,11 +294,30 @@ const styles = StyleSheet.create({
   underlineInput: {
     gap: 8,
   },
+  strikethroughContainer: {
+    position: "relative",
+    justifyContent: "center",
+  },
+  strikethrough: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: colors.text.tertiary,
+  },
   priceInput: {
     fontSize: 16,
     fontWeight: "400",
     lineHeight: 24,
     color: colors.text.primary,
+  },
+  priceInputDisabled: {
+    color: colors.text.tertiary,
+  },
+  priceErrorText: {
+    color: "#FF4444",
+    fontSize: 13,
+    fontWeight: "500",
   },
   underline: {
     height: 1,
