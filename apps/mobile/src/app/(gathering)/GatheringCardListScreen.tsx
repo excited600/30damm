@@ -18,9 +18,11 @@ function formatGatheringCard(item: GatheringListItem) {
   const participants = `${item.maleCount}:${item.femaleCount}`;
   const price = item.isFree
     ? "무료"
-    : item.price
-      ? `${item.price.toLocaleString()}원`
-      : "";
+    : item.isSplit
+      ? "1/N"
+      : item.price
+        ? `${item.price.toLocaleString()}원`
+        : "";
 
   return {
     title: item.title,
