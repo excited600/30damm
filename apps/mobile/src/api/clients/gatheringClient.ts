@@ -27,4 +27,10 @@ export const gatheringClient = {
       .get<GatheringDetailResponse>(`/api/v1/gatherings/${gatheringUuid}`)
       .then((res) => res.data);
   },
+
+  join(gatheringUuid: string): Promise<void> {
+    return apiClient
+      .post(`/api/v1/gatherings/${gatheringUuid}/join`, {})
+      .then(() => undefined);
+  },
 };

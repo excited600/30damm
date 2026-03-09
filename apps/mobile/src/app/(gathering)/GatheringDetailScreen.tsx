@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, Image, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
@@ -63,6 +63,9 @@ export default function GatheringDetailScreen() {
     showToast?: string;
   }>();
   const [toastVisible, setToastVisible] = useState(showToast === "true");
+  const [errorToastVisible, setErrorToastVisible] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: detail, isLoading, isError, refetch } = useQuery({
     queryKey: ["gathering", gatheringUuid],
@@ -71,6 +74,19 @@ export default function GatheringDetailScreen() {
   });
 
   console.log("detail.isHost:", detail?.isHost);
+
+  const handleJoin = async () => {
+    if (!gatheringUuid || joining) return;
+    setJoining(true);
+    try {
+      await gatheringClient.join(gatheringUuid);
+      await queryClient.invalidateQueries({ queryKey: ["gathering", gatheringUuid] });
+    } catch {
+      setErrorToastVisible(true);
+    } finally {
+      setJoining(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -175,10 +191,12 @@ export default function GatheringDetailScreen() {
           />
         ) : (
           <Button
-            label="참여하기"
+            label={joining ? "참여 중..." : "참여하기"}
             color={colors.accent.primary}
             labelColor={colors.text.primary}
             style={styles.button}
+            onPress={handleJoin}
+            disabled={joining}
           />
         )}
       </View>
@@ -189,6 +207,12 @@ export default function GatheringDetailScreen() {
         visible={toastVisible}
         duration={1500}
         onHide={() => setToastVisible(false)}
+      />
+      <Toast
+        message="호출에 실패했습니다"
+        visible={errorToastVisible}
+        duration={1500}
+        onHide={() => setErrorToastVisible(false)}
       />
 
       {/* Header (absolute, overlaps image when hasImage=true) */}
