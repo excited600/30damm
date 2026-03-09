@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: 3040 API
+  title: 30damm API
   description: |
-    3040 서비스의 API 명세서입니다.
+    30damm 서비스의 API 명세서입니다.
   version: 1.0.0
   contact:
     name: developer - xi600

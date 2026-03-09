@@ -49,7 +49,7 @@
       content:
         application/json:
           schema:
-            $ref: '../3040-api-spec-overview.yml#/components/schemas/JoinGatheringRequest'
+            $ref: '../30damm-api-spec-overview.yml#/components/schemas/JoinGatheringRequest'
     responses:
       '201':
         description: Joined gathering successfully
@@ -199,14 +199,14 @@
       content:
         application/json:
           schema:
-            $ref: '../3040-api-spec-overview.yml#/components/schemas/OpenGatheringRequest'
+            $ref: '../30damm-api-spec-overview.yml#/components/schemas/OpenGatheringRequest'
     responses:
       '201':
         description: 모임 생성 성공
         content:
           application/json:
             schema:
-              $ref: '../3040-api-spec-overview.yml#/components/schemas/OpenGatheringResponse'
+              $ref: '../30damm-api-spec-overview.yml#/components/schemas/OpenGatheringResponse'
       '400':
         description: 유효성 검사 실패
       '401':
@@ -264,7 +264,7 @@
       content:
         application/json:
           schema:
-            $ref: '../3040-api-spec-overview.yml#/components/schemas/ScheduleSeriesRequest'
+            $ref: '../30damm-api-spec-overview.yml#/components/schemas/ScheduleSeriesRequest'
     responses:
       '201':
         description: Gatherings scheduled successfully
