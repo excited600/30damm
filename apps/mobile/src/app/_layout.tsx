@@ -1,4 +1,4 @@
-import { Slot, SplashScreen } from "expo-router";
+import { Stack, SplashScreen } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
@@ -72,7 +72,7 @@ export default function RootLayout() {
 
   return (
     <AppProviders>
-      <Slot />
+      <Stack screenOptions={{ headerShown: false }} />
     </AppProviders>
   );
 }

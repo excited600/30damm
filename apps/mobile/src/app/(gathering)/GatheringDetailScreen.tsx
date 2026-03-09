@@ -223,7 +223,7 @@ export default function GatheringDetailScreen() {
 
       {/* Header (absolute, overlaps image when hasImage=true) */}
       <View style={[styles.header, { top: insets.top }]}>
-        <Pressable onPress={() => router.replace("/(gathering)/GatheringCardListScreen")} hitSlop={8}>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
         <View style={styles.headerBlank} />

@@ -28,7 +28,7 @@ export default function LoginScreen() {
       { email, password },
       {
         onSuccess: () => {
-          router.replace("/(gathering)/GatheringCardListScreen");
+          router.replace("/(tabs)" as any);
         },
         onError: (err) => {
           const message =

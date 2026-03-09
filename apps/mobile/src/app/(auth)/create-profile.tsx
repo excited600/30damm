@@ -42,7 +42,7 @@ export default function CreateProfileScreen() {
       {
         onSuccess: () => {
           reset();
-          router.replace("/(gathering)/GatheringCardListScreen");
+          router.replace("/(tabs)" as any);
         },
         onError: (err) => {
           const message =

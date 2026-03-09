@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { colors } from "@/shared/constants/colors";
-import { HomeIcon, ChatIcon, MeIcon } from "@/shared/components/ui/TabIcons";
+import { HomeIcon, MeIcon } from "@/shared/components/ui/TabIcons";
 
 export default function TabLayout() {
   return (
@@ -30,7 +30,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          tabBarIcon: ({ color }) => <ChatIcon color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen
