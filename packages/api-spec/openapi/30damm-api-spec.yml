@@ -852,6 +852,7 @@ components:
         - currentFemaleCount
         - isFree
         - isSplit
+        - isHost
       properties:
         gatheringUuid:
           type: string
@@ -966,6 +967,9 @@ components:
           type: integer
           nullable: true
           description: 가격 (원 단위)
+        isHost:
+          type: boolean
+          description: 현재 사용자가 호스트인지 여부
     JoinGatheringRequest:
       type: object
       required:

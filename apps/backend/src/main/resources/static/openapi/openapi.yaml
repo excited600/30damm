@@ -883,6 +883,7 @@ components:
         title: title
         imgUrl: https://openapi-generator.tech
         duration: 7
+        isHost: true
         isGenderRatioEnabled: true
         currentFemaleCount: 2
         isFree: true
@@ -984,6 +985,9 @@ components:
           description: 가격 (원 단위)
           nullable: true
           type: integer
+        isHost:
+          description: 현재 사용자가 호스트인지 여부
+          type: boolean
       required:
       - category
       - currentFemaleCount
@@ -994,6 +998,7 @@ components:
       - host
       - isFree
       - isGenderRatioEnabled
+      - isHost
       - isSplit
       - maxCapacity
       - minCapacity

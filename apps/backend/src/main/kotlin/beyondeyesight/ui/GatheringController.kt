@@ -93,6 +93,7 @@ class GatheringController(
                     isSplit = gathering.isSplit,
                     price = if (gathering.isFree()) null else gathering.fee,
                     imgUrl = gathering.imageUrl?.let { URI(it) },
+                    isHost = currentUserUuid() == host.uuid,
                 )
             }
         )
