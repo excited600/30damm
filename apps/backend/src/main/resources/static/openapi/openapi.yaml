@@ -1006,21 +1006,14 @@ components:
       type: object
     JoinGatheringRequest:
       example:
-        userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         confirmPaymentRequest:
           paymentToken: paymentToken
           amount: 0
           paymentId: paymentId
           txId: txId
       properties:
-        userUuid:
-          description: UUID of the user who wants to join the gathering
-          format: uuid
-          type: string
         confirmPaymentRequest:
           $ref: "#/components/schemas/ConfirmPaymentRequest"
-      required:
-      - userUuid
       type: object
     PreparePaymentRequest:
       example:

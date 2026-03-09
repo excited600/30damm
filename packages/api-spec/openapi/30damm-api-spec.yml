@@ -972,13 +972,7 @@ components:
           description: 현재 사용자가 호스트인지 여부
     JoinGatheringRequest:
       type: object
-      required:
-        - userUuid
       properties:
-        userUuid:
-          type: string
-          format: uuid
-          description: UUID of the user who wants to join the gathering
         confirmPaymentRequest:
           $ref: '#/components/schemas/ConfirmPaymentRequest'
     PreparePaymentRequest:

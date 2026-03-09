@@ -1,12 +1,6 @@
 JoinGatheringRequest:
   type: object
-  required:
-    - userUuid
   properties:
-    userUuid:
-      type: string
-      format: uuid
-      description: UUID of the user who wants to join the gathering
     confirmPaymentRequest:
       $ref: '#/ConfirmPaymentRequest'
 

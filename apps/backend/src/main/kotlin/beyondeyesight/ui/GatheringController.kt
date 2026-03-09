@@ -209,7 +209,7 @@ class GatheringController(
     ) {
         gatheringApplicationService.join(
             gatheringUuid = gatheringUuid,
-            userUuid = joinGatheringRequest.userUuid,
+            userUuid = currentUserUuid(),
             confirmPaymentRequest = joinGatheringRequest.confirmPaymentRequest?.let {
                 ConfirmPaymentRequest(
                     paymentId = it.paymentId,
