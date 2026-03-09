@@ -852,7 +852,7 @@ components:
         - currentFemaleCount
         - isFree
         - isSplit
-        - isHost
+        - userStatus
       properties:
         gatheringUuid:
           type: string
@@ -967,9 +967,8 @@ components:
           type: integer
           nullable: true
           description: 가격 (원 단위)
-        isHost:
-          type: boolean
-          description: 현재 사용자가 호스트인지 여부
+        userStatus:
+          $ref: '#/components/schemas/GatheringUserStatus'
     JoinGatheringRequest:
       type: object
       properties:
@@ -1078,6 +1077,13 @@ components:
         - MALE
         - FEMALE
       description: Gender of the user
+    GatheringUserStatus:
+      type: string
+      enum:
+        - HOST_OPENED
+        - GUEST_JOINED
+        - GUEST_NOT_JOINED
+      description: 현재 사용자의 모임 참여 상태
     Gathering_WeeklyScheduleSummary:
       type: object
       required:

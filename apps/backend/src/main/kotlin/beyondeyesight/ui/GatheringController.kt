@@ -60,6 +60,7 @@ class GatheringController(
 
     override fun getGatheringDetail(gatheringId: UUID): GetGatheringDetailResponse {
         return gatheringApplicationService.getDetail(
+            userUuid = currentUserUuid(),
             gatheringUuid = gatheringId,
             mapper = { detail ->
                 val gathering = detail.gathering
@@ -93,7 +94,7 @@ class GatheringController(
                     isSplit = gathering.isSplit,
                     price = if (gathering.isFree()) null else gathering.fee,
                     imgUrl = gathering.imageUrl?.let { URI(it) },
-                    isHost = currentUserUuid() == host.uuid,
+                    userStatus = beyondeyesight.model.GatheringUserStatus.forValue(detail.userStatus.name),
                 )
             }
         )

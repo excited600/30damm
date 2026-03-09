@@ -55,6 +55,7 @@ class GatheringService(
         val host: UserEntity,
         val guestsWithUsers: List<GuestWithUser>,
         val genderCounts: GenderCounts,
+        val userStatus: GatheringUserStatus,
     )
     data class ScrollWithDetails(
         val scrollResult: beyondeyesight.domain.model.ScrollResult<GatheringEntity, GatheringCursor>,
@@ -113,7 +114,7 @@ class GatheringService(
         gatheringRepository.save(gathering)
     }
 
-    fun getDetail(gatheringUuid: UUID): GatheringDetail {
+    fun getDetail(userUuid: UUID, gatheringUuid: UUID): GatheringDetail {
         val gathering = gatheringRepository.findByUuid(gatheringUuid)
             ?: throw ResourceNotFoundException.byUuid(
                 resourceName = GatheringEntity.RESOURCE_NAME,
@@ -134,11 +135,18 @@ class GatheringService(
 
         val genderCounts = countGendersByGathering(gatheringUuid)
 
+        val userStatus = when {
+            userUuid == host.uuid -> GatheringUserStatus.HOST_OPENED
+            guestsWithUsers.any { it.user.uuid == userUuid } -> GatheringUserStatus.GUEST_JOINED
+            else -> GatheringUserStatus.GUEST_NOT_JOINED
+        }
+
         return GatheringDetail(
             gathering = gathering,
             host = host,
             guestsWithUsers = guestsWithUsers,
             genderCounts = genderCounts,
+            userStatus = userStatus
         )
     }
 

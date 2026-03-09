@@ -8,6 +8,7 @@ import beyondeyesight.domain.model.gathering.GatheringFilter
 import beyondeyesight.domain.model.gathering.ScheduleType
 import beyondeyesight.domain.model.gathering.WeeklySchedule
 import beyondeyesight.domain.model.payment.ConfirmPaymentRequest
+import beyondeyesight.domain.model.gathering.GatheringUserStatus
 import beyondeyesight.domain.service.gathering.GatheringService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -100,10 +101,11 @@ class GatheringApplicationService(
 
     @Transactional(readOnly = true)
     fun <R> getDetail(
+        userUuid: UUID,
         gatheringUuid: UUID,
         mapper: (GatheringService.GatheringDetail) -> R
     ): R {
-        val detail = gatheringService.getDetail(gatheringUuid)
+        val detail = gatheringService.getDetail(userUuid, gatheringUuid)
         return mapper.invoke(detail)
     }
 

@@ -877,13 +877,13 @@ components:
       example:
         date: 2000-01-23
         isSplit: true
+        userStatus: HOST_OPENED
         description: description
         maxCapacity: 6
         maxMaleCapacity: 1
         title: title
         imgUrl: https://openapi-generator.tech
         duration: 7
-        isHost: true
         isGenderRatioEnabled: true
         currentFemaleCount: 2
         isFree: true
@@ -985,9 +985,8 @@ components:
           description: 가격 (원 단위)
           nullable: true
           type: integer
-        isHost:
-          description: 현재 사용자가 호스트인지 여부
-          type: boolean
+        userStatus:
+          $ref: "#/components/schemas/GatheringUserStatus"
       required:
       - category
       - currentFemaleCount
@@ -998,11 +997,11 @@ components:
       - host
       - isFree
       - isGenderRatioEnabled
-      - isHost
       - isSplit
       - maxCapacity
       - minCapacity
       - title
+      - userStatus
       type: object
     JoinGatheringRequest:
       example:
@@ -1139,6 +1138,13 @@ components:
       enum:
       - MALE
       - FEMALE
+      type: string
+    GatheringUserStatus:
+      description: 현재 사용자의 모임 참여 상태
+      enum:
+      - HOST_OPENED
+      - GUEST_JOINED
+      - GUEST_NOT_JOINED
       type: string
     Gathering_WeeklyScheduleSummary:
       properties:
