@@ -94,5 +94,7 @@ export interface GatheringDetailResponse {
   isFree: boolean;
   isSplit: boolean;
   price?: number | null;
-  isHost: boolean;
+  userStatus: GatheringUserStatus;
 }
+
+export type GatheringUserStatus = "HOST_OPENED" | "GUEST_JOINED" | "GUEST_NOT_JOINED";

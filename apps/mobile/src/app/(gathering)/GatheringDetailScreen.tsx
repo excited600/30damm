@@ -73,8 +73,6 @@ export default function GatheringDetailScreen() {
     enabled: !!gatheringUuid,
   });
 
-  console.log("detail.isHost:", detail?.isHost);
-
   const handleJoin = async () => {
     if (!gatheringUuid || joining) return;
     setJoining(true);
@@ -183,13 +181,21 @@ export default function GatheringDetailScreen() {
 
       {/* BottomCTAOnlyButton */}
       <View style={[styles.bottomCTA, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-        {detail.isHost ? (
+        {detail.userStatus === "HOST_OPENED" && (
           <Button
             label="호스트 입니다"
             disabled
             style={styles.button}
           />
-        ) : (
+        )}
+        {detail.userStatus === "GUEST_JOINED" && (
+          <Button
+            label="참여중입니다"
+            disabled
+            style={styles.button}
+          />
+        )}
+        {detail.userStatus === "GUEST_NOT_JOINED" && (
           <Button
             label={joining ? "참여 중..." : "참여하기"}
             color={colors.accent.primary}
