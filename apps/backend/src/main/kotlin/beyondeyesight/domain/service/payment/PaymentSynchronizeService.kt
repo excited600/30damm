@@ -21,7 +21,7 @@ class PaymentSynchronizeService(
             resourceName = PaymentEntity.RESOURCE_NAME,
             fieldName = "paymentId",
             fieldValue = paymentId
-        ).also { logger.error("[3040] 동기화 실패 - paymentId: $paymentId 에 해당하는 엔티티가 없습니다.") }
+        ).also { logger.error("[30damm] 동기화 실패 - paymentId: $paymentId 에 해당하는 엔티티가 없습니다.") }
 
         val pgPayment = paymentGateway.getPayment(paymentId)
         paymentEntity.synchronize(pgPayment)

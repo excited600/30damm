@@ -9,7 +9,7 @@ plugins {
 
 group = "beyondeyesight"
 version = "0.0.1-SNAPSHOT"
-description = "3040 project"
+description = "30damm project"
 
 springBoot {
     mainClass.set("beyondeyesight.ApplicationKt")
@@ -78,7 +78,7 @@ allOpen {
 
 openApiGenerate {
     generatorName.set("kotlin-spring")
-    inputSpec.set("${rootDir}/../../packages/api-spec/openapi/3040-api-spec.yml")
+    inputSpec.set("${rootDir}/../../packages/api-spec/openapi/30damm-api-spec.yml")
     outputDir.set("${buildDir}/generated")
     apiPackage.set("beyondeyesight.api")
     modelPackage.set("beyondeyesight.model")
@@ -237,7 +237,7 @@ tasks.register<Exec>("bundleOpenApi") {
     workingDir = file("${rootDir}/../../packages/api-spec/openapi")
     commandLine(
         "sh", "-c",
-        "npx @redocly/cli bundle 3040-api-spec-overview.yml -o 3040-api-spec.yml"
+        "npx @redocly/cli bundle 30damm-api-spec-overview.yml -o 30damm-api-spec.yml"
     )
 }
 

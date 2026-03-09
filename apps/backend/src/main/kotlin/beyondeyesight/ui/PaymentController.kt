@@ -22,7 +22,7 @@ class PaymentController(
 
     override fun paymentWebhook(paymentWebhook: PaymentWebhook) {
         val webhookType = WebhookType.entries.find { it.name == paymentWebhook.type.name } ?: run {
-            logger.error("[3040] 알 수 없는 웹훅 타입 수신: type=${paymentWebhook.type.name}. 무시 처리.")
+            logger.error("[30damm] 알 수 없는 웹훅 타입 수신: type=${paymentWebhook.type.name}. 무시 처리.")
             return
         }
         paymentApplicationService.handleWebhook(

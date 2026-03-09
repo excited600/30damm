@@ -176,7 +176,7 @@ class GatheringService(
 
     fun leave(gatheringUuid: UUID, userUuid: UUID, reason: String) {
         guestService.leave(userUuid = userUuid, gatheringUuid = gatheringUuid)
-        logger.info("[3040] 사용자 $userUuid 님이 모임 $gatheringUuid 에서 나감.")
+        logger.info("[30damm] 사용자 $userUuid 님이 모임 $gatheringUuid 에서 나감.")
 
         val paymentEntity = paymentRepository.findByProductTypeAndProductUuidAndBuyerUuid(
             productType = ProductType.GATHERING,
@@ -465,19 +465,19 @@ class GatheringService(
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
         ) ?: run {
-            logger.error("[3040] 결제 실패 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
+            logger.error("[30damm] 결제 실패 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
 
         try {
             if (paymentEntity.status != Status.FAILED) {
-                logger.info("[3040] 실패 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
+                logger.info("[30damm] 실패 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
 
             val pgPayment = paymentGateway.getPayment(paymentEntity.paymentId)
             if (pgPayment.status != Status.FAILED) {
-                logger.error("[3040] 실패 웹훅 처리 실패: PG 결제 상태가 FAILED가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
+                logger.error("[30damm] 실패 웹훅 처리 실패: PG 결제 상태가 FAILED가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
                 return
             }
 
@@ -485,7 +485,7 @@ class GatheringService(
             val userUuid = paymentEntity.buyerUuid
 
             if (!guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
-                logger.info("[3040] 이미 모임에서 나간 사용자입니다. 결제 실패를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+                logger.info("[30damm] 이미 모임에서 나간 사용자입니다. 결제 실패를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
 
@@ -493,7 +493,7 @@ class GatheringService(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
             )
-            logger.info("[3040] 결제 실패 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+            logger.info("[30damm] 결제 실패 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
             paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
             lockService.unlock(
@@ -512,19 +512,19 @@ class GatheringService(
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
         ) ?: run {
-            logger.error("[3040] 결제 취소 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
+            logger.error("[30damm] 결제 취소 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
 
         try {
             if (paymentEntity.status != Status.CANCELLED) {
-                logger.info("[3040] 취소 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
+                logger.info("[30damm] 취소 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
 
             val pgPayment = paymentGateway.getPayment(paymentEntity.paymentId)
             if (pgPayment.status != Status.CANCELLED) {
-                logger.error("[3040] 취소 웹훅 처리 실패: PG 결제 상태가 CANCELLED가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
+                logger.error("[30damm] 취소 웹훅 처리 실패: PG 결제 상태가 CANCELLED가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
                 return
             }
 
@@ -532,7 +532,7 @@ class GatheringService(
             val userUuid = paymentEntity.buyerUuid
 
             if (!guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
-                logger.info("[3040] 이미 모임에서 나간 사용자입니다. 취소를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+                logger.info("[30damm] 이미 모임에서 나간 사용자입니다. 취소를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
 
@@ -540,7 +540,7 @@ class GatheringService(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
             )
-            logger.info("[3040] 결제 취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+            logger.info("[30damm] 결제 취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
             paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
             lockService.unlock(
@@ -559,18 +559,18 @@ class GatheringService(
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
         ) ?: run {
-            logger.error("[3040] 결제 부분취소 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
+            logger.error("[30damm] 결제 부분취소 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
         try {
             if (paymentEntity.status != Status.PARTIAL_CANCELLED) {
-                logger.info("[3040] 부분 취소 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
+                logger.info("[30damm] 부분 취소 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
 
             val pgPayment = paymentGateway.getPayment(paymentEntity.paymentId)
             if (pgPayment.status != Status.PARTIAL_CANCELLED) {
-                logger.error("[3040] 부분 취소 웹훅 처리 실패: PG 결제 상태가 PARTIAL_CANCELLED가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
+                logger.error("[30damm] 부분 취소 웹훅 처리 실패: PG 결제 상태가 PARTIAL_CANCELLED가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
                 return
             }
 
@@ -578,7 +578,7 @@ class GatheringService(
             val userUuid = paymentEntity.buyerUuid
 
             if (!guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
-                logger.info("[3040] 이미 모임에서 나간 사용자입니다. 부분 취소를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+                logger.info("[30damm] 이미 모임에서 나간 사용자입니다. 부분 취소를 무시합니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
 
@@ -586,7 +586,7 @@ class GatheringService(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
             )
-            logger.info("[3040] 결제 부분취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+            logger.info("[30damm] 결제 부분취소 웹훅 처리: 모임 떠나기 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
             paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
             lockService.unlock(
@@ -605,19 +605,19 @@ class GatheringService(
             waitTimeout = Duration.ofSeconds(20),
             retryInterval = Duration.ofMillis(100)
         ) ?: run {
-            logger.error("[3040] 결제 완료 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
+            logger.error("[30damm] 결제 완료 웹훅 처리 실패: lock 획득 실패 paymentId=${paymentEntity.paymentId}, gatheringUuid=${paymentEntity.productUuid}")
             return
         }
 
         try {
             if (paymentEntity.status == Status.PAID) {
-                logger.info("[3040] 결제 완료 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
+                logger.info("[30damm] 결제 완료 웹훅 처리: 이미 처리된 결제입니다. paymentId=${paymentEntity.paymentId}")
                 return
             }
 
             val pgPayment = paymentGateway.getPayment(paymentEntity.paymentId)
             if (pgPayment.status != Status.PAID) {
-                logger.error("[3040] 결제 완료 웹훅 처리 실패: PG 결제 상태가 PAID가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
+                logger.error("[30damm] 결제 완료 웹훅 처리 실패: PG 결제 상태가 PAID가 아닙니다. paymentId=${paymentEntity.paymentId}, pgStatus=${pgPayment.status}")
                 return
             }
 
@@ -626,7 +626,7 @@ class GatheringService(
 
             val gathering = gatheringRepository.findByUuid(gatheringUuid)
                 ?: run {
-                    logger.error("[3040] 결제 완료 웹훅 처리 실패: 모임을 찾을 수 없습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
+                    logger.error("[30damm] 결제 완료 웹훅 처리 실패: 모임을 찾을 수 없습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
                     paymentGateway.cancelPayment(
                         paymentId = paymentEntity.paymentId,
                         reason = "모임을 찾을 수 없습니다. gatheringUuid=${gatheringUuid}, userUuid=${userUuid}",
@@ -636,14 +636,14 @@ class GatheringService(
                 }
 
             if (guestRepository.existsByGuestId(GuestId(gatheringUuid = gatheringUuid, userUuid = userUuid))) {
-                logger.info("[3040] 결제 완료 웹훅 처리: 이미 모임에 참가한 사용자입니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+                logger.info("[30damm] 결제 완료 웹훅 처리: 이미 모임에 참가한 사용자입니다. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
                 return
             }
 
             val currentGuestCount = guestRepository.countByGathering(gathering.uuid)
 
             if (currentGuestCount + 1 > gathering.maxCapacity) {
-                logger.error("[3040] 결제 완료 웹훅 처리 실패: 모임 정원이 초과되었습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
+                logger.error("[30damm] 결제 완료 웹훅 처리 실패: 모임 정원이 초과되었습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
                 paymentGateway.cancelPayment(
                     paymentId = paymentEntity.paymentId,
                     reason = "정원 초과. gatheringUuid=${gatheringUuid}, userUuid=${userUuid}",
@@ -661,7 +661,7 @@ class GatheringService(
                 )
 
                 if (currentMaleGuestCount + 1 > maxMaleCount) {
-                    logger.error("[3040] 결제 완료 웹훅 처리 실패: 모임 정원이 초과되었습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
+                    logger.error("[30damm] 결제 완료 웹훅 처리 실패: 모임 정원이 초과되었습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
                     paymentGateway.cancelPayment(
                         paymentId = paymentEntity.paymentId,
                         reason = "정원 초과 M. gatheringUuid=${gatheringUuid}, userUuid=${userUuid}",
@@ -681,7 +681,7 @@ class GatheringService(
                 )
 
                 if (currentFemaleGuestCount + 1 > maxFemaleCount) {
-                    logger.error("[3040] 결제 완료 웹훅 처리 실패: 모임 정원이 초과되었습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
+                    logger.error("[30damm] 결제 완료 웹훅 처리 실패: 모임 정원이 초과되었습니다. 취소 처리합니다. gatheringUuid=$gatheringUuid, paymentId=${paymentEntity.paymentId}")
                     paymentGateway.cancelPayment(
                         paymentId = paymentEntity.paymentId,
                         reason = "정원 초과 F. gatheringUuid=${gatheringUuid}, userUuid=${userUuid}",
@@ -695,7 +695,7 @@ class GatheringService(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
             )
-            logger.info("[3040] 결제 완료 웹훅 처리: 모임 참가 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
+            logger.info("[30damm] 결제 완료 웹훅 처리: 모임 참가 처리 완료. userUuid=$userUuid, gatheringUuid=$gatheringUuid")
             paymentSynchronizeService.synchronize(paymentEntity.paymentId)
         } finally {
             lockService.unlock(

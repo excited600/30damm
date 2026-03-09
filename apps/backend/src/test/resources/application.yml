@@ -1,8 +1,8 @@
 spring:
   application:
-    name: 3040-test
+    name: 30damm-test
   datasource:
-    url: jdbc:postgresql://localhost:15432/3040
+    url: jdbc:postgresql://localhost:15432/30damm
     username: test
     password: test
   data:
@@ -22,7 +22,7 @@ spring:
     locations: classpath:db/migration
 
 jwt:
-  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi0zMDQw
+  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi0zMGRhbW0=
   access-token-expiry: 3600000
   refresh-token-expiry: 604800000
 

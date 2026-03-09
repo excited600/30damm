@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Spring Boot 4.0 application written in Kotlin for managing social gatherings. The project uses PostgreSQL for persistence, Redis for distributed locking, and follows a layered architecture pattern.
 
-**Package naming**: The base package is `beyondeyesight._0` (note the underscore) - the original package name '3040' was invalid so it was changed to '_0'.
+**Package naming**: The base package is `beyondeyesight._0` (note the underscore) - the original package name '30damm' was invalid so it was changed to '_0'.
 
 ## Development Commands
 
@@ -50,7 +50,7 @@ Controllers implement these generated interfaces (e.g., `GatheringsApiImpl` impl
 
 ### Database Setup
 The application requires PostgreSQL and Redis running locally:
-- **Development PostgreSQL**: `localhost:5432/3040` (username: `root`, password: `beyondeyesight`)
+- **Development PostgreSQL**: `localhost:5432/30damm` (username: `root`, password: `beyondeyesight`)
 - **Test PostgreSQL**: `localhost:15432/testdb` (username: `test`, password: `test`)
 - **Redis**: `localhost:6379`
 

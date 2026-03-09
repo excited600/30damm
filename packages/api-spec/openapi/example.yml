@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: 3040 API
+  title: 30damm API
   description: |
-    3040 서비스의 API 명세서입니다.
+    30damm 서비스의 API 명세서입니다.
 
     ## 인증
     대부분의 API는 Bearer 토큰 인증이 필요합니다.
@@ -20,7 +20,7 @@ info:
 servers:
   - url: http://localhost:8080
     description: 로컬 개발 서버
-  - url: https://api.3040.com
+  - url: https://api.30damm.com
     description: 운영 서버
 
 tags:

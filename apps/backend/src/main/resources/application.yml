@@ -1,8 +1,8 @@
 spring:
   application:
-    name: 3040
+    name: 30damm
   datasource:
-    url: jdbc:postgresql://localhost:5432/3040
+    url: jdbc:postgresql://localhost:5432/30damm
     username: root
     password: beyondeyesight
     driver-class-name: org.postgresql.Driver
@@ -23,7 +23,7 @@ spring:
       password: beyondeyesight
 
 jwt:
-  secret: dGhpcyBpcyBhIHZlcnkgc2VjcmV0IGtleSBmb3IgSldUIHRva2VuIGdlbmVyYXRpb24gMzA0MA==
+  secret: dGhpcyBpcyBhIHZlcnkgc2VjcmV0IGtleSBmb3IgSldUIHRva2VuIGdlbmVyYXRpb24gMzBkYW1t
   access-token-expiry: 3600000
   refresh-token-expiry: 604800000
 

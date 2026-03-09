@@ -65,7 +65,7 @@ class PaymentService(
                 )
             )
             paymentGateway.preRegisterPayment(paymentId, amount, Currency.KRW)
-            logger.info("[3040] Payment 준비 완료. paymentId=$paymentId, productType=${paymentEntity.productType} productUuid=${paymentEntity.productUuid}, amount=${paymentEntity.amount}")
+            logger.info("[30damm] Payment 준비 완료. paymentId=$paymentId, productType=${paymentEntity.productType} productUuid=${paymentEntity.productUuid}, amount=${paymentEntity.amount}")
         } finally {
             lockService.unlock(
                 resourceName = PaymentEntity.RESOURCE_NAME,
@@ -80,7 +80,7 @@ class PaymentService(
             val pgPayment = paymentGateway.getPayment(paymentId)
             if (pgPayment.status != Status.PAID) {
 
-                logger.error("[3040] 결제 상태가 취소 가능한 상태가 아님: ${pgPayment.status}")
+                logger.error("[30damm] 결제 상태가 취소 가능한 상태가 아님: ${pgPayment.status}")
                 throw CannotCancelException.invalidPaymentStatus(
                     paymentId = paymentId,
                     status = pgPayment.status
@@ -91,14 +91,14 @@ class PaymentService(
                 reason = reason,
                 amount = amount
             )
-            logger.info("[3040] 결제 취소 성공. paymentId: $paymentId, amount: $amount, reason: $reason")
+            logger.info("[30damm] 결제 취소 성공. paymentId: $paymentId, amount: $amount, reason: $reason")
         } finally {
             paymentSynchronizeService.synchronize(paymentId = paymentId)
         }
     }
 
     fun confirmPayment(paymentId: String, paymentToken: String, txId: String, amount: Int) {
-        logger.info("[3040] 결제 컨펌 시작. paymentId=$paymentId")
+        logger.info("[30damm] 결제 컨펌 시작. paymentId=$paymentId")
 
         val paymentEntity = paymentRepository.findByPaymentId(paymentId)
             ?: throw ResourceNotFoundException.byField(
@@ -110,7 +110,7 @@ class PaymentService(
         // 검증: 금액 일치 여부 (위변조 방지)
         if (pgPayment.amount.total != paymentEntity.amount) {
             logger.error(
-                "[3040] 서버 금액과 pg 금액이 다름. server=${paymentEntity.amount}, pg=${pgPayment.amount.total}, paymentId=$paymentId"
+                "[30damm] 서버 금액과 pg 금액이 다름. server=${paymentEntity.amount}, pg=${pgPayment.amount.total}, paymentId=$paymentId"
             )
             throw VerificationFailedException.invalidAmount(
                 serverAmount = paymentEntity.amount,

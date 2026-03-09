@@ -4,8 +4,8 @@ info:
     email: excited600@gmail.com
     name: developer - xi600
   description: |
-    3040 서비스의 API 명세서입니다.
-  title: 3040 API
+    30damm 서비스의 API 명세서입니다.
+  title: 30damm API
   version: 1.0.0
 servers:
 - description: 로컬 서버

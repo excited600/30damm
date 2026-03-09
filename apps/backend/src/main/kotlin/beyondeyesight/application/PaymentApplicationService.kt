@@ -34,13 +34,13 @@ class PaymentApplicationService(
         // verifyWebhookSignature(signature, rawBody)
 
         val paymentEntity = paymentRepository.findByPaymentId(webhook.data.paymentId) ?: run {
-            logger.error("[3040] 웹훅 수신된 paymentId=${webhook.data.paymentId}에 해당하는 결제 건을 찾을 수 없음. 무시 처리.")
+            logger.error("[30damm] 웹훅 수신된 paymentId=${webhook.data.paymentId}에 해당하는 결제 건을 찾을 수 없음. 무시 처리.")
             return
         }
 
         when (webhook.type) {
             WebhookType.TransactionPeriodReady -> {
-                logger.info("[3040 결제 준비 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
+                logger.info("[30damm] 결제 준비 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
                 return
             }
 
@@ -52,7 +52,7 @@ class PaymentApplicationService(
             }
 
             WebhookType.TransactionPeriodVirtualAccountIssued -> {
-                logger.info("[3040] 가상결제 발급 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
+                logger.info("[30damm] 가상결제 발급 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
                 return
             }
 
@@ -77,19 +77,19 @@ class PaymentApplicationService(
                 return
             }
             WebhookType.TransactionPeriodPayPending -> {
-                logger.info("[3040] 결제 대기 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
+                logger.info("[30damm] 결제 대기 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
                 return
             }
             WebhookType.TransactionPeriodCancelPending -> {
-                logger.info("[3040] 취소 대기 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
+                logger.info("[30damm] 취소 대기 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
                 return
             }
             WebhookType.TransactionPeriodDisputeCreated -> {
-                logger.info("[3040] DisputeCreated 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
+                logger.info("[30damm] DisputeCreated 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
                 return
             }
             WebhookType.TransactionPeriodDisputeResolved -> {
-                logger.info("[3040] DisputeResolved 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
+                logger.info("[30damm] DisputeResolved 웹훅 수신: paymentId=${paymentEntity.paymentId}. 무시합니다.")
                 return
             }
         }

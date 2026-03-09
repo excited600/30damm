@@ -3,9 +3,9 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16
-    container_name: 3040-postgres
+    container_name: 30damm-postgres
     environment:
-      POSTGRES_DB: 3040
+      POSTGRES_DB: 30damm
       POSTGRES_USER: root
       POSTGRES_PASSWORD: beyondeyesight
     ports:
@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
   redis:
     image: redis:7
-    container_name: 3040-redis
+    container_name: 30damm-redis
     command: redis-server --requirepass beyondeyesight
     ports:
       - "6379:6379"

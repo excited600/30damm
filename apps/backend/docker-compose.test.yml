@@ -1,16 +1,16 @@
 services:
   postgres-test:
     image: postgres:16
-    container_name: 3040-postgres-test
+    container_name: 30damm-postgres-test
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-      POSTGRES_DB: 3040
+      POSTGRES_DB: 30damm
     ports:
       - "15432:5432"
   redis-test:
     image: redis:7
-    container_name: 3040-redis-test
+    container_name: 30damm-redis-test
     command: redis-server --requirepass test
     ports:
       - "16379:6379"
