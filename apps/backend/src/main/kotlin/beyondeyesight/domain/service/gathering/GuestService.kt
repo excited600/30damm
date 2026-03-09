@@ -23,7 +23,7 @@ class GuestService(
             resourceName = "User",
             resourceUuid = userUuid
         )
-        val guest = GuestEntity.Companion.join(
+        val guest = GuestEntity.join(
             gatheringUuid = gatheringEntity.uuid,
             userUuid = userUuid,
         )
