@@ -94,4 +94,5 @@ export interface GatheringDetailResponse {
   isFree: boolean;
   isSplit: boolean;
   price?: number | null;
+  isHost: boolean;
 }

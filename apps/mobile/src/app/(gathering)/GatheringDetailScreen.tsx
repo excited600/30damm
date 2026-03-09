@@ -70,6 +70,8 @@ export default function GatheringDetailScreen() {
     enabled: !!gatheringUuid,
   });
 
+  console.log("detail.isHost:", detail?.isHost);
+
   if (isLoading) {
     return (
       <View style={[styles.gatheringDetailScreen, styles.centered, { paddingTop: insets.top }]}>
@@ -165,12 +167,20 @@ export default function GatheringDetailScreen() {
 
       {/* BottomCTAOnlyButton */}
       <View style={[styles.bottomCTA, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-        <Button
-          label="참여하기"
-          color={colors.accent.primary}
-          labelColor={colors.text.primary}
-          style={styles.button}
-        />
+        {detail.isHost ? (
+          <Button
+            label="호스트 입니다"
+            disabled
+            style={styles.button}
+          />
+        ) : (
+          <Button
+            label="참여하기"
+            color={colors.accent.primary}
+            labelColor={colors.text.primary}
+            style={styles.button}
+          />
+        )}
       </View>
 
       {/* Toast */}
