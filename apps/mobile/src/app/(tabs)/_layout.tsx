@@ -34,7 +34,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="my-30damm"
         options={{
           tabBarIcon: ({ color }) => <MeIcon color={color} />,
         }}
