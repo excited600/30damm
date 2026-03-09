@@ -2,12 +2,12 @@ import { ExpoConfig, ConfigContext } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "3040",
-  slug: "3040-mobile",
+  name: "30damm",
+  slug: "30damm-mobile",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
-  scheme: "app3040",
+  scheme: "app30damm",
   userInterfaceStyle: "automatic",
   splash: {
     image: "./assets/splash-icon.png",
@@ -16,7 +16,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.beyondeyesight.app3040",
+    bundleIdentifier: "com.beyondeyesight.app30damm",
     infoPlist: {
       NSAppTransportSecurity: {
         NSAllowsArbitraryLoads: process.env.APP_ENV !== "production",
@@ -31,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundImage: "./assets/android-icon-background.png",
       monochromeImage: "./assets/android-icon-monochrome.png",
     },
-    package: "com.beyondeyesight.app3040",
+    package: "com.beyondeyesight.app30damm",
   },
   web: {
     bundler: "metro",
