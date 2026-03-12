@@ -101,7 +101,17 @@ export default function GatheringDetailScreen() {
   if (isError || !detail) {
     return (
       <View style={[styles.gatheringDetailScreen, styles.centered, { paddingTop: insets.top }]}>
-        <Pressable onPress={() => router.back()} style={[styles.errorBackButton, { top: insets.top + 12 }]} hitSlop={8}>
+        <Pressable
+          onPress={() => {
+            if (showToast === "true") {
+              router.replace("/(gathering)/GatheringCardListScreen" as any);
+            } else {
+              router.back();
+            }
+          }}
+          style={[styles.errorBackButton, { top: insets.top + 12 }]}
+          hitSlop={8}
+        >
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
         <Text style={styles.errorText}>모임 정보를 불러오지 못했습니다.</Text>
@@ -227,7 +237,16 @@ export default function GatheringDetailScreen() {
 
       {/* Header (absolute, overlaps image when hasImage=true) */}
       <View style={[styles.header, { top: insets.top }]}>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
+        <Pressable
+          onPress={() => {
+            if (showToast === "true") {
+              router.replace("/(gathering)/GatheringCardListScreen" as any);
+            } else {
+              router.back();
+            }
+          }}
+          hitSlop={8}
+        >
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
         <View style={styles.headerBlank} />
