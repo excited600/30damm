@@ -59,6 +59,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             subCategory = GatheringSubCategory.HOME_PARTY,
             imageUrl = anyString,
             title = anyString,
+            description = anyString,
             maxMaleCount = 5,
             maxFemaleCount = 5
         )
@@ -153,7 +154,7 @@ class GatheringControllerTest : EndToEndTestBase() {
             .responseBody!!
 
         // when
-        val joinRequest = JoinGatheringRequest(userUuid = guest.userUuid)
+        val joinRequest = JoinGatheringRequest()
 
         webTestClient.post()
             .uri("/api/v1/gatherings/${gathering.gatheringUuid}/join")
@@ -229,7 +230,6 @@ class GatheringControllerTest : EndToEndTestBase() {
 
         // when
         val joinRequest = JoinGatheringRequest(
-            userUuid = guest.userUuid,
             confirmPaymentRequest = ConfirmPaymentRequest(
                 paymentId = paymentId,
                 paymentToken = "test-token",
@@ -402,7 +402,7 @@ class GatheringControllerTest : EndToEndTestBase() {
         webTestClient.post()
             .uri("/api/v1/gatherings/${gathering.gatheringUuid}/join")
             .header("Authorization", "Bearer ${guest.accessToken}")
-            .bodyValue(JoinGatheringRequest(userUuid = guest.userUuid))
+            .bodyValue(JoinGatheringRequest())
             .exchange()
             .expectStatus().is2xxSuccessful
 

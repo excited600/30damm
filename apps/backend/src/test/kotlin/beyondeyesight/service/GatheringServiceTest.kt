@@ -85,6 +85,7 @@ class GatheringServiceTest {
                 category = Category.PARTY,
                 imageUrl = "https://example.com/image.jpg",
                 title = "테스트 모임",
+                description = null,
                 scheduleType = testCase.scheduleType,
                 weeklySchedule = testCase.weeklySchedule,
                 dateSchedule = testCase.dateSchedule,
@@ -371,6 +372,7 @@ class GatheringServiceTest {
             category = Category.PARTY,
             imageUrl = "https://example.com/image.jpg",
             title = "테스트 모임",
+            description = null,
             scheduleType = ScheduleType.DATE,
             weeklySchedule = null,
             dateSchedule = DateSchedule(

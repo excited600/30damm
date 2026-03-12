@@ -331,6 +331,7 @@ class GatheringService(
         category: Category,
         imageUrl: String?,
         title: String,
+        description: String?,
         scheduleType: ScheduleType,
         weeklySchedule: WeeklySchedule?,
         dateSchedule: DateSchedule?,
@@ -358,7 +359,7 @@ class GatheringService(
                 category = category,
                 imageUrl = imageUrl,
                 title = title,
-                description = null,
+                description = description,
             )
         )
 

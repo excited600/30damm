@@ -250,6 +250,7 @@ class GatheringController(
                 ),
             imageUrl = scheduleSeriesRequest.imageUrl,
             title = scheduleSeriesRequest.title,
+            description = scheduleSeriesRequest.description,
             scheduleType = ScheduleType.entries.find { it.name == scheduleSeriesRequest.scheduleType.name }
                 ?: throw InvalidValueException(
                     valueName = "scheduleType",

@@ -608,6 +608,7 @@ components:
         subCategory: HOME_PARTY
         fee: 7
         maxCapacity: 6
+        description: description
         title: title
         gatheringDays: 9
         discountEnabled: true
@@ -622,7 +623,6 @@ components:
         minCapacity: 0
         place: place
         category: NONE
-        introduction: introduction
       properties:
         scheduleType:
           $ref: "#/components/schemas/Gathering_ScheduleType"
@@ -675,8 +675,8 @@ components:
         title:
           description: Title of the gathering
           type: string
-        introduction:
-          description: Introduction of the gathering
+        description:
+          description: Description of the gathering
           type: string
         gatheringDays:
           description: Number of days before the gathering will take place.
@@ -684,13 +684,13 @@ components:
       required:
       - approveType
       - category
+      - description
       - discountEnabled
       - fee
       - gatheringDays
       - genderRatioEnabled
       - hostUuid
       - imageUrl
-      - introduction
       - maxAge
       - maxCapacity
       - minAge

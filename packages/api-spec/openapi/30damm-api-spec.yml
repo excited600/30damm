@@ -557,7 +557,7 @@ components:
         - subCategory
         - imageUrl
         - title
-        - introduction
+        - description
         - gatheringDays
       properties:
         scheduleType:
@@ -611,9 +611,9 @@ components:
         title:
           type: string
           description: Title of the gathering
-        introduction:
+        description:
           type: string
-          description: Introduction of the gathering
+          description: Description of the gathering
         gatheringDays:
           type: integer
           description: Number of days before the gathering will take place.
