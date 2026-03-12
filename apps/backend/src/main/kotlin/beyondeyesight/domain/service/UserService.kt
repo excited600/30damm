@@ -6,6 +6,7 @@ import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.domain.repository.user.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class UserService(
@@ -55,5 +56,15 @@ class UserService(
         }
 
         return user
+    }
+
+    fun delete(userUuid: UUID) {
+        val user = userRepository.findByUuid(userUuid)
+            ?: throw ResourceNotFoundException.byUuid(
+                resourceName = UserEntity.RESOURCE_NAME,
+                resourceUuid = userUuid
+            )
+        user.delete()
+        userRepository.save(user)
     }
 }

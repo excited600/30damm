@@ -45,3 +45,17 @@
         description: 유효성 검사 실패
       '401':
         description: 이메일 또는 비밀번호 불일치
+
+/users/me:
+  delete:
+    operationId: deleteUser
+    tags:
+      - Users
+    summary: 회원 탈퇴
+    security:
+      - BearerAuth: []
+    responses:
+      '204':
+        description: 회원 탈퇴 성공
+      '401':
+        description: 미인증

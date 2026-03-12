@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
 import beyondeyesight.config.uuidV7
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Entity
@@ -39,8 +40,17 @@ class UserEntity(
     val provider: Provider,
     @Column(name = "profile_image_url", nullable = true)
     var profileImageUrl: String?,
+    @Column(name = "is_deleted", nullable = false)
+    var isDeleted: Boolean,
+    @Column(name = "deleted_at", nullable = true)
+    var deletedAt: LocalDateTime?,
 
     ) : BaseEntity(uuid = uuid) {
+
+    fun delete() {
+        isDeleted = true
+        deletedAt = LocalDateTime.now()
+    }
 
     companion object {
         fun signUp(
@@ -62,6 +72,8 @@ class UserEntity(
                 isPrivate = false,
                 provider = Provider.THIRTY_FORTY,
                 profileImageUrl = null,
+                isDeleted = false,
+                deletedAt = null,
             )
         }
         const val RESOURCE_NAME = "users"

@@ -3,6 +3,7 @@ package beyondeyesight.ui
 import beyondeyesight.api.UsersApiService
 import beyondeyesight.application.UserApplicationService
 import beyondeyesight.config.JwtTokenProvider
+import beyondeyesight.config.currentUserUuid
 import beyondeyesight.model.LoginRequest
 import beyondeyesight.model.LoginResponse
 import beyondeyesight.model.SignupRequest
@@ -42,5 +43,9 @@ class UserController(
                 )
             }
         )
+    }
+
+    override fun deleteUser() {
+        userApplicationService.delete(userUuid = currentUserUuid())
     }
 }

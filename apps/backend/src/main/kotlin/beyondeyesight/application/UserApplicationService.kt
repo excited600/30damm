@@ -4,6 +4,7 @@ import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.domain.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class UserApplicationService(
@@ -35,5 +36,10 @@ class UserApplicationService(
             password = password,
         )
         return mapper.invoke(userEntity)
+    }
+
+    @Transactional
+    fun delete(userUuid: UUID) {
+        userService.delete(userUuid)
     }
 }

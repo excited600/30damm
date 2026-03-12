@@ -62,6 +62,19 @@ paths:
       summary: 로그인
       tags:
       - Users
+  /api/v1/users/me:
+    delete:
+      operationId: deleteUser
+      responses:
+        "204":
+          description: 회원 탈퇴 성공
+        "401":
+          description: 미인증
+      security:
+      - BearerAuth: []
+      summary: 회원 탈퇴
+      tags:
+      - Users
   /api/v1/gatherings:
     get:
       operationId: scrollFilteredGatherings

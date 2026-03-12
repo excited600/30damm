@@ -24,6 +24,8 @@ paths:
     $ref: './paths/users.yml#/~1users~1signup'
   /api/v1/users/login:
     $ref: './paths/users.yml#/~1users~1login'
+  /api/v1/users/me:
+    $ref: './paths/users.yml#/~1users~1me'
 
   # Gatherings
   /api/v1/gatherings:

@@ -12,6 +12,8 @@ CREATE TABLE users (
     is_private BOOLEAN NOT NULL DEFAULT FALSE,
     provider TEXT NOT NULL CHECK (provider IN ('THIRTY_FORTY', 'KAKAO')),
     profile_image_url TEXT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     UNIQUE (email)
