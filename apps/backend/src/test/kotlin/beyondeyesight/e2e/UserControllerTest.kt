@@ -45,4 +45,32 @@ class UserControllerTest : EndToEndTestBase() {
         assertThat(loginResponse.accessToken).isNotBlank()
         assertThat(loginResponse.refreshToken).isNotBlank()
     }
+
+    @Test
+    fun `회원 탈퇴`() {
+        // given
+        val user = signUp(email = "user@email.com", nickname = "usernick", password = "password1234")
+
+        // when
+        webTestClient.delete()
+            .uri("/api/v1/users/me")
+            .header("Authorization", "Bearer ${user.accessToken}")
+            .exchange()
+            .expectStatus().isNoContent
+
+        // then
+        val isDeleted = jdbcTemplate.queryForObject(
+            "SELECT is_deleted FROM users WHERE uuid = ?::uuid",
+            Boolean::class.java,
+            user.userUuid.toString()
+        )
+        assertThat(isDeleted).isTrue()
+
+        val deletedAt = jdbcTemplate.queryForObject(
+            "SELECT deleted_at FROM users WHERE uuid = ?::uuid",
+            java.sql.Timestamp::class.java,
+            user.userUuid.toString()
+        )
+        assertThat(deletedAt).isNotNull()
+    }
 }
