@@ -2,6 +2,7 @@ package beyondeyesight.domain.service
 
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.ResourceNotFoundException
+import beyondeyesight.domain.exception.user.CannotLoginException
 import beyondeyesight.domain.model.user.UserEntity
 import beyondeyesight.domain.repository.user.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -46,6 +47,10 @@ class UserService(
                 fieldName = "email",
                 fieldValue = email
             )
+
+        if (user.isDeleted) {
+            throw CannotLoginException.userIsDeleted()
+        }
 
         if (!passwordEncoder.matches(password, user.password)) {
             throw InvalidValueException(

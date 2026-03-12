@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useDeleteUser } from "@/features/auth/hooks/useAuth";
 
 function MenuSection({ children }: { children: React.ReactNode }) {
   return <View style={styles.menuSection}>{children}</View>;
@@ -36,10 +37,36 @@ export default function My30dammScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
+  const deleteUser = useDeleteUser();
 
   const handleLogout = () => {
-    logout();
-    router.replace("/(auth)/login" as any);
+    Alert.alert("로그아웃", "로그아웃 하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "확인",
+        onPress: () => {
+          logout();
+          router.replace("/(auth)/login" as any);
+        },
+      },
+    ]);
+  };
+
+  const handleDeleteUser = () => {
+    Alert.alert("탈퇴하기", "탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "탈퇴",
+        style: "destructive",
+        onPress: () => {
+          deleteUser.mutate(undefined, {
+            onSuccess: () => {
+              router.replace("/(auth)/login" as any);
+            },
+          });
+        },
+      },
+    ]);
   };
 
   return (
@@ -70,9 +97,7 @@ export default function My30dammScreen() {
           <MenuWithRightIcon label="로그아웃" onPress={handleLogout} />
           <MenuWithRightIcon
             label="탈퇴하기"
-            onPress={() => {
-              // TODO: 탈퇴하기 기능
-            }}
+            onPress={handleDeleteUser}
           />
         </MenuSection>
       </ScrollView>

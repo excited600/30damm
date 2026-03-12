@@ -24,3 +24,14 @@ export function useSignup() {
     },
   });
 }
+
+export function useDeleteUser() {
+  const logout = useAuthStore((state) => state.logout);
+
+  return useMutation({
+    mutationFn: () => authClient.deleteUser(),
+    onSuccess: () => {
+      logout();
+    },
+  });
+}

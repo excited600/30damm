@@ -18,4 +18,8 @@ export const authClient = {
       .post<LoginResponse>("/api/v1/users/login", request)
       .then((res) => res.data);
   },
+
+  deleteUser(): Promise<void> {
+    return apiClient.delete("/api/v1/users/me").then(() => undefined);
+  },
 };
