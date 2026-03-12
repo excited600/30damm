@@ -14,7 +14,11 @@ const PAGE_SIZE = 20;
 function formatGatheringCard(item: GatheringListItem) {
   const date = item.date ?? "";
   const time = item.startTime ?? "";
-  const duration = item.duration ? `${item.duration}시간` : "";
+  const duration = item.duration
+    ? item.duration % 60 > 0
+      ? `${Math.floor(item.duration / 60)}시간 ${item.duration % 60}분`
+      : `${Math.floor(item.duration / 60)}시간`
+    : "";
   const participants = `${item.maleCount}:${item.femaleCount}`;
   const price = item.isFree
     ? "무료"

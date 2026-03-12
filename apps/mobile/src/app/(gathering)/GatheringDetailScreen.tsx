@@ -43,7 +43,11 @@ function formatDetailInfo(detail: GatheringDetailResponse): string[] {
   if (detail.date) {
     const parts = [detail.date];
     if (detail.startTime) parts.push(detail.startTime);
-    if (detail.duration) parts.push(`${detail.duration}시간`);
+    if (detail.duration) {
+      const h = Math.floor(detail.duration / 60);
+      const m = detail.duration % 60;
+      parts.push(m > 0 ? `${h}시간 ${m}분` : `${h}시간`);
+    }
     info.push(parts.join(" · "));
   }
   if (detail.location) info.push(detail.location);
