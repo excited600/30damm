@@ -10,13 +10,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "app30damm",
   userInterfaceStyle: "automatic",
   splash: {
-    image: "./assets/splash-icon.png",
-    resizeMode: "contain",
     backgroundColor: "#161616",
   },
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.beyondeyesight.app30damm",
+    bundleIdentifier: "com.samosao.30damm",
+    buildNumber: "1",
     infoPlist: {
       NSAppTransportSecurity: {
         NSAllowsArbitraryLoads: process.env.APP_ENV !== "production",
@@ -31,18 +30,33 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundImage: "./assets/android-icon-background.png",
       monochromeImage: "./assets/android-icon-monochrome.png",
     },
-    package: "com.beyondeyesight.app30damm",
+    package: "com.samosao.thirtydamm",
   },
   web: {
     bundler: "metro",
     output: "static",
     favicon: "./assets/favicon.png",
   },
-  plugins: ["expo-router", "expo-font"],
+  plugins: [
+    "expo-router",
+    "expo-font",
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/splash-icon.png",
+        imageWidth: 250,
+        resizeMode: "contain",
+        backgroundColor: "#161616",
+      },
+    ],
+  ],
   experiments: {
     typedRoutes: true,
   },
   extra: {
+    eas: {
+      projectId: "32e4d142-0909-4830-ad77-1a6499099327"
+    },
     apiUrl: process.env.API_URL ?? "http://localhost:8080",
     appEnv: process.env.APP_ENV ?? "local",
   },
