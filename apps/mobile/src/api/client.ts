@@ -2,8 +2,18 @@ import axios from "axios";
 import Constants from "expo-constants";
 import { useAuthStore } from "@/store/useAuthStore";
 
+const getApiUrl = (): string => {
+  const extra =
+    Constants.expoConfig?.extra ??
+    (Constants.manifest2 as any)?.extra?.expoClient?.extra ??
+    (Constants.manifest as any)?.extra;
+  return extra?.apiUrl ?? "http://localhost:8080";
+};
+
+const resolvedApiUrl = getApiUrl();
+
 const apiClient = axios.create({
-  baseURL: Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:8080",
+  baseURL: resolvedApiUrl,
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
