@@ -9,6 +9,7 @@ import {
 import { colors } from "@/shared/constants/colors";
 
 const ITEM_HEIGHT = 30;
+const VISIBLE_ITEMS = 3;
 
 interface WheelPickerBaseProps {
   title: string;
@@ -45,91 +46,124 @@ export function WheelPicker(props: WheelPickerProps) {
     [itemList, value],
   );
 
-  const translateY = useRef(new Animated.Value(0)).current;
+  // scrollY represents the offset from the position where currentIndex is centered.
+  // Negative = scrolled up (showing higher indices), Positive = scrolled down (showing lower indices).
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollYOffset = useRef(0);
 
   useEffect(() => {
-    translateY.setValue(0);
-  }, [value]);
-
-  const clampIndex = useCallback(
-    (idx: number) => Math.max(0, Math.min(itemList.length - 1, idx)),
-    [itemList],
-  );
+    scrollY.setValue(0);
+    scrollYOffset.current = 0;
+  }, [value, scrollY]);
 
   const currentIndexRef = useRef(currentIndex);
-  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   const itemListRef = useRef(itemList);
-  useEffect(() => { itemListRef.current = itemList; }, [itemList]);
-
-  const clampIndexRef = useRef(clampIndex);
-  useEffect(() => { clampIndexRef.current = clampIndex; }, [clampIndex]);
+  useEffect(() => {
+    itemListRef.current = itemList;
+  }, [itemList]);
 
   const onChangeRef = useRef(onChange);
-  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
-  const valueRef = useRef(value);
-  useEffect(() => { valueRef.current = value; }, [value]);
+  const clampOffset = useCallback(
+    (offset: number) => {
+      const maxUp = -(itemList.length - 1 - currentIndex) * ITEM_HEIGHT;
+      const maxDown = currentIndex * ITEM_HEIGHT;
+      return Math.max(maxUp, Math.min(maxDown, offset));
+    },
+    [itemList, currentIndex],
+  );
+
+  const clampOffsetRef = useRef(clampOffset);
+  useEffect(() => {
+    clampOffsetRef.current = clampOffset;
+  }, [clampOffset]);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_, gestureState) => {
-        translateY.setValue(gestureState.dy);
+        const clamped = clampOffsetRef.current(gestureState.dy);
+        scrollY.setValue(clamped);
+        scrollYOffset.current = clamped;
       },
       onPanResponderRelease: (_, gestureState) => {
-        const steps = Math.round(-gestureState.dy / ITEM_HEIGHT);
-        const newIndex = clampIndexRef.current(currentIndexRef.current + steps);
-        const newValue = itemListRef.current[newIndex];
+        const clamped = clampOffsetRef.current(gestureState.dy);
+        // Snap to nearest item
+        const steps = Math.round(-clamped / ITEM_HEIGHT);
+        const newIndex = Math.max(
+          0,
+          Math.min(
+            itemListRef.current.length - 1,
+            currentIndexRef.current + steps,
+          ),
+        );
+        const snappedOffset =
+          -(newIndex - currentIndexRef.current) * ITEM_HEIGHT;
 
-        Animated.spring(translateY, {
-          toValue: 0,
+        Animated.spring(scrollY, {
+          toValue: snappedOffset,
           useNativeDriver: true,
           tension: 100,
           friction: 12,
-        }).start();
-
-        if (newValue !== valueRef.current) {
-          onChangeRef.current(newValue);
-        }
+        }).start(() => {
+          const newValue = itemListRef.current[newIndex];
+          if (newValue !== undefined) {
+            onChangeRef.current(newValue);
+          }
+        });
       },
     }),
   ).current;
 
-  const prevIndex = currentIndex - 1;
-  const nextIndex = currentIndex + 1;
-
+  // Render all items, positioned relative to the center slot
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.line} />
       <View style={styles.wheelContainer} {...panResponder.panHandlers}>
-        <Animated.View style={[styles.wheelContent, { transform: [{ translateY }] }]}>
-          {/* Previous item */}
-          <View style={styles.itemWrapper}>
-            <View style={styles.perspectiveTop}>
-              <Text style={[styles.count, styles.countDimmed]}>
-                {prevIndex >= 0 ? String(itemList[prevIndex]) : ""}
-              </Text>
-            </View>
-          </View>
-
-          {/* Selected item */}
-          <View style={styles.itemWrapper}>
-            <Text style={[styles.count, styles.countSelected]}>
-              {String(value)}
-            </Text>
-          </View>
-
-          {/* Next item */}
-          <View style={styles.itemWrapper}>
-            <View style={styles.perspectiveBottom}>
-              <Text style={[styles.count, styles.countDimmed]}>
-                {nextIndex < itemList.length ? String(itemList[nextIndex]) : ""}
-              </Text>
-            </View>
-          </View>
+        <Animated.View
+          style={[
+            styles.wheelContent,
+            {
+              transform: [{ translateY: Animated.add(scrollY, 0) }],
+            },
+          ]}
+        >
+          {itemList.map((item, index) => {
+            const offset = index - currentIndex;
+            return (
+              <View
+                key={item}
+                style={[
+                  styles.itemWrapper,
+                  {
+                    position: "absolute",
+                    top: (offset + 1) * ITEM_HEIGHT,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.count,
+                    offset === 0 ? styles.countSelected : styles.countDimmed,
+                  ]}
+                >
+                  {String(item)}
+                </Text>
+              </View>
+            );
+          })}
         </Animated.View>
       </View>
       <View style={styles.line} />
@@ -156,31 +190,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text.primary,
   },
   wheelContainer: {
-    height: ITEM_HEIGHT * 3,
+    height: ITEM_HEIGHT * VISIBLE_ITEMS,
     overflow: "hidden",
     justifyContent: "center",
   },
   wheelContent: {
-    alignItems: "center",
+    width: 41,
+    height: ITEM_HEIGHT * VISIBLE_ITEMS,
   },
   itemWrapper: {
     height: ITEM_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
-  },
-  perspectiveTop: {
-    transform: [
-      { perspective: 150 },
-      { rotateX: "45deg" },
-      { scaleY: 0.8 },
-    ],
-  },
-  perspectiveBottom: {
-    transform: [
-      { perspective: 150 },
-      { rotateX: "-45deg" },
-      { scaleY: 0.8 },
-    ],
+    width: 41,
   },
   count: {
     fontSize: 18,
