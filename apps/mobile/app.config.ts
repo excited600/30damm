@@ -14,7 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.samosao.30damm",
+    bundleIdentifier: "com.beyondeyesight.piri",
     buildNumber: "1",
     infoPlist: {
       NSAppTransportSecurity: {
