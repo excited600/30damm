@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -50,11 +50,14 @@ export function WheelPicker(props: WheelPickerProps) {
   // Negative = scrolled up (showing higher indices), Positive = scrolled down (showing lower indices).
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollYOffset = useRef(0);
+  // Tracks which index is visually centered during drag (for styling)
+  const [visualCenterIndex, setVisualCenterIndex] = useState(currentIndex);
 
   useEffect(() => {
     scrollY.setValue(0);
     scrollYOffset.current = 0;
-  }, [value, scrollY]);
+    setVisualCenterIndex(currentIndex);
+  }, [value, scrollY, currentIndex]);
 
   const currentIndexRef = useRef(currentIndex);
   useEffect(() => {
@@ -70,6 +73,11 @@ export function WheelPicker(props: WheelPickerProps) {
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  const setVisualCenterIndexRef = useRef(setVisualCenterIndex);
+  useEffect(() => {
+    setVisualCenterIndexRef.current = setVisualCenterIndex;
+  }, [setVisualCenterIndex]);
 
   const clampOffset = useCallback(
     (offset: number) => {
@@ -96,10 +104,18 @@ export function WheelPicker(props: WheelPickerProps) {
         const clamped = clampOffsetRef.current(gestureState.dy);
         scrollY.setValue(clamped);
         scrollYOffset.current = clamped;
+        const steps = Math.round(-clamped / ITEM_HEIGHT);
+        const visualIdx = Math.max(
+          0,
+          Math.min(
+            itemListRef.current.length - 1,
+            currentIndexRef.current + steps,
+          ),
+        );
+        setVisualCenterIndexRef.current(visualIdx);
       },
       onPanResponderRelease: (_, gestureState) => {
         const clamped = clampOffsetRef.current(gestureState.dy);
-        // Snap to nearest item
         const steps = Math.round(-clamped / ITEM_HEIGHT);
         const newIndex = Math.max(
           0,
@@ -141,7 +157,14 @@ export function WheelPicker(props: WheelPickerProps) {
           ]}
         >
           {itemList.map((item, index) => {
-            const offset = index - currentIndex;
+            const posOffset = index - currentIndex;
+            const visualOffset = index - visualCenterIndex;
+            const perspectiveStyle =
+              visualOffset < 0
+                ? styles.perspectiveTop
+                : visualOffset > 0
+                  ? styles.perspectiveBottom
+                  : undefined;
             return (
               <View
                 key={item}
@@ -149,18 +172,22 @@ export function WheelPicker(props: WheelPickerProps) {
                   styles.itemWrapper,
                   {
                     position: "absolute",
-                    top: (offset + 1) * ITEM_HEIGHT,
+                    top: (posOffset + 1) * ITEM_HEIGHT,
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.count,
-                    offset === 0 ? styles.countSelected : styles.countDimmed,
-                  ]}
-                >
-                  {String(item)}
-                </Text>
+                <View style={perspectiveStyle}>
+                  <Text
+                    style={[
+                      styles.count,
+                      visualOffset === 0
+                        ? styles.countSelected
+                        : styles.countDimmed,
+                    ]}
+                  >
+                    {String(item)}
+                  </Text>
+                </View>
               </View>
             );
           })}
@@ -210,6 +237,20 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     textAlign: "center",
     width: 41,
+  },
+  perspectiveTop: {
+    transform: [
+      { perspective: 150 },
+      { rotateX: "45deg" },
+      { scaleY: 0.8 },
+    ],
+  },
+  perspectiveBottom: {
+    transform: [
+      { perspective: 150 },
+      { rotateX: "-45deg" },
+      { scaleY: 0.8 },
+    ],
   },
   countSelected: {
     color: colors.text.primary,
