@@ -286,14 +286,6 @@ class GatheringService(
                 )
             }
 
-            if (!gathering.isFree() && confirmPaymentRequest == null) {
-                throw InvalidValueException(
-                    valueName = "confirmPaymentRequest",
-                    value = "null",
-                    reason = "confirmPaymentRequest must not be null when gathering is not free"
-                )
-            }
-
             guestService.join(
                 gatheringUuid = gatheringUuid,
                 userUuid = userUuid,
