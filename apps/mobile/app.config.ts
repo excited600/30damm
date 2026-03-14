@@ -13,7 +13,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: "#161616",
   },
   ios: {
-    supportsTablet: true,
+    supportsTablet: false,
     bundleIdentifier: "com.beyondeyesight.piri",
     buildNumber: "1",
     infoPlist: {
