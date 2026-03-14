@@ -2,7 +2,7 @@ import { ExpoConfig, ConfigContext } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "서티댐",
+  name: "서티담",
   slug: "30damm-mobile",
   version: "1.0.0",
   orientation: "portrait",
