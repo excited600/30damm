@@ -34,11 +34,6 @@ function formatDetailInfo(detail: GatheringDetailResponse): string[] {
   }
   const totalParticipants = detail.currentMaleCount + detail.currentFemaleCount + 1;
   info.push(`${totalParticipants}명 (${detail.minCapacity}~${detail.maxCapacity}명)`);
-  if (detail.isGenderRatioEnabled) {
-    info.push(
-      `남 ${detail.currentMaleCount}/${detail.maxMaleCapacity ?? "-"} 여 ${detail.currentFemaleCount}/${detail.maxFemaleCapacity ?? "-"}`,
-    );
-  }
   if (detail.date) {
     const parts = [detail.date];
     if (detail.startTime) parts.push(detail.startTime);
