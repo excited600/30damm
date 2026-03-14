@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 14,
     fontWeight: "700",
-    lineHeight: 20,
     color: colors.text.primary,
-    padding: 0,
+    paddingVertical: 2,
+    paddingHorizontal: 0,
   },
 });

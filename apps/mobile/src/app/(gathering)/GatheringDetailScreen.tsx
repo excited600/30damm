@@ -29,15 +29,14 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 function formatDetailInfo(detail: GatheringDetailResponse): string[] {
   const info: string[] = [];
-  info.push(CATEGORY_LABELS[detail.category] ?? detail.category);
-  info.push(`총 ${detail.minCapacity}명 ~ ${detail.maxCapacity}명`);
+  if (detail.category !== "NONE") {
+    info.push(CATEGORY_LABELS[detail.category] ?? detail.category);
+  }
+  const totalParticipants = detail.currentMaleCount + detail.currentFemaleCount + 1;
+  info.push(`${totalParticipants}명 (${detail.minCapacity}~${detail.maxCapacity}명)`);
   if (detail.isGenderRatioEnabled) {
     info.push(
       `남 ${detail.currentMaleCount}/${detail.maxMaleCapacity ?? "-"} 여 ${detail.currentFemaleCount}/${detail.maxFemaleCapacity ?? "-"}`,
-    );
-  } else {
-    info.push(
-      `남 ${detail.currentMaleCount} 여 ${detail.currentFemaleCount}`,
     );
   }
   if (detail.date) {
@@ -104,7 +103,7 @@ export default function GatheringDetailScreen() {
         <Pressable
           onPress={() => {
             if (showToast === "true") {
-              router.replace("/(gathering)/GatheringCardListScreen" as any);
+              router.replace("/(tabs)" as any);
             } else {
               router.back();
             }
@@ -240,7 +239,7 @@ export default function GatheringDetailScreen() {
         <Pressable
           onPress={() => {
             if (showToast === "true") {
-              router.replace("/(gathering)/GatheringCardListScreen" as any);
+              router.replace("/(tabs)" as any);
             } else {
               router.back();
             }

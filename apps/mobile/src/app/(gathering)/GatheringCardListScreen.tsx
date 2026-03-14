@@ -19,7 +19,7 @@ function formatGatheringCard(item: GatheringListItem) {
       ? `${Math.floor(item.duration / 60)}시간 ${item.duration % 60}분`
       : `${Math.floor(item.duration / 60)}시간`
     : "";
-  const participants = `${item.maleCount}:${item.femaleCount}`;
+  const participants = `${item.maleCount + item.femaleCount + 1}명`;
   const price = item.isFree
     ? "무료"
     : item.isSplit

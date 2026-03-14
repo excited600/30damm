@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontWeight: "700",
-    lineHeight: 20,
     color: colors.text.primary,
+    paddingVertical: 2,
   },
   fieldInputWithIcon: {
     flex: 1,

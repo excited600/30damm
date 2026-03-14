@@ -90,9 +90,9 @@ class GatheringController(
                     startTime = gathering.startDateTime?.toLocalTime()?.format(DateTimeFormatter.ofPattern("HH:mm")),
                     duration = gathering.duration?.toMinutes()?.toInt(),
                     location = gathering.place,
-                    isFree = gathering.isFree(),
+                    isFree = gathering.isFree,
                     isSplit = gathering.isSplit,
-                    price = if (gathering.isFree()) null else gathering.fee,
+                    price = gathering.fee,
                     imgUrl = gathering.imageUrl?.let { URI(it) },
                     userStatus = beyondeyesight.model.GatheringUserStatus.forValue(detail.userStatus.name),
                 )
@@ -183,14 +183,14 @@ class GatheringController(
                             maleCount = genderCounts.maleCount,
                             femaleCount = genderCounts.femaleCount,
                             host = toHostResponse(host),
-                            isFree = gathering.isFree(),
+                            isFree = gathering.isFree,
                             isSplit = gathering.isSplit,
                             imgUrl = gathering.imageUrl?.let { URI(it) },
                             location = gathering.place,
                             date = gathering.startDateTime?.toLocalDate(),
                             startTime = gathering.startDateTime?.toLocalTime()?.format(DateTimeFormatter.ofPattern("HH:mm")),
                             duration = gathering.duration?.toMinutes()?.toInt(),
-                            price = if (gathering.isFree()) null else gathering.fee,
+                            price = gathering.fee,
                         )
                     },
                     cursor = details.scrollResult.cursor?.let {

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { AppProviders } from "@/providers/AppProviders";
 import { colors } from "@/shared/constants/colors";
+import { useAuthStore } from "@/store/useAuthStore";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -54,9 +55,10 @@ const errorStyles = StyleSheet.create({
 
 export default function RootLayout() {
   const [loaded] = useFonts({});
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && hasHydrated) {
       SplashScreen.hideAsync().catch(() => {});
       return;
     }
@@ -64,9 +66,9 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {});
     }, 3000);
     return () => clearTimeout(timeout);
-  }, [loaded]);
+  }, [loaded, hasHydrated]);
 
-  if (!loaded) {
+  if (!loaded || !hasHydrated) {
     return null;
   }
 

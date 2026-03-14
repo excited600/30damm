@@ -10,11 +10,14 @@ import { colors } from "@/shared/constants/colors";
 
 const ITEM_HEIGHT = 30;
 const VISIBLE_ITEMS = 3;
+const TOUCH_WIDTH = 70;
 
 interface WheelPickerBaseProps {
   title: string;
   value: number;
   onChange: (value: number) => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }
 
 interface WheelPickerRangeProps extends WheelPickerBaseProps {
@@ -32,7 +35,7 @@ interface WheelPickerItemsProps extends WheelPickerBaseProps {
 type WheelPickerProps = WheelPickerRangeProps | WheelPickerItemsProps;
 
 export function WheelPicker(props: WheelPickerProps) {
-  const { title, value, onChange } = props;
+  const { title, value, onChange, onDragStart, onDragEnd } = props;
 
   const itemList = useMemo(() => {
     if (props.items) return props.items;
@@ -74,6 +77,16 @@ export function WheelPicker(props: WheelPickerProps) {
     onChangeRef.current = onChange;
   }, [onChange]);
 
+  const onDragStartRef = useRef(onDragStart);
+  useEffect(() => {
+    onDragStartRef.current = onDragStart;
+  }, [onDragStart]);
+
+  const onDragEndRef = useRef(onDragEnd);
+  useEffect(() => {
+    onDragEndRef.current = onDragEnd;
+  }, [onDragEnd]);
+
   const setVisualCenterIndexRef = useRef(setVisualCenterIndex);
   useEffect(() => {
     setVisualCenterIndexRef.current = setVisualCenterIndex;
@@ -100,6 +113,9 @@ export function WheelPicker(props: WheelPickerProps) {
       onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: () => {
+        onDragStartRef.current?.();
+      },
       onPanResponderMove: (_, gestureState) => {
         const clamped = clampOffsetRef.current(gestureState.dy);
         scrollY.setValue(clamped);
@@ -115,6 +131,7 @@ export function WheelPicker(props: WheelPickerProps) {
         setVisualCenterIndexRef.current(visualIdx);
       },
       onPanResponderRelease: (_, gestureState) => {
+        onDragEndRef.current?.();
         const clamped = clampOffsetRef.current(gestureState.dy);
         const steps = Math.round(-clamped / ITEM_HEIGHT);
         const newIndex = Math.max(
@@ -138,6 +155,9 @@ export function WheelPicker(props: WheelPickerProps) {
             onChangeRef.current(newValue);
           }
         });
+      },
+      onPanResponderTerminate: () => {
+        onDragEndRef.current?.();
       },
     }),
   ).current;
@@ -200,7 +220,7 @@ export function WheelPicker(props: WheelPickerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 41,
+    width: TOUCH_WIDTH,
     alignItems: "center",
     gap: 4,
   },
@@ -217,26 +237,27 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text.primary,
   },
   wheelContainer: {
+    width: TOUCH_WIDTH,
     height: ITEM_HEIGHT * VISIBLE_ITEMS,
     overflow: "hidden",
     justifyContent: "center",
   },
   wheelContent: {
-    width: 41,
+    width: TOUCH_WIDTH,
     height: ITEM_HEIGHT * VISIBLE_ITEMS,
   },
   itemWrapper: {
     height: ITEM_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
-    width: 41,
+    width: TOUCH_WIDTH,
   },
   count: {
     fontSize: 18,
     fontWeight: "600",
     lineHeight: 26,
     textAlign: "center",
-    width: 41,
+    width: TOUCH_WIDTH,
   },
   perspectiveTop: {
     transform: [

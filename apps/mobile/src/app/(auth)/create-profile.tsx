@@ -25,6 +25,7 @@ export default function CreateProfileScreen() {
   const { email, password, reset } = useRegisterStore();
   const signup = useSignup();
   const [nickname, setNickname] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
   const { height } = useWindowDimensions();
 
   const handleSignup = () => {
@@ -34,9 +35,10 @@ export default function CreateProfileScreen() {
       return;
     }
     if (nickname.length < 2 || nickname.length > 10) {
-      Alert.alert("알림", "닉네임은 2~10자로 입력해주세요.");
+      setNicknameError("닉네임은 2~10자로 입력해주세요.");
       return;
     }
+    setNicknameError("");
     signup.mutate(
       { email, password, nickname },
       {
@@ -91,10 +93,16 @@ export default function CreateProfileScreen() {
             placeholder="닉네임을 입력해주세요"
             placeholderTextColor="#6B6B6B"
             value={nickname}
-            onChangeText={setNickname}
+            onChangeText={(text) => {
+              setNickname(text);
+              setNicknameError("");
+            }}
             autoFocus
           />
         </View>
+        {nicknameError !== "" && (
+          <Text style={styles.nicknameError}>{nicknameError}</Text>
+        )}
 
         <View style={styles.spacer} />
 
@@ -203,9 +211,9 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 14,
     fontWeight: "700",
-    lineHeight: 20,
     color: colors.text.primary,
-    padding: 0,
+    paddingVertical: 2,
+    paddingHorizontal: 0,
   },
   genderSection: {
     width: "100%",
@@ -240,6 +248,11 @@ const styles = StyleSheet.create({
   },
   genderTextSelected: {
     color: colors.text.primary,
+  },
+  nicknameError: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: colors.error,
   },
   button: {
     width: "100%",

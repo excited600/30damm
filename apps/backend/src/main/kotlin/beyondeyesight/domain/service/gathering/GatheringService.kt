@@ -86,6 +86,22 @@ class GatheringService(
             resourceUuid = hostUuid
         )
 
+        if (!isFree && !isSplit && (price == null || price == 0)) {
+            throw InvalidValueException(
+                valueName = "price",
+                value = price?.toString() ?: "null",
+                reason = "price must not be null or 0 when gathering is not free and not split"
+            )
+        }
+
+        if (!isFree && isSplit && price != null) {
+            throw InvalidValueException(
+                valueName = "price",
+                value = price,
+                reason = "price must be null when gathering is not free and is split"
+            )
+        }
+
         val entity = GatheringEntity.open(
             hostUuid = host.uuid,
             title = title,
@@ -278,7 +294,7 @@ class GatheringService(
                 }
             }
 
-            if (gathering.isFree() && confirmPaymentRequest != null) {
+            if (gathering.isFree && confirmPaymentRequest != null) {
                 throw InvalidValueException(
                     valueName = "confirmPaymentRequest",
                     value = confirmPaymentRequest,
@@ -291,10 +307,11 @@ class GatheringService(
                 userUuid = userUuid,
             )
 
-            if (!gathering.isFree() && confirmPaymentRequest != null) {
-                if (gathering.fee != confirmPaymentRequest.amount) {
+            if (!gathering.isFree && confirmPaymentRequest != null) {
+                val fee = gathering.fee ?: 0
+                if (fee != confirmPaymentRequest.amount) {
                     throw CannotJoinException.priceChanged(
-                        currentPrice = gathering.fee,
+                        currentPrice = fee,
                         priceAtPay = confirmPaymentRequest.amount
                     )
                 }

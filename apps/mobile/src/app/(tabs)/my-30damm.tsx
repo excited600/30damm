@@ -46,7 +46,7 @@ export default function My30dammScreen() {
         text: "확인",
         onPress: () => {
           logout();
-          router.replace("/(auth)/login" as any);
+          router.replace("/welcome" as any);
         },
       },
     ]);

@@ -52,6 +52,10 @@ export default function CreateGatheringWhenScreen() {
   const [minute, setMinute] = useState(0);
   const [durationHour, setDurationHour] = useState(0);
   const [durationMinute, setDurationMinute] = useState(0);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+
+  const handleWheelDragStart = useCallback(() => setScrollEnabled(false), []);
+  const handleWheelDragEnd = useCallback(() => setScrollEnabled(true), []);
 
   const openGathering = useMutation({
     mutationFn: (request: OpenGatheringRequest) => gatheringClient.open(request),
@@ -180,6 +184,7 @@ export default function CreateGatheringWhenScreen() {
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={scrollEnabled}
       >
         {/* Title */}
         <View style={styles.title}>
@@ -267,12 +272,16 @@ export default function CreateGatheringWhenScreen() {
               max={23}
               value={hour}
               onChange={setHour}
+              onDragStart={handleWheelDragStart}
+              onDragEnd={handleWheelDragEnd}
             />
             <WheelPicker
               title="분"
               items={[0, 30]}
               value={minute}
               onChange={setMinute}
+              onDragStart={handleWheelDragStart}
+              onDragEnd={handleWheelDragEnd}
             />
           </View>
         )}
@@ -307,12 +316,16 @@ export default function CreateGatheringWhenScreen() {
               max={8}
               value={durationHour}
               onChange={setDurationHour}
+              onDragStart={handleWheelDragStart}
+              onDragEnd={handleWheelDragEnd}
             />
             <WheelPicker
               title="분"
               items={[0]}
               value={durationMinute}
               onChange={setDurationMinute}
+              onDragStart={handleWheelDragStart}
+              onDragEnd={handleWheelDragEnd}
             />
           </View>
         )}

@@ -28,8 +28,10 @@ class GatheringEntity(
     val maxFemaleCount: Int?,
     @Column(nullable = false)
     val totalGuests: Int,
-    @Column(nullable = false)
-    val fee: Int,
+    @Column(name = "is_free", nullable = false)
+    val isFree: Boolean,
+    @Column(nullable = true)
+    val fee: Int?,
     @Column(name = "is_split", nullable = false)
     val isSplit: Boolean,
     @Column(nullable = true)
@@ -64,10 +66,6 @@ class GatheringEntity(
         this.status = Status.CLOSED
     }
 
-    fun isFree(): Boolean {
-        return fee == 0
-    }
-
     companion object {
         fun open(
             hostUuid: UUID,
@@ -87,7 +85,7 @@ class GatheringEntity(
             isSplit: Boolean,
             imageUrl: String?,
         ): GatheringEntity {
-            val fee = if (isFree) 0 else (price ?: 0)
+            val fee = if (isFree) 0 else price
             return GatheringEntity(
                 uuid = uuidV7(),
                 hostUuid = hostUuid,
@@ -97,6 +95,7 @@ class GatheringEntity(
                 maxMaleCount = maxMaleCount,
                 maxFemaleCount = maxFemaleCount,
                 totalGuests = INITIAL_TOTAL_GUESTS,
+                isFree = isFree,
                 fee = fee,
                 isSplit = isSplit,
                 place = location,

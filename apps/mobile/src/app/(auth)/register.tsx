@@ -86,6 +86,8 @@ export default function RegisterScreen() {
               setError("");
             }}
             secureTextEntry
+            textContentType="oneTimeCode"
+            autoComplete="off"
           />
           <Input
             label="비밀번호 확인"
@@ -96,6 +98,8 @@ export default function RegisterScreen() {
               setError("");
             }}
             secureTextEntry
+            textContentType="oneTimeCode"
+            autoComplete="off"
           />
           {error !== "" && <Text style={styles.errorText}>{error}</Text>}
         </View>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -19,13 +19,14 @@ export default function CreateGatheringIntroductionScreen() {
   const store = useCreateGatheringStore();
   const [title, setTitle] = useState(store.title);
   const [detail, setDetail] = useState(store.description);
+  const [titleEmptyError, setTitleEmptyError] = useState(false);
 
   const titleOverflow = title.length > TITLE_MAX;
   const detailOverflow = detail.length > DETAIL_MAX;
 
   const handleNext = () => {
     if (!title.trim()) {
-      Alert.alert("알림", "제목을 입력해주세요.");
+      setTitleEmptyError(true);
       return;
     }
     if (titleOverflow || detailOverflow) {
@@ -84,8 +85,17 @@ export default function CreateGatheringIntroductionScreen() {
             label="제목"
             placeholder="예) 30, 우리끼리 모여요(30자 이내)"
             value={title}
-            onChangeText={setTitle}
-            error={titleOverflow ? "글자수(30자)를 초과했습니다" : undefined}
+            onChangeText={(text) => {
+              setTitle(text);
+              setTitleEmptyError(false);
+            }}
+            error={
+              titleEmptyError
+                ? "제목을 입력해주세요."
+                : titleOverflow
+                  ? "글자수(30자)를 초과했습니다"
+                  : undefined
+            }
           />
           <UnderlineInput
             label="상세소개"
