@@ -43,6 +43,8 @@ yarn-error.*
 # env
 .env
 .env.local
+.env.local-ios
+.env.local-android
 .env.prod
 
 # coverage
