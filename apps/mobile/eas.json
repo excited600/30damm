@@ -13,7 +13,11 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "production",
+        "API_URL": "https://30damm-prod.beyondeyesight.org"
+      }
     },
     "production": {
       "autoIncrement": true,
