@@ -1038,9 +1038,8 @@ components:
         reason:
           type: string
           enum:
-            - SPAM
-            - HARASSMENT
-            - INAPPROPRIATE_CONTENT
+            - OFFENSIVE_CONTENT
+            - ILLEGAL_OR_FALSE_INFO
             - OTHER
           description: 신고 사유
         description:

@@ -1060,7 +1060,7 @@ components:
       type: object
     ReportRequest:
       example:
-        reason: SPAM
+        reason: OFFENSIVE_CONTENT
         description: description
         targetType: USER
         targetUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -1078,9 +1078,8 @@ components:
         reason:
           description: 신고 사유
           enum:
-          - SPAM
-          - HARASSMENT
-          - INAPPROPRIATE_CONTENT
+          - OFFENSIVE_CONTENT
+          - ILLEGAL_OR_FALSE_INFO
           - OTHER
           type: string
         description:

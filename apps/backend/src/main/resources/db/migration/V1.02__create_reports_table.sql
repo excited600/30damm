@@ -3,7 +3,7 @@ CREATE TABLE reports (
     reporter_uuid UUID NOT NULL,
     target_type TEXT NOT NULL CHECK (target_type IN ('USER', 'GATHERING')),
     target_uuid UUID NOT NULL,
-    reason TEXT NOT NULL CHECK (reason IN ('SPAM', 'HARASSMENT', 'INAPPROPRIATE_CONTENT', 'OTHER')),
+    reason TEXT NOT NULL CHECK (reason IN ('OFFENSIVE_CONTENT', 'ILLEGAL_OR_FALSE_INFO', 'OTHER')),
     description TEXT NULL,
     status TEXT NOT NULL CHECK (status IN ('PENDING', 'REVIEWED', 'RESOLVED', 'DISMISSED')),
     reviewed_at TIMESTAMP NULL,

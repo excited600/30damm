@@ -7,6 +7,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { Toast } from "@/shared/components/ui/Toast";
+import { ReportBottomSheet } from "@/shared/components/ui/ReportBottomSheet";
 import { gatheringClient } from "@/api/clients/gatheringClient";
 import type { GatheringDetailResponse } from "@/api/types/gathering";
 
@@ -63,6 +64,7 @@ export default function GatheringDetailScreen() {
   const [toastVisible, setToastVisible] = useState(showToast === "true");
   const [errorToastVisible, setErrorToastVisible] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: detail, isLoading, isError, refetch } = useQuery({
@@ -243,8 +245,28 @@ export default function GatheringDetailScreen() {
         >
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
-        <View style={styles.headerBlank} />
+        <Pressable
+          onPress={() => setBottomSheetVisible(true)}
+          hitSlop={8}
+          style={styles.headerMore}
+        >
+          <View style={styles.moreDot} />
+          <View style={styles.moreDot} />
+          <View style={styles.moreDot} />
+        </Pressable>
       </View>
+
+      <ReportBottomSheet
+        visible={bottomSheetVisible}
+        onClose={() => setBottomSheetVisible(false)}
+        onReport={() => {
+          setBottomSheetVisible(false);
+          router.push({
+            pathname: "/(gathering)/ReportScreen",
+            params: { gatheringUuid },
+          } as any);
+        }}
+      />
     </View>
   );
 }
@@ -379,9 +401,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
-  headerBlank: {
-    width: 24,
-    height: 24,
+  headerMore: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  moreDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: colors.text.primary,
   },
   errorBackButton: {
     position: "absolute",

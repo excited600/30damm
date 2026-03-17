@@ -6,6 +6,10 @@ export const colors = {
   },
   background: "#121212",
   surface: "#2C2C2C",
+  bg: {
+    tertiary: "#1B2023",
+    elevated: "#293037",
+  },
   text: {
     primary: "#FFFFFF",
     secondary: "#ABABAB",

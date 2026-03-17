@@ -1,8 +1,7 @@
 package beyondeyesight.domain.model.report
 
 enum class ReportReason {
-    SPAM,
-    HARASSMENT,
-    INAPPROPRIATE_CONTENT,
+    OFFENSIVE_CONTENT,
+    ILLEGAL_OR_FALSE_INFO,
     OTHER,
 }
