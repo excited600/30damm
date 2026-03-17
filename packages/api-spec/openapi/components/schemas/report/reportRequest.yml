@@ -1,0 +1,29 @@
+ReportRequest:
+  type: object
+  required:
+    - targetType
+    - targetUuid
+    - reason
+  properties:
+    targetType:
+      type: string
+      enum:
+        - USER
+        - GATHERING
+      description: 신고 대상 유형
+    targetUuid:
+      type: string
+      format: uuid
+      description: 신고 대상 UUID
+    reason:
+      type: string
+      enum:
+        - SPAM
+        - HARASSMENT
+        - INAPPROPRIATE_CONTENT
+        - OTHER
+      description: 신고 사유
+    description:
+      type: string
+      maxLength: 500
+      description: 신고 상세 설명 (선택)

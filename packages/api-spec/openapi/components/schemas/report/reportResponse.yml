@@ -1,0 +1,18 @@
+ReportResponse:
+  type: object
+  required:
+    - reportUuid
+    - status
+  properties:
+    reportUuid:
+      type: string
+      format: uuid
+      description: 생성된 신고 UUID
+    status:
+      type: string
+      enum:
+        - PENDING
+        - REVIEWED
+        - RESOLVED
+        - DISMISSED
+      description: 신고 상태

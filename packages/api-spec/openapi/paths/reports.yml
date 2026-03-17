@@ -1,0 +1,29 @@
+/reports:
+  post:
+    operationId: createReport
+    tags:
+      - Reports
+    summary: 콘텐츠 신고
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/report/reportRequest.yml#/ReportRequest'
+    responses:
+      '201':
+        description: 신고 접수 성공
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/report/reportResponse.yml#/ReportResponse'
+      '400':
+        description: 유효성 검사 실패
+      '401':
+        description: 미인증
+      '404':
+        description: 신고 대상을 찾을 수 없음
+      '409':
+        description: 이미 신고한 대상

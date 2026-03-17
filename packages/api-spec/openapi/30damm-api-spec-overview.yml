@@ -17,6 +17,8 @@ tags:
     description: 모임
   - name: Users
     description: 사용자
+  - name: Reports
+    description: 신고
 
 paths:
   # Users
@@ -38,6 +40,10 @@ paths:
     $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1join'
   /api/v1/gatherings/{gatheringUuid}/leave:
     $ref: './paths/gatherings.yml#/~1gatherings~1{gatheringUuid}~1leave'
+
+  # Reports
+  /api/v1/reports:
+    $ref: './paths/reports.yml#/~1reports'
 
   # Payments
   /api/v1/payments/{paymentId}/prepare:
@@ -83,6 +89,12 @@ components:
       $ref: './components/schemas/gathering/getGatheringDetail/getGatheringDetailResponse.yml#/GetGatheringDetailResponse'
     JoinGatheringRequest:
       $ref: './components/schemas/gathering/joinGathering/joinGatheringRequest.yml#/JoinGatheringRequest'
+
+    # Reports
+    ReportRequest:
+      $ref: './components/schemas/report/reportRequest.yml#/ReportRequest'
+    ReportResponse:
+      $ref: './components/schemas/report/reportResponse.yml#/ReportResponse'
 
     # Payments
     PreparePaymentRequest:

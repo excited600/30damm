@@ -15,6 +15,8 @@ tags:
   name: Gatherings
 - description: 사용자
   name: Users
+- description: 신고
+  name: Reports
 paths:
   /api/v1/users/signup:
     post:
@@ -372,6 +374,35 @@ paths:
       summary: Leave a gathering as a guest
       tags:
       - Gatherings
+  /api/v1/reports:
+    post:
+      operationId: createReport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportResponse"
+          description: 신고 접수 성공
+        "400":
+          description: 유효성 검사 실패
+        "401":
+          description: 미인증
+        "404":
+          description: 신고 대상을 찾을 수 없음
+        "409":
+          description: 이미 신고한 대상
+      security:
+      - BearerAuth: []
+      summary: 콘텐츠 신고
+      tags:
+      - Reports
   /api/v1/payments/{paymentId}/prepare:
     post:
       operationId: preparePayment
@@ -1026,6 +1057,61 @@ components:
       properties:
         confirmPaymentRequest:
           $ref: "#/components/schemas/ConfirmPaymentRequest"
+      type: object
+    ReportRequest:
+      example:
+        reason: SPAM
+        description: description
+        targetType: USER
+        targetUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        targetType:
+          description: 신고 대상 유형
+          enum:
+          - USER
+          - GATHERING
+          type: string
+        targetUuid:
+          description: 신고 대상 UUID
+          format: uuid
+          type: string
+        reason:
+          description: 신고 사유
+          enum:
+          - SPAM
+          - HARASSMENT
+          - INAPPROPRIATE_CONTENT
+          - OTHER
+          type: string
+        description:
+          description: 신고 상세 설명 (선택)
+          maxLength: 500
+          type: string
+      required:
+      - reason
+      - targetType
+      - targetUuid
+      type: object
+    ReportResponse:
+      example:
+        reportUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: PENDING
+      properties:
+        reportUuid:
+          description: 생성된 신고 UUID
+          format: uuid
+          type: string
+        status:
+          description: 신고 상태
+          enum:
+          - PENDING
+          - REVIEWED
+          - RESOLVED
+          - DISMISSED
+          type: string
+      required:
+      - reportUuid
+      - status
       type: object
     PreparePaymentRequest:
       example:
