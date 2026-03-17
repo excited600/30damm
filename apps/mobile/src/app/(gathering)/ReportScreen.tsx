@@ -8,9 +8,16 @@ import { typography } from "@/shared/constants/typography";
 import { Checkbox } from "@/shared/components/ui/Checkbox";
 import { UnderlineInput } from "@/shared/components/ui/UnderlineInput";
 import { BottomCTA } from "@/shared/components/ui/BottomCTA";
+import { reportClient } from "@/api/clients/reportClient";
+import type { ReportReason } from "@/api/types/report";
 
-const REPORT_REASONS = ["불쾌한 문구", "불법, 허위 정보", "기타"] as const;
-type ReportReason = (typeof REPORT_REASONS)[number];
+const REASON_LABELS: Record<ReportReason, string> = {
+  OFFENSIVE_CONTENT: "불쾌한 문구",
+  ILLEGAL_OR_FALSE_INFO: "불법, 허위 정보",
+  OTHER: "기타",
+};
+
+const REPORT_REASONS: ReportReason[] = ["OFFENSIVE_CONTENT", "ILLEGAL_OR_FALSE_INFO", "OTHER"];
 
 export default function ReportScreen() {
   const insets = useSafeAreaInsets();
@@ -30,8 +37,12 @@ export default function ReportScreen() {
     if (submitting) return;
     setSubmitting(true);
     try {
-      // TODO: API 호출 (나중에 연결)
-      // await reportClient.report({ gatheringUuid, reason: selectedReason, description });
+      await reportClient.report({
+        targetType: "GATHERING",
+        targetUuid: gatheringUuid!,
+        reason: selectedReason,
+        description: description || undefined,
+      });
       router.push({
         pathname: "/(gathering)/ReportCompleteScreen",
         params: { gatheringUuid },
@@ -78,7 +89,7 @@ export default function ReportScreen() {
             {REPORT_REASONS.map((reason) => (
               <Checkbox
                 key={reason}
-                label={reason}
+                label={REASON_LABELS[reason]}
                 checked={selectedReason === reason}
                 onPress={() => handleSelectReason(reason)}
               />
