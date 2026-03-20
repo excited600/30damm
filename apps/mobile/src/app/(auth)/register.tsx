@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useState, useRef } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useState, useRef, useCallback } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { useRegisterStore } from "@/store/useRegisterStore";
+import { AgreementBottomSheet } from "@/shared/components/ui/AgreementBottomSheet";
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
@@ -16,7 +17,18 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
+  const [showAgreement, setShowAgreement] = useState(false);
+  const pendingAgreementRef = useRef(false);
   const navigatingRef = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (pendingAgreementRef.current) {
+        setShowAgreement(true);
+        pendingAgreementRef.current = false;
+      }
+    }, []),
+  );
 
   const handleNext = () => {
     if (!email.trim() || !password.trim()) {
@@ -35,9 +47,14 @@ export default function RegisterScreen() {
       setError("비밀번호는 8~20자로 입력해주세요.");
       return;
     }
+    setError("");
+    setShowAgreement(true);
+  };
+
+  const handleAgreementConfirm = () => {
     if (navigatingRef.current) return;
     navigatingRef.current = true;
-    setError("");
+    setShowAgreement(false);
     setCredentials(email, password);
     router.push("/(auth)/create-profile");
     setTimeout(() => { navigatingRef.current = false; }, 1000);
@@ -112,6 +129,22 @@ export default function RegisterScreen() {
         />
         <View style={styles.spacer} />
       </ScrollView>
+
+      <AgreementBottomSheet
+        visible={showAgreement}
+        onClose={() => setShowAgreement(false)}
+        onConfirm={handleAgreementConfirm}
+        onTerms={() => {
+          setShowAgreement(false);
+          pendingAgreementRef.current = true;
+          router.push("/(gathering)/TermsOfServiceScreen" as any);
+        }}
+        onPrivacy={() => {
+          setShowAgreement(false);
+          pendingAgreementRef.current = true;
+          router.push("/(gathering)/PrivacyPolicyScreen" as any);
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }

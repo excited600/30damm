@@ -15,6 +15,7 @@ import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Status
 import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.repository.gathering.block.UserBlockedGatheringRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.GuestRepository
 import beyondeyesight.domain.repository.gathering.SeriesRepository
@@ -45,6 +46,7 @@ class GatheringService(
     private val paymentRepository: PaymentRepository,
     private val paymentSynchronizeService: PaymentSynchronizeService,
     private val paymentGateway: PaymentGateway,
+    private val userBlockedGatheringRepository: UserBlockedGatheringRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -167,14 +169,18 @@ class GatheringService(
     }
 
     fun scroll(
+        userUuid: UUID,
         cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
     ): ScrollWithDetails {
+        val blockedGatheringUuids = userBlockedGatheringRepository.findBlockedGatheringUuids(userUuid)
+
         val result = gatheringRepository.scroll(
             cursor = cursor,
             size = size,
             filter = filter,
+            blockedGatheringUuids = blockedGatheringUuids,
         )
 
         val hostUuids = result.items.map { it.hostUuid }.distinct()

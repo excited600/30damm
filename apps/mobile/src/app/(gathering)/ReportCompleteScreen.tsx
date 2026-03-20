@@ -11,7 +11,7 @@ export default function ReportCompleteScreen() {
   const router = useRouter();
 
   const handleComplete = () => {
-    router.replace("/(gathering)/GatheringCardListScreen" as any);
+    router.replace("/(tabs)" as any);
   };
 
   return (

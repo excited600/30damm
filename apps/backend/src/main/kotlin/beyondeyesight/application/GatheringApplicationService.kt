@@ -86,12 +86,14 @@ class GatheringApplicationService(
 
     @Transactional(readOnly = true)
     fun <R> scroll(
+        userUuid: UUID,
         cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
         mapper: (GatheringService.ScrollWithDetails) -> R
     ): R {
         val details = gatheringService.scroll(
+            userUuid = userUuid,
             cursor = cursor,
             size = size,
             filter = filter,

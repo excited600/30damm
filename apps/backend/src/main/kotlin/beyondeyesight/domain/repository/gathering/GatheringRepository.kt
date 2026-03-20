@@ -20,5 +20,6 @@ interface GatheringRepository {
         cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
+        blockedGatheringUuids: List<UUID>,
     ): ScrollResult<GatheringEntity, GatheringCursor>
 }

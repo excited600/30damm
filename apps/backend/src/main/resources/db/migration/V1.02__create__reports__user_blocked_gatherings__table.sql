@@ -12,3 +12,12 @@ CREATE TABLE reports (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT unique_report_per_target UNIQUE (reporter_uuid, target_type, target_uuid)
 );
+
+CREATE TABLE user_blocked_gatherings (
+    uuid UUID PRIMARY KEY,
+    user_uuid UUID NOT NULL,
+    gathering_uuid UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT unique_user_blocked_gathering UNIQUE (user_uuid, gathering_uuid)
+);

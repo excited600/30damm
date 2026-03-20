@@ -39,6 +39,7 @@ class GatheringRepositoryImpl(
         cursor: GatheringCursor?,
         size: Int,
         filter: GatheringFilter,
+        blockedGatheringUuids: List<UUID>,
     ): ScrollResult<GatheringEntity, GatheringCursor> {
         val results = gatheringJpaRepository.findPage(pageable = Pageable.ofSize(size + 1)) {
             select(entity(GatheringEntity::class))
@@ -52,6 +53,9 @@ class GatheringRepositoryImpl(
                                 path(GatheringEntity::uuid).greaterThan(it.uuid)
                             )
                         )
+                    },
+                    blockedGatheringUuids.takeIf { it.isNotEmpty() }?.let {
+                        path(GatheringEntity::uuid).notIn(it)
                     },
                     * buildFilterPredicates(filter).toTypedArray()
                 )

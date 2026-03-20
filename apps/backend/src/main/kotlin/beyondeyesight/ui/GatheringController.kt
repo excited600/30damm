@@ -159,6 +159,7 @@ class GatheringController(
         )
 
         return gatheringApplicationService.scroll(
+            userUuid = currentUserUuid(),
             cursor = cursor,
             size = size,
             filter = filter,
