@@ -93,6 +93,18 @@ export default function My30dammScreen() {
         </MenuSection>
 
         <MenuSection>
+          <MenuTitle title="기타" />
+          <MenuWithRightIcon
+            label="문의"
+            onPress={() =>
+              Alert.alert("아래 이메일로 문의해주세요", "excited600@gmail.com", [
+                { text: "확인" },
+              ])
+            }
+          />
+        </MenuSection>
+
+        <MenuSection>
           <MenuTitle title="나가기" />
           <MenuWithRightIcon label="로그아웃" onPress={handleLogout} />
           <MenuWithRightIcon
