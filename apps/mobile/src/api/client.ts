@@ -1,6 +1,7 @@
-import axios from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import Constants from "expo-constants";
 import { useAuthStore } from "@/store/useAuthStore";
+import type { RefreshResponse } from "./types/auth";
 
 const getApiUrl = (): string => {
   const extra =
@@ -31,6 +32,8 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+let refreshPromise: Promise<RefreshResponse> | null = null;
+
 apiClient.interceptors.response.use(
   (response) => {
     if (__DEV__) {
@@ -38,17 +41,47 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error: AxiosError) => {
     if (__DEV__) {
       console.error(`[API ERROR] ${error.config?.url}`, error.response?.status, error.response?.data ?? error.message);
     }
 
-    // 401 Unauthorized → auto-logout
-    if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    const { refreshToken } = useAuthStore.getState();
+    if (!refreshToken) {
+      useAuthStore.getState().logout();
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post<RefreshResponse>(`${resolvedApiUrl}/api/v1/users/refresh`, {
+            refreshToken,
+          })
+          .then((res) => res.data);
+      }
+
+      const data = await refreshPromise;
+      useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
+
+      originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+      return apiClient(originalRequest);
+    } catch {
+      useAuthStore.getState().logout();
+      return Promise.reject(error);
+    } finally {
+      refreshPromise = null;
+    }
   },
 );
 

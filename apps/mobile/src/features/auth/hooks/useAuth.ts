@@ -9,7 +9,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (request: LoginRequest) => authClient.login(request),
     onSuccess: (data) => {
-      setAuth(data.accessToken, data.userUuid);
+      setAuth(data.accessToken, data.refreshToken, data.userUuid);
     },
   });
 }
@@ -20,7 +20,7 @@ export function useSignup() {
   return useMutation({
     mutationFn: (request: SignupRequest) => authClient.signup(request),
     onSuccess: (data) => {
-      setAuth(data.accessToken, data.userUuid);
+      setAuth(data.accessToken, data.refreshToken, data.userUuid);
     },
   });
 }
