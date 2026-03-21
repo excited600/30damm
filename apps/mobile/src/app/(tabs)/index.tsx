@@ -35,7 +35,7 @@ function formatGatheringCard(item: GatheringListItem) {
     time,
     duration,
     participants,
-    hostName: item.host.nickname,
+    hostName: item.host.viewerRelation === "BLOCKED" ? "차단한 사용자" : item.host.nickname,
     hostAvatarUri: item.host.profileImageUrl ?? undefined,
     price,
     thumbnailUri: item.imgUrl ?? undefined,

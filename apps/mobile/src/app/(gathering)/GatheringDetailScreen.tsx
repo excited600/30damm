@@ -177,7 +177,7 @@ export default function GatheringDetailScreen() {
                     </View>
                   )}
                 </View>
-                <Text style={styles.participantName}>{p.nickname}</Text>
+                <Text style={styles.participantName}>{p.viewerRelation === "BLOCKED" ? "차단한 사용자" : p.nickname}</Text>
                 {p.isHost && (
                   <View style={styles.hostIcon}>
                     <Ionicons name="shield-checkmark" size={14} color={colors.accent.primary} />

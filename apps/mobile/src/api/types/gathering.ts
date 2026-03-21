@@ -2,7 +2,7 @@ export type GatheringCategory = "NONE" | "PARTY" | "FOOD_DRINK" | "ACTIVITY";
 
 export type Gender = "MALE" | "FEMALE";
 
-export type ViewerRelation = "SELF" | "STRANGER";
+export type ViewerRelation = "SELF" | "STRANGER" | "BLOCKED";
 
 export interface OpenGatheringRequest {
   title: string;
@@ -49,6 +49,7 @@ export interface GatheringListItem {
     nickname: string;
     profileImageUrl?: string | null;
     gender: Gender;
+    viewerRelation: ViewerRelation;
   };
   isFree: boolean;
   isSplit: boolean;
