@@ -153,7 +153,9 @@ export default function GatheringDetailScreen() {
               <Pressable
                 key={p.userUuid}
                 style={styles.participant}
-                onPress={() =>
+                // TODO: 임시로직 - BLOCKED인 경우 프로필 네비게이션 차단
+                onPress={() => {
+                  if (p.viewerRelation === "BLOCKED") return;
                   router.push({
                     pathname: "/(gathering)/ProfileScreen",
                     params: {
@@ -162,8 +164,8 @@ export default function GatheringDetailScreen() {
                       profileImageUrl: p.profileImageUrl ?? "",
                       viewerRelation: p.viewerRelation,
                     },
-                  } as any)
-                }
+                  } as any);
+                }}
               >
                 <View style={styles.participantProfile}>
                   {p.profileImageUrl ? (
