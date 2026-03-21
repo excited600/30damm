@@ -259,15 +259,17 @@ export default function GatheringDetailScreen() {
         >
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </Pressable>
-        <Pressable
-          onPress={() => setBottomSheetVisible(true)}
-          hitSlop={8}
-          style={styles.headerMore}
-        >
-          <View style={styles.moreDot} />
-          <View style={styles.moreDot} />
-          <View style={styles.moreDot} />
-        </Pressable>
+        {detail.userStatus !== "HOST_OPENED" && (
+          <Pressable
+            onPress={() => setBottomSheetVisible(true)}
+            hitSlop={8}
+            style={styles.headerMore}
+          >
+            <View style={styles.moreDot} />
+            <View style={styles.moreDot} />
+            <View style={styles.moreDot} />
+          </Pressable>
+        )}
       </View>
 
       <ReportBottomSheet

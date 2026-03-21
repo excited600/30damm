@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { ProfileMenuBottomSheet } from "@/shared/components/ui/ProfileMenuBottomSheet";
+import { blockClient } from "@/api/clients/blockClient";
 
 const EMOJIS = ["😀", "😎", "🤩", "🥳", "😺", "🐶", "🐱", "🦊", "🐻", "🐼", "🐸", "🐵", "🦁", "🐯", "🐰", "🐨", "🐷", "🌸", "🌺", "🍀", "🔥", "⭐", "🎉", "🎈", "🍕", "🎸", "🏀", "⚽", "🎮", "🚀"];
 
@@ -74,6 +75,26 @@ export default function ProfileScreen() {
       <ProfileMenuBottomSheet
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
+        onBlock={() => {
+          setMenuVisible(false);
+          Alert.alert("차단하기", `${nickname}님을 차단하시겠습니까?`, [
+            { text: "취소", style: "cancel" },
+            {
+              text: "차단",
+              style: "destructive",
+              onPress: async () => {
+                try {
+                  await blockClient.block({ blockedUserUuid: userUuid! });
+                  Alert.alert("차단 완료", `${nickname}님을 차단했습니다.`, [
+                    { text: "확인", onPress: () => router.replace("/(tabs)" as any) },
+                  ]);
+                } catch {
+                  Alert.alert("오류", "차단에 실패했습니다.", [{ text: "확인" }]);
+                }
+              },
+            },
+          ]);
+        }}
         onReport={() => {
           setMenuVisible(false);
           router.push({

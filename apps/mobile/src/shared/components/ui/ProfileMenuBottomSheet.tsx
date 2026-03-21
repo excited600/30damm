@@ -7,10 +7,11 @@ import { colors } from "@/shared/constants/colors";
 interface ProfileMenuBottomSheetProps {
   visible: boolean;
   onClose: () => void;
+  onBlock: () => void;
   onReport: () => void;
 }
 
-export function ProfileMenuBottomSheet({ visible, onClose, onReport }: ProfileMenuBottomSheetProps) {
+export function ProfileMenuBottomSheet({ visible, onClose, onBlock, onReport }: ProfileMenuBottomSheetProps) {
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(300);
   const backdropOpacity = useSharedValue(0);
@@ -41,7 +42,7 @@ export function ProfileMenuBottomSheet({ visible, onClose, onReport }: ProfileMe
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
       <Animated.View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }, sheetStyle]}>
-        <Pressable style={styles.menuItem} onPress={() => {}}>
+        <Pressable style={styles.menuItem} onPress={onBlock}>
           <Text style={styles.menuText}>차단하기</Text>
         </Pressable>
         <Pressable style={styles.menuItem} onPress={onReport}>
