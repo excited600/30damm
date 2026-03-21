@@ -6,6 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors } from "@/shared/constants/colors";
 import { ProfileMenuBottomSheet } from "@/shared/components/ui/ProfileMenuBottomSheet";
 import { blockClient } from "@/api/clients/blockClient";
+import { queryClient } from "@/api/queryClient";
 
 const EMOJIS = ["😀", "😎", "🤩", "🥳", "😺", "🐶", "🐱", "🦊", "🐻", "🐼", "🐸", "🐵", "🦁", "🐯", "🐰", "🐨", "🐷", "🌸", "🌺", "🍀", "🔥", "⭐", "🎉", "🎈", "🍕", "🎸", "🏀", "⚽", "🎮", "🚀"];
 
@@ -85,6 +86,8 @@ export default function ProfileScreen() {
               onPress: async () => {
                 try {
                   await blockClient.block({ blockedUserUuid: userUuid! });
+                  await queryClient.invalidateQueries({ queryKey: ["gatherings"] });
+                  await queryClient.invalidateQueries({ queryKey: ["gathering"] });
                   Alert.alert("차단 완료", `${nickname}님을 차단했습니다.`, [
                     { text: "확인", onPress: () => router.replace("/(tabs)" as any) },
                   ]);

@@ -17,6 +17,7 @@ import { Button } from "@/shared/components/ui/Button";
 import { WheelPicker } from "@/shared/components/ui/WheelPicker";
 import { useCreateGatheringStore } from "@/store/useCreateGatheringStore";
 import { gatheringClient } from "@/api/clients/gatheringClient";
+import { queryClient } from "@/api/queryClient";
 import type { OpenGatheringRequest } from "@/api/types/gathering";
 
 const TOTAL_STEPS = 7;
@@ -140,6 +141,7 @@ export default function CreateGatheringWhenScreen() {
     openGathering.mutate(request, {
       onSuccess: (data) => {
         store.reset();
+        queryClient.invalidateQueries({ queryKey: ["gatherings"] });
         router.replace({
           pathname: "/(gathering)/GatheringDetailScreen",
           params: { gatheringUuid: data.gatheringUuid, showToast: "true" },

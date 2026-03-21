@@ -79,6 +79,7 @@ export default function GatheringDetailScreen() {
     try {
       await gatheringClient.join(gatheringUuid);
       await queryClient.invalidateQueries({ queryKey: ["gathering", gatheringUuid] });
+      await queryClient.invalidateQueries({ queryKey: ["gatherings"] });
     } catch {
       setErrorToastVisible(true);
     } finally {
