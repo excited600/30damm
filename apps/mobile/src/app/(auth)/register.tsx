@@ -137,12 +137,12 @@ export default function RegisterScreen() {
         onTerms={() => {
           setShowAgreement(false);
           pendingAgreementRef.current = true;
-          router.push("/(gathering)/TermsOfServiceScreen" as any);
+          router.push("/(legal)/TermsOfServiceScreen" as any);
         }}
         onPrivacy={() => {
           setShowAgreement(false);
           pendingAgreementRef.current = true;
-          router.push("/(gathering)/PrivacyPolicyScreen" as any);
+          router.push("/(legal)/PrivacyPolicyScreen" as any);
         }}
       />
     </KeyboardAvoidingView>

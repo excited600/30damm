@@ -81,13 +81,13 @@ export default function My30dammScreen() {
           <MenuWithRightIcon
             label="개인정보 처리방침"
             onPress={() =>
-              router.push("/(gathering)/PrivacyPolicyScreen" as any)
+              router.push("/(legal)/PrivacyPolicyScreen" as any)
             }
           />
           <MenuWithRightIcon
             label="이용약관"
             onPress={() =>
-              router.push("/(gathering)/TermsOfServiceScreen" as any)
+              router.push("/(legal)/TermsOfServiceScreen" as any)
             }
           />
         </MenuSection>
