@@ -14,10 +14,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Filter from "badwords-ko";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { useRegisterStore } from "@/store/useRegisterStore";
 import { useSignup } from "@/features/auth/hooks/useAuth";
+
+const profanityFilter = new Filter();
 
 export default function CreateProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -26,6 +29,7 @@ export default function CreateProfileScreen() {
   const signup = useSignup();
   const [nickname, setNickname] = useState("");
   const [nicknameError, setNicknameError] = useState("");
+  const [nicknameProfanity, setNicknameProfanity] = useState(false);
   const { height } = useWindowDimensions();
 
   const handleSignup = () => {
@@ -36,6 +40,9 @@ export default function CreateProfileScreen() {
     }
     if (nickname.length < 2 || nickname.length > 10) {
       setNicknameError("닉네임은 2~10자로 입력해주세요.");
+      return;
+    }
+    if (nicknameProfanity) {
       return;
     }
     setNicknameError("");
@@ -96,12 +103,15 @@ export default function CreateProfileScreen() {
             onChangeText={(text) => {
               setNickname(text);
               setNicknameError("");
+              setNicknameProfanity(profanityFilter.isProfane(text));
             }}
             autoFocus
           />
         </View>
-        {nicknameError !== "" && (
-          <Text style={styles.nicknameError}>{nicknameError}</Text>
+        {(nicknameError !== "" || nicknameProfanity) && (
+          <Text style={styles.nicknameError}>
+            {nicknameProfanity ? "비속어가 포함되어 있습니다" : nicknameError}
+          </Text>
         )}
 
         <View style={styles.spacer} />
@@ -110,7 +120,7 @@ export default function CreateProfileScreen() {
         <Button
           label={signup.isPending ? "가입 중..." : "시작하기"}
           onPress={handleSignup}
-          disabled={signup.isPending}
+          disabled={signup.isPending || nicknameProfanity}
           color={colors.accent.primary}
           labelColor={colors.text.primary}
           style={styles.button}

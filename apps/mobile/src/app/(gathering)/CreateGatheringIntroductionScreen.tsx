@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform, Scro
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Filter from "badwords-ko";
 import { colors } from "@/shared/constants/colors";
 import { Button } from "@/shared/components/ui/Button";
 import { UnderlineInput } from "@/shared/components/ui/UnderlineInput";
@@ -12,6 +13,7 @@ const TOTAL_STEPS = 7;
 const CURRENT_STEP = 5;
 const TITLE_MAX = 30;
 const DETAIL_MAX = 200;
+const profanityFilter = new Filter();
 
 export default function CreateGatheringIntroductionScreen() {
   const insets = useSafeAreaInsets();
@@ -20,6 +22,8 @@ export default function CreateGatheringIntroductionScreen() {
   const [title, setTitle] = useState(store.title);
   const [detail, setDetail] = useState(store.description);
   const [titleEmptyError, setTitleEmptyError] = useState(false);
+  const [titleProfanity, setTitleProfanity] = useState(false);
+  const [detailProfanity, setDetailProfanity] = useState(false);
 
   const titleOverflow = title.length > TITLE_MAX;
   const detailOverflow = detail.length > DETAIL_MAX;
@@ -29,7 +33,7 @@ export default function CreateGatheringIntroductionScreen() {
       setTitleEmptyError(true);
       return;
     }
-    if (titleOverflow || detailOverflow) {
+    if (titleOverflow || detailOverflow || titleProfanity || detailProfanity) {
       return;
     }
     store.setIntroduction(title, detail);
@@ -88,22 +92,34 @@ export default function CreateGatheringIntroductionScreen() {
             onChangeText={(text) => {
               setTitle(text);
               setTitleEmptyError(false);
+              setTitleProfanity(profanityFilter.isProfane(text));
             }}
             error={
               titleEmptyError
                 ? "제목을 입력해주세요."
                 : titleOverflow
                   ? "글자수(30자)를 초과했습니다"
-                  : undefined
+                  : titleProfanity
+                    ? "비속어가 포함되어 있습니다"
+                    : undefined
             }
           />
           <UnderlineInput
             label="상세소개"
             placeholder="모임을 조금 더 소개해주세요(200자 이내)"
             value={detail}
-            onChangeText={setDetail}
+            onChangeText={(text) => {
+              setDetail(text);
+              setDetailProfanity(profanityFilter.isProfane(text));
+            }}
             multiline
-            error={detailOverflow ? "글자수(200자)를 초과했습니다" : undefined}
+            error={
+              detailOverflow
+                ? "글자수(200자)를 초과했습니다"
+                : detailProfanity
+                  ? "비속어가 포함되어 있습니다"
+                  : undefined
+            }
           />
         </View>
       </ScrollView>
@@ -118,6 +134,7 @@ export default function CreateGatheringIntroductionScreen() {
           labelColor={colors.text.primary}
           style={styles.button}
           onPress={handleNext}
+          disabled={titleProfanity || detailProfanity}
         />
       </View>
     </KeyboardAvoidingView>
