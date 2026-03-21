@@ -22,5 +22,6 @@ interface GatheringRepository {
         filter: GatheringFilter,
         blockedGatheringUuids: List<UUID>,
         blockedUserUuids: List<UUID>,
+        viewerUuid: UUID,
     ): ScrollResult<GatheringEntity, GatheringCursor>
 }

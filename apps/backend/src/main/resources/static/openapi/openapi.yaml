@@ -909,6 +909,7 @@ components:
           maleCount: 1
           price: 5
           host:
+            viewerRelation: SELF
             gender: MALE
             userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             nickname: nickname
@@ -926,6 +927,7 @@ components:
           maleCount: 1
           price: 5
           host:
+            viewerRelation: SELF
             gender: MALE
             userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             nickname: nickname
@@ -969,13 +971,13 @@ components:
           nickname: nickname
           profileImageUrl: https://openapi-generator.tech
         guests:
-        - viewerRelation: null
-          gender: null
+        - viewerRelation: SELF
+          gender: MALE
           userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           nickname: nickname
           profileImageUrl: https://openapi-generator.tech
-        - viewerRelation: null
-          gender: null
+        - viewerRelation: SELF
+          gender: MALE
           userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           nickname: nickname
           profileImageUrl: https://openapi-generator.tech
@@ -1002,7 +1004,7 @@ components:
           description: 모임 설명
           type: string
         host:
-          $ref: "#/components/schemas/GetGatheringDetailResponse_host"
+          $ref: "#/components/schemas/ScrollFilteredGatheringsResponse_list_inner_host"
         guests:
           description: 참여 게스트 목록 (빈 배열 가능)
           items:
@@ -1302,6 +1304,7 @@ components:
       enum:
       - SELF
       - STRANGER
+      - BLOCKED
       type: string
     GatheringUserStatus:
       description: 현재 사용자의 모임 참여 상태
@@ -1457,6 +1460,7 @@ components:
       type: object
     ScrollFilteredGatheringsResponse_list_inner_host:
       example:
+        viewerRelation: SELF
         gender: MALE
         userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         nickname: nickname
@@ -1476,10 +1480,13 @@ components:
           type: string
         gender:
           $ref: "#/components/schemas/Gender"
+        viewerRelation:
+          $ref: "#/components/schemas/ViewerRelation"
       required:
       - gender
       - nickname
       - userUuid
+      - viewerRelation
       type: object
     ScrollFilteredGatheringsResponse_list_inner:
       example:
@@ -1493,6 +1500,7 @@ components:
         maleCount: 1
         price: 5
         host:
+          viewerRelation: SELF
           gender: MALE
           userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           nickname: nickname
@@ -1558,40 +1566,10 @@ components:
       - maleCount
       - title
       type: object
-    GetGatheringDetailResponse_host:
+    GetGatheringDetailResponse_guests_inner:
       example:
         viewerRelation: SELF
         gender: MALE
-        userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        nickname: nickname
-        profileImageUrl: https://openapi-generator.tech
-      properties:
-        userUuid:
-          description: 호스트 UUID
-          format: uuid
-          type: string
-        nickname:
-          description: 호스트 닉네임
-          type: string
-        profileImageUrl:
-          description: 호스트 프로필 이미지 URL
-          format: uri
-          nullable: true
-          type: string
-        gender:
-          $ref: "#/components/schemas/Gender"
-        viewerRelation:
-          $ref: "#/components/schemas/ViewerRelation"
-      required:
-      - gender
-      - nickname
-      - userUuid
-      - viewerRelation
-      type: object
-    GetGatheringDetailResponse_guests_inner:
-      example:
-        viewerRelation: null
-        gender: null
         userUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         nickname: nickname
         profileImageUrl: https://openapi-generator.tech

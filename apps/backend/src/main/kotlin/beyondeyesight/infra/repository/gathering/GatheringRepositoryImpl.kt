@@ -41,6 +41,7 @@ class GatheringRepositoryImpl(
         filter: GatheringFilter,
         blockedGatheringUuids: List<UUID>,
         blockedUserUuids: List<UUID>,
+        viewerUuid: UUID,
     ): ScrollResult<GatheringEntity, GatheringCursor> {
         val results = gatheringJpaRepository.findPage(pageable = Pageable.ofSize(size + 1)) {
             select(entity(GatheringEntity::class))
@@ -58,11 +59,8 @@ class GatheringRepositoryImpl(
                     blockedGatheringUuids.takeIf { it.isNotEmpty() }?.let {
                         path(GatheringEntity::uuid).notIn(it)
                     },
-                    blockedUserUuids.takeIf { it.isNotEmpty() }?.let {
-                        path(GatheringEntity::hostUuid).notIn(it)
-                    },
                     blockedUserUuids.takeIf { it.isNotEmpty() }?.let { uuids ->
-                        val blockedGuestSubquery = select(count(entity(GuestEntity::class)))
+                        val blockedGuestCountSubquery = select(count(entity(GuestEntity::class)))
                             .from(entity(GuestEntity::class))
                             .where(
                                 and(
@@ -71,7 +69,25 @@ class GatheringRepositoryImpl(
                                 )
                             )
                             .asSubquery()
-                        blockedGuestSubquery.eq(0L)
+
+                        val viewerIsGuestSubquery = select(count(entity(GuestEntity::class)))
+                            .from(entity(GuestEntity::class))
+                            .where(
+                                and(
+                                    path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)),
+                                    path(GuestEntity::userUuid).eq(viewerUuid)
+                                )
+                            )
+                            .asSubquery()
+
+                        or(
+                            and(
+                                path(GatheringEntity::hostUuid).notIn(uuids),
+                                blockedGuestCountSubquery.eq(0L)
+                            ),
+                            path(GatheringEntity::hostUuid).eq(viewerUuid),
+                            viewerIsGuestSubquery.greaterThan(0L)
+                        )
                     },
                     * buildFilterPredicates(filter).toTypedArray()
                 )

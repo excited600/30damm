@@ -71,4 +71,5 @@ ViewerRelation:
   enum:
     - SELF
     - STRANGER
+    - BLOCKED
   description: 조회한 사용자와의 관계

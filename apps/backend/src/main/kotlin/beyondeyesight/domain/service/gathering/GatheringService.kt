@@ -53,18 +53,36 @@ class GatheringService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    data class GuestWithUser(val guest: beyondeyesight.domain.model.GuestEntity, val user: UserEntity)
+    enum class ViewerRelation { SELF, STRANGER, BLOCKED }
+
     data class GenderCounts(val maleCount: Int, val femaleCount: Int)
+
+    // Detail용
+    data class HostDetailView(
+        val user: UserEntity,
+        val viewerRelation: ViewerRelation,
+    )
+    data class GuestDetailView(
+        val guest: GuestEntity,
+        val user: UserEntity,
+        val viewerRelation: ViewerRelation,
+    )
     data class GatheringDetail(
         val gathering: GatheringEntity,
-        val host: UserEntity,
-        val guestsWithUsers: List<GuestWithUser>,
+        val host: HostDetailView,
+        val guests: List<GuestDetailView>,
         val genderCounts: GenderCounts,
         val userStatus: GatheringUserStatus,
     )
+
+    // Scroll용
+    data class HostScrollView(
+        val user: UserEntity,
+        val viewerRelation: ViewerRelation,
+    )
     data class ScrollWithDetails(
         val scrollResult: beyondeyesight.domain.model.ScrollResult<GatheringEntity, GatheringCursor>,
-        val hostUsers: Map<UUID, UserEntity>,
+        val hostViews: Map<UUID, HostScrollView>,
         val genderCountsMap: Map<UUID, GenderCounts>,
     )
 
@@ -142,11 +160,7 @@ class GatheringService(
                 resourceUuid = gatheringUuid
             )
 
-        val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid)
-
-        if (gathering.hostUuid in blockedUserUuids) {
-            throw BlockingParticipantGatheringException.blockedHost(gatheringUuid)
-        }
+        val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid).toSet()
 
         val host = userRepository.findByUuid(gathering.hostUuid)
             ?: throw ResourceNotFoundException.byUuid(
@@ -157,25 +171,37 @@ class GatheringService(
         val guests = guestRepository.findAllByGatheringUuid(gatheringUuid)
         val guestsWithUsers = guests.mapNotNull { guest ->
             val user = userRepository.findByUuid(guest.userUuid) ?: return@mapNotNull null
-            GuestWithUser(guest, user)
+            Pair(guest, user)
         }
 
-        if (guestsWithUsers.any { it.user.uuid in blockedUserUuids }) {
-            throw BlockingParticipantGatheringException.blockedGuest(gatheringUuid)
+        val isViewerParticipant = userUuid == host.uuid || guestsWithUsers.any { it.second.uuid == userUuid }
+        val hasBlockedParticipant = host.uuid in blockedUserUuids || guestsWithUsers.any { it.second.uuid in blockedUserUuids }
+
+        if (!isViewerParticipant && hasBlockedParticipant) {
+            throw BlockingParticipantGatheringException.blocked(gatheringUuid)
         }
 
         val genderCounts = countGendersByGathering(gatheringUuid)
 
         val userStatus = when {
             userUuid == host.uuid -> GatheringUserStatus.HOST_OPENED
-            guestsWithUsers.any { it.user.uuid == userUuid } -> GatheringUserStatus.GUEST_JOINED
+            guestsWithUsers.any { it.second.uuid == userUuid } -> GatheringUserStatus.GUEST_JOINED
             else -> GatheringUserStatus.GUEST_NOT_JOINED
         }
 
         return GatheringDetail(
             gathering = gathering,
-            host = host,
-            guestsWithUsers = guestsWithUsers,
+            host = HostDetailView(
+                user = host,
+                viewerRelation = resolveViewerRelation(host.uuid, userUuid, blockedUserUuids),
+            ),
+            guests = guestsWithUsers.map { (guest, user) ->
+                GuestDetailView(
+                    guest = guest,
+                    user = user,
+                    viewerRelation = resolveViewerRelation(user.uuid, userUuid, blockedUserUuids),
+                )
+            },
             genderCounts = genderCounts,
             userStatus = userStatus
         )
@@ -188,18 +214,26 @@ class GatheringService(
         filter: GatheringFilter,
     ): ScrollWithDetails {
         val blockedGatheringUuids = userBlockedGatheringRepository.findBlockedGatheringUuids(userUuid)
-        val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid)
+        val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid).toSet()
 
         val result = gatheringRepository.scroll(
             cursor = cursor,
             size = size,
             filter = filter,
             blockedGatheringUuids = blockedGatheringUuids,
-            blockedUserUuids = blockedUserUuids,
+            blockedUserUuids = blockedUserUuids.toList(),
+            viewerUuid = userUuid,
         )
 
         val hostUuids = result.items.map { it.hostUuid }.distinct()
         val hostUsers = hostUuids.mapNotNull { userRepository.findByUuid(it) }.associateBy { it.uuid }
+
+        val hostViews = hostUsers.mapValues { (_, user) ->
+            HostScrollView(
+                user = user,
+                viewerRelation = resolveViewerRelation(user.uuid, userUuid, blockedUserUuids),
+            )
+        }
 
         val genderCountsMap = result.items.associate { gathering ->
             gathering.uuid to countGendersByGathering(gathering.uuid)
@@ -207,9 +241,17 @@ class GatheringService(
 
         return ScrollWithDetails(
             scrollResult = result,
-            hostUsers = hostUsers,
+            hostViews = hostViews,
             genderCountsMap = genderCountsMap,
         )
+    }
+
+    private fun resolveViewerRelation(targetUuid: UUID, viewerUuid: UUID, blockedUserUuids: Set<UUID>): ViewerRelation {
+        return when {
+            targetUuid == viewerUuid -> ViewerRelation.SELF
+            targetUuid in blockedUserUuids -> ViewerRelation.BLOCKED
+            else -> ViewerRelation.STRANGER
+        }
     }
 
     private fun countGendersByGathering(gatheringUuid: UUID): GenderCounts {

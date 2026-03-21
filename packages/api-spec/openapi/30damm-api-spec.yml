@@ -884,6 +884,7 @@ components:
                   - userUuid
                   - nickname
                   - gender
+                  - viewerRelation
                 properties:
                   userUuid:
                     type: string
@@ -899,6 +900,8 @@ components:
                     description: 호스트 프로필 이미지 URL
                   gender:
                     $ref: '#/components/schemas/Gender'
+                  viewerRelation:
+                    $ref: '#/components/schemas/ViewerRelation'
               isFree:
                 type: boolean
                 description: 무료 여부
@@ -1230,6 +1233,7 @@ components:
       enum:
         - SELF
         - STRANGER
+        - BLOCKED
       description: 조회한 사용자와의 관계
     GatheringUserStatus:
       type: string

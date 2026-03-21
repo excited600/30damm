@@ -59,31 +59,29 @@ class GatheringController(
     }
 
     override fun getGatheringDetail(gatheringId: UUID): GetGatheringDetailResponse {
-        val viewerUuid = currentUserUuid()
         return gatheringApplicationService.getDetail(
-            userUuid = viewerUuid,
+            userUuid = currentUserUuid(),
             gatheringUuid = gatheringId,
             mapper = { detail ->
                 val gathering = detail.gathering
-                val host = detail.host
                 GetGatheringDetailResponse(
                     gatheringUuid = gathering.uuid,
                     title = gathering.title,
                     description = gathering.description ?: "",
-                    host = GetGatheringDetailResponseHost(
-                        userUuid = host.uuid,
-                        nickname = host.nickname,
-                        gender = requireGender(host),
-                        profileImageUrl = host.profileImageUrl?.let { URI(it) },
-                        viewerRelation = if (host.uuid == viewerUuid) ViewerRelation.SELF else ViewerRelation.STRANGER,
+                    host = ScrollFilteredGatheringsResponseListInnerHost(
+                        userUuid = detail.host.user.uuid,
+                        nickname = detail.host.user.nickname,
+                        gender = requireGender(detail.host.user),
+                        profileImageUrl = detail.host.user.profileImageUrl?.let { URI(it) },
+                        viewerRelation = ViewerRelation.forValue(detail.host.viewerRelation.name),
                     ),
-                    guests = detail.guestsWithUsers.map { guestWithUser ->
+                    guests = detail.guests.map { guestView ->
                         GetGatheringDetailResponseGuestsInner(
-                            userUuid = guestWithUser.user.uuid,
-                            nickname = guestWithUser.user.nickname,
-                            gender = requireGender(guestWithUser.user),
-                            profileImageUrl = guestWithUser.user.profileImageUrl?.let { URI(it) },
-                            viewerRelation = if (guestWithUser.user.uuid == viewerUuid) ViewerRelation.SELF else ViewerRelation.STRANGER,
+                            userUuid = guestView.user.uuid,
+                            nickname = guestView.user.nickname,
+                            gender = requireGender(guestView.user),
+                            profileImageUrl = guestView.user.profileImageUrl?.let { URI(it) },
+                            viewerRelation = ViewerRelation.forValue(guestView.viewerRelation.name),
                         )
                     },
                     category = GatheringCategory.valueOf(gathering.category.name),
@@ -175,7 +173,7 @@ class GatheringController(
                 ScrollFilteredGatheringsResponse(
                     hasNext = details.scrollResult.hasNext,
                     list = details.scrollResult.items.map { gathering ->
-                        val host = details.hostUsers[gathering.hostUuid]
+                        val hostView = details.hostViews[gathering.hostUuid]
                             ?: throw ResourceNotFoundException.byUuid(
                                 resourceName = UserEntity.RESOURCE_NAME,
                                 resourceUuid = gathering.hostUuid
@@ -191,7 +189,13 @@ class GatheringController(
                             title = gathering.title,
                             maleCount = genderCounts.maleCount,
                             femaleCount = genderCounts.femaleCount,
-                            host = toHostResponse(host),
+                            host = ScrollFilteredGatheringsResponseListInnerHost(
+                                userUuid = hostView.user.uuid,
+                                nickname = hostView.user.nickname,
+                                gender = requireGender(hostView.user),
+                                profileImageUrl = hostView.user.profileImageUrl?.let { URI(it) },
+                                viewerRelation = ViewerRelation.forValue(hostView.viewerRelation.name),
+                            ),
                             isFree = gathering.isFree,
                             isSplit = gathering.isSplit,
                             imgUrl = gathering.imageUrl?.let { URI(it) },
@@ -298,15 +302,6 @@ class GatheringController(
             gatheringDays = scheduleSeriesRequest.gatheringDays,
             maxMaleCount = scheduleSeriesRequest.maxMaleCount,
             maxFemaleCount = scheduleSeriesRequest.maxFemaleCount
-        )
-    }
-
-    private fun toHostResponse(user: UserEntity): ScrollFilteredGatheringsResponseListInnerHost {
-        return ScrollFilteredGatheringsResponseListInnerHost(
-            userUuid = user.uuid,
-            nickname = user.nickname,
-            gender = requireGender(user),
-            profileImageUrl = user.profileImageUrl?.let { URI(it) },
         )
     }
 

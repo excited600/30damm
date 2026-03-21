@@ -69,6 +69,7 @@ ScrollFilteredGatheringsResponse:
               - userUuid
               - nickname
               - gender
+              - viewerRelation
             properties:
               userUuid:
                 type: string
@@ -84,6 +85,8 @@ ScrollFilteredGatheringsResponse:
                 description: 호스트 프로필 이미지 URL
               gender:
                 $ref: '../../shared.yml#/Gender'
+              viewerRelation:
+                $ref: '../../shared.yml#/ViewerRelation'
           isFree:
             type: boolean
             description: 무료 여부

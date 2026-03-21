@@ -10,13 +10,7 @@ class BlockingParticipantGatheringException(
     message = message
 ) {
     companion object {
-        fun blockedHost(gatheringUuid: UUID): BlockingParticipantGatheringException {
-            return BlockingParticipantGatheringException(
-                "Cannot view gathering $gatheringUuid because the host is blocked."
-            )
-        }
-
-        fun blockedGuest(gatheringUuid: UUID): BlockingParticipantGatheringException {
+        fun blocked(gatheringUuid: UUID): BlockingParticipantGatheringException {
             return BlockingParticipantGatheringException(
                 "Cannot view gathering $gatheringUuid because a blocked user is participating."
             )
