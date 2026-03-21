@@ -29,7 +29,7 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/api/v1/users/signup", "/api/v1/users/login").permitAll()
+                    .requestMatchers("/api/v1/users/signup", "/api/v1/users/login", "/api/v1/users/refresh").permitAll()
                     .requestMatchers("/api/v1/payments/webhook").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/openapi/**").permitAll()
                     .requestMatchers("/api/v1/**").authenticated()

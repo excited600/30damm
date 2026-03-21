@@ -64,6 +64,27 @@ paths:
       summary: 로그인
       tags:
       - Users
+  /api/v1/users/refresh:
+    post:
+      operationId: refreshToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponse"
+          description: 토큰 갱신 성공
+        "401":
+          description: 유효하지 않거나 만료된 리프레시 토큰
+      summary: 토큰 갱신
+      tags:
+      - Users
   /api/v1/users/me:
     delete:
       operationId: deleteUser
@@ -559,6 +580,31 @@ components:
       - accessToken
       - refreshToken
       - userUuid
+      type: object
+    RefreshTokenRequest:
+      example:
+        refreshToken: refreshToken
+      properties:
+        refreshToken:
+          description: 리프레시 토큰
+          type: string
+      required:
+      - refreshToken
+      type: object
+    RefreshTokenResponse:
+      example:
+        accessToken: accessToken
+        refreshToken: refreshToken
+      properties:
+        accessToken:
+          description: 새로운 JWT 액세스 토큰
+          type: string
+        refreshToken:
+          description: 새로운 JWT 리프레시 토큰
+          type: string
+      required:
+      - accessToken
+      - refreshToken
       type: object
     OpenGatheringRequest:
       example:

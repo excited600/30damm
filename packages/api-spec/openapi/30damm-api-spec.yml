@@ -64,6 +64,27 @@ paths:
           description: 유효성 검사 실패
         '401':
           description: 이메일 또는 비밀번호 불일치
+  /api/v1/users/refresh:
+    post:
+      operationId: refreshToken
+      tags:
+        - Users
+      summary: 토큰 갱신
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: 토큰 갱신 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: 유효하지 않거나 만료된 리프레시 토큰
   /api/v1/users/me:
     delete:
       operationId: deleteUser
@@ -520,6 +541,26 @@ components:
         refreshToken:
           type: string
           description: JWT 리프레시 토큰
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: 리프레시 토큰
+    RefreshTokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+          description: 새로운 JWT 액세스 토큰
+        refreshToken:
+          type: string
+          description: 새로운 JWT 리프레시 토큰
     OpenGatheringRequest:
       type: object
       required:

@@ -13,8 +13,8 @@ spring:
 
 jwt:
   secret: dGhpcyBpcyBhIHZlcnkgc2VjcmV0IGtleSBmb3IgSldUIHRva2VuIGdlbmVyYXRpb24gMzBkYW1t
-  access-token-expiry: 3600000
-  refresh-token-expiry: 604800000
+  access-token-expiry: 86400000
+  refresh-token-expiry: 31536000000
 
 portone:
   api-secret: Na5vnSd3bSdBtded0DGBWxQbVD8u6oSMHzvvhr7ohSTNm8PyLvSFn4qQlYA2Fq9cVRnBgrf4N6JHGcs7

@@ -46,6 +46,28 @@
       '401':
         description: 이메일 또는 비밀번호 불일치
 
+/users/refresh:
+  post:
+    operationId: refreshToken
+    tags:
+      - Users
+    summary: 토큰 갱신
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user/refreshTokenRequest.yml#/RefreshTokenRequest'
+    responses:
+      '200':
+        description: 토큰 갱신 성공
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user/refreshTokenResponse.yml#/RefreshTokenResponse'
+      '401':
+        description: 유효하지 않거나 만료된 리프레시 토큰
+
 /users/me:
   delete:
     operationId: deleteUser

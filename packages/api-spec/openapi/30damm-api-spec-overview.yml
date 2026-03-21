@@ -26,6 +26,8 @@ paths:
     $ref: './paths/users.yml#/~1users~1signup'
   /api/v1/users/login:
     $ref: './paths/users.yml#/~1users~1login'
+  /api/v1/users/refresh:
+    $ref: './paths/users.yml#/~1users~1refresh'
   /api/v1/users/me:
     $ref: './paths/users.yml#/~1users~1me'
 
@@ -73,6 +75,10 @@ components:
       $ref: './components/schemas/user/loginRequest.yml#/LoginRequest'
     LoginResponse:
       $ref: './components/schemas/user/loginResponse.yml#/LoginResponse'
+    RefreshTokenRequest:
+      $ref: './components/schemas/user/refreshTokenRequest.yml#/RefreshTokenRequest'
+    RefreshTokenResponse:
+      $ref: './components/schemas/user/refreshTokenResponse.yml#/RefreshTokenResponse'
 
     # Gatherings
     OpenGatheringRequest:
