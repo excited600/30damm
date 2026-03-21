@@ -919,6 +919,7 @@ components:
             - userUuid
             - nickname
             - gender
+            - viewerRelation
           properties:
             userUuid:
               type: string
@@ -934,6 +935,8 @@ components:
               description: 호스트 프로필 이미지 URL
             gender:
               $ref: '#/components/schemas/Gender'
+            viewerRelation:
+              $ref: '#/components/schemas/ViewerRelation'
         guests:
           type: array
           description: 참여 게스트 목록 (빈 배열 가능)
@@ -943,6 +946,7 @@ components:
               - userUuid
               - nickname
               - gender
+              - viewerRelation
             properties:
               userUuid:
                 type: string
@@ -958,6 +962,8 @@ components:
                 description: 프로필 이미지 URL
               gender:
                 $ref: '#/components/schemas/Gender'
+              viewerRelation:
+                $ref: '#/components/schemas/ViewerRelation'
         category:
           $ref: '#/components/schemas/Gathering_Category'
         minCapacity:
@@ -1167,6 +1173,12 @@ components:
         - MALE
         - FEMALE
       description: Gender of the user
+    ViewerRelation:
+      type: string
+      enum:
+        - SELF
+        - STRANGER
+      description: 조회한 사용자와의 관계
     GatheringUserStatus:
       type: string
       enum:

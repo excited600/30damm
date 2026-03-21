@@ -65,3 +65,10 @@ Gathering_ScheduleType:
 Series_ScheduleType:
   type: string
   enum: [WEEKLY, DATE]
+
+ViewerRelation:
+  type: string
+  enum:
+    - SELF
+    - STRANGER
+  description: 조회한 사용자와의 관계

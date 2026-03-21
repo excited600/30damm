@@ -37,6 +37,7 @@ GetGatheringDetailResponse:
         - userUuid
         - nickname
         - gender
+        - viewerRelation
       properties:
         userUuid:
           type: string
@@ -52,6 +53,8 @@ GetGatheringDetailResponse:
           description: 호스트 프로필 이미지 URL
         gender:
           $ref: '../../shared.yml#/Gender'
+        viewerRelation:
+          $ref: '../../shared.yml#/ViewerRelation'
     guests:
       type: array
       description: 참여 게스트 목록 (빈 배열 가능)
@@ -61,6 +64,7 @@ GetGatheringDetailResponse:
           - userUuid
           - nickname
           - gender
+          - viewerRelation
         properties:
           userUuid:
             type: string
@@ -76,6 +80,8 @@ GetGatheringDetailResponse:
             description: 프로필 이미지 URL
           gender:
             $ref: '../../shared.yml#/Gender'
+          viewerRelation:
+            $ref: '../../shared.yml#/ViewerRelation'
     category:
       $ref: '../../shared.yml#/Gathering_Category'
     minCapacity:

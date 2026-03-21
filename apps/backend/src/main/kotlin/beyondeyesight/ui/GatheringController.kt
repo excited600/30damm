@@ -59,8 +59,9 @@ class GatheringController(
     }
 
     override fun getGatheringDetail(gatheringId: UUID): GetGatheringDetailResponse {
+        val viewerUuid = currentUserUuid()
         return gatheringApplicationService.getDetail(
-            userUuid = currentUserUuid(),
+            userUuid = viewerUuid,
             gatheringUuid = gatheringId,
             mapper = { detail ->
                 val gathering = detail.gathering
@@ -69,13 +70,20 @@ class GatheringController(
                     gatheringUuid = gathering.uuid,
                     title = gathering.title,
                     description = gathering.description ?: "",
-                    host = toHostResponse(host),
+                    host = GetGatheringDetailResponseHost(
+                        userUuid = host.uuid,
+                        nickname = host.nickname,
+                        gender = requireGender(host),
+                        profileImageUrl = host.profileImageUrl?.let { URI(it) },
+                        viewerRelation = if (host.uuid == viewerUuid) ViewerRelation.SELF else ViewerRelation.STRANGER,
+                    ),
                     guests = detail.guestsWithUsers.map { guestWithUser ->
                         GetGatheringDetailResponseGuestsInner(
                             userUuid = guestWithUser.user.uuid,
                             nickname = guestWithUser.user.nickname,
                             gender = requireGender(guestWithUser.user),
                             profileImageUrl = guestWithUser.user.profileImageUrl?.let { URI(it) },
+                            viewerRelation = if (guestWithUser.user.uuid == viewerUuid) ViewerRelation.SELF else ViewerRelation.STRANGER,
                         )
                     },
                     category = GatheringCategory.valueOf(gathering.category.name),
