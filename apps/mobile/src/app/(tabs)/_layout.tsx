@@ -1,8 +1,15 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { colors } from "@/shared/constants/colors";
 import { HomeIcon, MeIcon } from "@/shared/components/ui/TabIcons";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function TabLayout() {
+  const token = useAuthStore((s) => s.token);
+
+  if (!token) {
+    return <Redirect href="/welcome" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
