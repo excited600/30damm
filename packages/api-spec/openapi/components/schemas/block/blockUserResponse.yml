@@ -1,0 +1,14 @@
+BlockUserResponse:
+  type: object
+  required:
+    - uuid
+    - blockedUserUuid
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: 차단 레코드 UUID
+    blockedUserUuid:
+      type: string
+      format: uuid
+      description: 차단된 사용자 UUID

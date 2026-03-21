@@ -6,6 +6,7 @@ import beyondeyesight.domain.exception.DataIntegrityException
 import beyondeyesight.domain.exception.InvalidValueException
 import beyondeyesight.domain.exception.LockAcquireFailException
 import beyondeyesight.domain.exception.ResourceNotFoundException
+import beyondeyesight.domain.exception.gathering.BlockingParticipantGatheringException
 import beyondeyesight.domain.exception.gathering.CannotJoinException
 import beyondeyesight.domain.model.GuestEntity
 import beyondeyesight.domain.model.GuestId
@@ -15,6 +16,7 @@ import beyondeyesight.domain.model.payment.PaymentEntity
 import beyondeyesight.domain.model.payment.ProductType
 import beyondeyesight.domain.model.payment.Status
 import beyondeyesight.domain.model.user.Gender
+import beyondeyesight.domain.repository.block.UserBlockedUserRepository
 import beyondeyesight.domain.repository.gathering.block.UserBlockedGatheringRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.gathering.GuestRepository
@@ -47,6 +49,7 @@ class GatheringService(
     private val paymentSynchronizeService: PaymentSynchronizeService,
     private val paymentGateway: PaymentGateway,
     private val userBlockedGatheringRepository: UserBlockedGatheringRepository,
+    private val userBlockedUserRepository: UserBlockedUserRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -139,6 +142,12 @@ class GatheringService(
                 resourceUuid = gatheringUuid
             )
 
+        val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid)
+
+        if (gathering.hostUuid in blockedUserUuids) {
+            throw BlockingParticipantGatheringException.blockedHost(gatheringUuid)
+        }
+
         val host = userRepository.findByUuid(gathering.hostUuid)
             ?: throw ResourceNotFoundException.byUuid(
                 resourceName = UserEntity.RESOURCE_NAME,
@@ -149,6 +158,10 @@ class GatheringService(
         val guestsWithUsers = guests.mapNotNull { guest ->
             val user = userRepository.findByUuid(guest.userUuid) ?: return@mapNotNull null
             GuestWithUser(guest, user)
+        }
+
+        if (guestsWithUsers.any { it.user.uuid in blockedUserUuids }) {
+            throw BlockingParticipantGatheringException.blockedGuest(gatheringUuid)
         }
 
         val genderCounts = countGendersByGathering(gatheringUuid)
@@ -175,12 +188,14 @@ class GatheringService(
         filter: GatheringFilter,
     ): ScrollWithDetails {
         val blockedGatheringUuids = userBlockedGatheringRepository.findBlockedGatheringUuids(userUuid)
+        val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid)
 
         val result = gatheringRepository.scroll(
             cursor = cursor,
             size = size,
             filter = filter,
             blockedGatheringUuids = blockedGatheringUuids,
+            blockedUserUuids = blockedUserUuids,
         )
 
         val hostUuids = result.items.map { it.hostUuid }.distinct()

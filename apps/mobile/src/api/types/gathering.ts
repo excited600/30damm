@@ -2,6 +2,8 @@ export type GatheringCategory = "NONE" | "PARTY" | "FOOD_DRINK" | "ACTIVITY";
 
 export type Gender = "MALE" | "FEMALE";
 
+export type ViewerRelation = "SELF" | "STRANGER";
+
 export interface OpenGatheringRequest {
   title: string;
   description: string;
@@ -72,12 +74,14 @@ export interface GatheringDetailResponse {
     nickname: string;
     profileImageUrl?: string | null;
     gender: Gender;
+    viewerRelation: ViewerRelation;
   };
   guests: Array<{
     userUuid: string;
     nickname: string;
     profileImageUrl?: string | null;
     gender: Gender;
+    viewerRelation: ViewerRelation;
   }>;
   category: GatheringCategory;
   minCapacity: number;

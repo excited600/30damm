@@ -1,0 +1,9 @@
+BlockUserRequest:
+  type: object
+  required:
+    - blockedUserUuid
+  properties:
+    blockedUserUuid:
+      type: string
+      format: uuid
+      description: 차단할 사용자 UUID

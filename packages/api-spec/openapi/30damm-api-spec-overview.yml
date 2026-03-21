@@ -45,6 +45,10 @@ paths:
   /api/v1/reports:
     $ref: './paths/reports.yml#/~1reports'
 
+  # Blocks
+  /api/v1/blocks/users:
+    $ref: './paths/blocks.yml#/~1blocks~1users'
+
   # Payments
   /api/v1/payments/{paymentId}/prepare:
     $ref: './paths/payments.yml#/~1payments~1{paymentId}~1prepare'
@@ -95,6 +99,12 @@ components:
       $ref: './components/schemas/report/reportRequest.yml#/ReportRequest'
     ReportResponse:
       $ref: './components/schemas/report/reportResponse.yml#/ReportResponse'
+
+    # Blocks
+    BlockUserRequest:
+      $ref: './components/schemas/block/blockUserRequest.yml#/BlockUserRequest'
+    BlockUserResponse:
+      $ref: './components/schemas/block/blockUserResponse.yml#/BlockUserResponse'
 
     # Payments
     PreparePaymentRequest:

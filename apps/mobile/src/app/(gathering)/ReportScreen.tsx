@@ -22,7 +22,10 @@ const REPORT_REASONS: ReportReason[] = ["OFFENSIVE_CONTENT", "ILLEGAL_OR_FALSE_I
 export default function ReportScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { gatheringUuid } = useLocalSearchParams<{ gatheringUuid: string }>();
+  const { targetType, targetUuid } = useLocalSearchParams<{
+    targetType: string;
+    targetUuid: string;
+  }>();
 
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
   const [description, setDescription] = useState("");
@@ -38,14 +41,13 @@ export default function ReportScreen() {
     setSubmitting(true);
     try {
       await reportClient.report({
-        targetType: "GATHERING",
-        targetUuid: gatheringUuid!,
+        targetType: (targetType as "USER" | "GATHERING") ?? "GATHERING",
+        targetUuid: targetUuid!,
         reason: selectedReason,
         description: description || undefined,
       });
       router.push({
         pathname: "/(gathering)/ReportCompleteScreen",
-        params: { gatheringUuid },
       } as any);
     } finally {
       setSubmitting(false);

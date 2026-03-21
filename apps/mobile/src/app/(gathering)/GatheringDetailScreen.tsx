@@ -150,7 +150,21 @@ export default function GatheringDetailScreen() {
           </View>
           <View style={styles.participants}>
             {participants.map((p) => (
-              <View key={p.userUuid} style={styles.participant}>
+              <Pressable
+                key={p.userUuid}
+                style={styles.participant}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(gathering)/ProfileScreen",
+                    params: {
+                      userUuid: p.userUuid,
+                      nickname: p.nickname,
+                      profileImageUrl: p.profileImageUrl ?? "",
+                      viewerRelation: p.viewerRelation,
+                    },
+                  } as any)
+                }
+              >
                 <View style={styles.participantProfile}>
                   {p.profileImageUrl ? (
                     <Image
@@ -169,7 +183,7 @@ export default function GatheringDetailScreen() {
                     <Ionicons name="shield-checkmark" size={14} color={colors.accent.primary} />
                   </View>
                 )}
-              </View>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -263,7 +277,7 @@ export default function GatheringDetailScreen() {
           setBottomSheetVisible(false);
           router.push({
             pathname: "/(gathering)/ReportScreen",
-            params: { gatheringUuid },
+            params: { targetType: "GATHERING", targetUuid: gatheringUuid },
           } as any);
         }}
       />

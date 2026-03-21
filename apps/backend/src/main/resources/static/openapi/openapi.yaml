@@ -403,6 +403,35 @@ paths:
       summary: 콘텐츠 신고
       tags:
       - Reports
+  /api/v1/blocks/users:
+    post:
+      operationId: blockUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockUserRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockUserResponse"
+          description: 차단 성공
+        "400":
+          description: 유효성 검사 실패
+        "401":
+          description: 미인증
+        "404":
+          description: 차단 대상을 찾을 수 없음
+        "409":
+          description: 이미 차단한 사용자
+      security:
+      - BearerAuth: []
+      summary: 사용자 차단
+      tags:
+      - Blocks
   /api/v1/payments/{paymentId}/prepare:
     post:
       operationId: preparePayment
@@ -1114,6 +1143,34 @@ components:
       required:
       - reportUuid
       - status
+      type: object
+    BlockUserRequest:
+      example:
+        blockedUserUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        blockedUserUuid:
+          description: 차단할 사용자 UUID
+          format: uuid
+          type: string
+      required:
+      - blockedUserUuid
+      type: object
+    BlockUserResponse:
+      example:
+        blockedUserUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        uuid:
+          description: 차단 레코드 UUID
+          format: uuid
+          type: string
+        blockedUserUuid:
+          description: 차단된 사용자 UUID
+          format: uuid
+          type: string
+      required:
+      - blockedUserUuid
+      - uuid
       type: object
     PreparePaymentRequest:
       example:

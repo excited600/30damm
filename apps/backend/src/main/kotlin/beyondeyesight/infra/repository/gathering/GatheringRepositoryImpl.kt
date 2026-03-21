@@ -40,6 +40,7 @@ class GatheringRepositoryImpl(
         size: Int,
         filter: GatheringFilter,
         blockedGatheringUuids: List<UUID>,
+        blockedUserUuids: List<UUID>,
     ): ScrollResult<GatheringEntity, GatheringCursor> {
         val results = gatheringJpaRepository.findPage(pageable = Pageable.ofSize(size + 1)) {
             select(entity(GatheringEntity::class))
@@ -56,6 +57,21 @@ class GatheringRepositoryImpl(
                     },
                     blockedGatheringUuids.takeIf { it.isNotEmpty() }?.let {
                         path(GatheringEntity::uuid).notIn(it)
+                    },
+                    blockedUserUuids.takeIf { it.isNotEmpty() }?.let {
+                        path(GatheringEntity::hostUuid).notIn(it)
+                    },
+                    blockedUserUuids.takeIf { it.isNotEmpty() }?.let { uuids ->
+                        val blockedGuestSubquery = select(count(entity(GuestEntity::class)))
+                            .from(entity(GuestEntity::class))
+                            .where(
+                                and(
+                                    path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)),
+                                    path(GuestEntity::userUuid).`in`(uuids)
+                                )
+                            )
+                            .asSubquery()
+                        blockedGuestSubquery.eq(0L)
                     },
                     * buildFilterPredicates(filter).toTypedArray()
                 )

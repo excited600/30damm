@@ -1,0 +1,29 @@
+/blocks/users:
+  post:
+    operationId: blockUser
+    tags:
+      - Blocks
+    summary: 사용자 차단
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/block/blockUserRequest.yml#/BlockUserRequest'
+    responses:
+      '201':
+        description: 차단 성공
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/block/blockUserResponse.yml#/BlockUserResponse'
+      '400':
+        description: 유효성 검사 실패
+      '401':
+        description: 미인증
+      '404':
+        description: 차단 대상을 찾을 수 없음
+      '409':
+        description: 이미 차단한 사용자
