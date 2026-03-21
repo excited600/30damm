@@ -1,0 +1,8 @@
+RefreshTokenRequest:
+  type: object
+  required:
+    - refreshToken
+  properties:
+    refreshToken:
+      type: string
+      description: 리프레시 토큰

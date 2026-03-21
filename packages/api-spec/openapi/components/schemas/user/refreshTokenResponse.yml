@@ -1,0 +1,12 @@
+RefreshTokenResponse:
+  type: object
+  required:
+    - accessToken
+    - refreshToken
+  properties:
+    accessToken:
+      type: string
+      description: 새로운 JWT 액세스 토큰
+    refreshToken:
+      type: string
+      description: 새로운 JWT 리프레시 토큰
