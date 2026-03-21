@@ -56,39 +56,7 @@ class GatheringRepositoryImpl(
                             )
                         )
                     },
-                    blockedGatheringUuids.takeIf { it.isNotEmpty() }?.let {
-                        path(GatheringEntity::uuid).notIn(it)
-                    },
-                    blockedUserUuids.takeIf { it.isNotEmpty() }?.let { uuids ->
-                        val blockedGuestCountSubquery = select(count(entity(GuestEntity::class)))
-                            .from(entity(GuestEntity::class))
-                            .where(
-                                and(
-                                    path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)),
-                                    path(GuestEntity::userUuid).`in`(uuids)
-                                )
-                            )
-                            .asSubquery()
-
-                        val viewerIsGuestSubquery = select(count(entity(GuestEntity::class)))
-                            .from(entity(GuestEntity::class))
-                            .where(
-                                and(
-                                    path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)),
-                                    path(GuestEntity::userUuid).eq(viewerUuid)
-                                )
-                            )
-                            .asSubquery()
-
-                        or(
-                            and(
-                                path(GatheringEntity::hostUuid).notIn(uuids),
-                                blockedGuestCountSubquery.eq(0L)
-                            ),
-                            path(GatheringEntity::hostUuid).eq(viewerUuid),
-                            viewerIsGuestSubquery.greaterThan(0L)
-                        )
-                    },
+                    buildBlockingPredicate(blockedGatheringUuids, blockedUserUuids, viewerUuid),
                     * buildFilterPredicates(filter).toTypedArray()
                 )
                 .orderBy(
@@ -109,6 +77,60 @@ class GatheringRepositoryImpl(
                 )
             },
             hasNext = hasNext
+        )
+    }
+
+    private fun Jpql.buildBlockingPredicate(
+        blockedGatheringUuids: List<UUID>,
+        blockedUserUuids: List<UUID>,
+        viewerUuid: UUID,
+    ): Predicate? {
+        val hasBlockedGatherings = blockedGatheringUuids.isNotEmpty()
+        val hasBlockedUsers = blockedUserUuids.isNotEmpty()
+
+        if (!hasBlockedGatherings && !hasBlockedUsers) return null
+
+        val viewerIsGuestSubquery = select(count(entity(GuestEntity::class)))
+            .from(entity(GuestEntity::class))
+            .where(
+                and(
+                    path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)),
+                    path(GuestEntity::userUuid).eq(viewerUuid)
+                )
+            )
+            .asSubquery()
+
+        val viewerIsParticipant = or(
+            path(GatheringEntity::hostUuid).eq(viewerUuid),
+            viewerIsGuestSubquery.greaterThan(0L)
+        )
+
+        val noBlockedGathering = if (hasBlockedGatherings) {
+            path(GatheringEntity::uuid).notIn(blockedGatheringUuids)
+        } else null
+
+        val noBlockedUsers = if (hasBlockedUsers) {
+            val blockedGuestCountSubquery = select(count(entity(GuestEntity::class)))
+                .from(entity(GuestEntity::class))
+                .where(
+                    and(
+                        path(GuestEntity::gatheringUuid).eq(path(GatheringEntity::uuid)),
+                        path(GuestEntity::userUuid).`in`(blockedUserUuids)
+                    )
+                )
+                .asSubquery()
+
+            and(
+                path(GatheringEntity::hostUuid).notIn(blockedUserUuids),
+                blockedGuestCountSubquery.eq(0L)
+            )
+        } else null
+
+        val noBlocking = listOfNotNull(noBlockedGathering, noBlockedUsers)
+
+        return or(
+            and(*noBlocking.toTypedArray()),
+            viewerIsParticipant
         )
     }
 

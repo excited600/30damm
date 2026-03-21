@@ -2,10 +2,12 @@ package beyondeyesight.domain.service.report
 
 import beyondeyesight.domain.exception.ResourceNotFoundException
 import beyondeyesight.domain.exception.report.DuplicateReportException
+import beyondeyesight.domain.model.block.UserBlockedUserEntity
 import beyondeyesight.domain.model.gathering.block.UserBlockedGatheringEntity
 import beyondeyesight.domain.model.report.ReportEntity
 import beyondeyesight.domain.model.report.ReportReason
 import beyondeyesight.domain.model.report.ReportTargetType
+import beyondeyesight.domain.repository.block.UserBlockedUserRepository
 import beyondeyesight.domain.repository.gathering.block.UserBlockedGatheringRepository
 import beyondeyesight.domain.repository.gathering.GatheringRepository
 import beyondeyesight.domain.repository.report.ReportRepository
@@ -19,6 +21,7 @@ class ReportService(
     private val userRepository: UserRepository,
     private val gatheringRepository: GatheringRepository,
     private val userBlockedGatheringRepository: UserBlockedGatheringRepository,
+    private val userBlockedUserRepository: UserBlockedUserRepository,
 ) {
     fun report(
         reporterUuid: UUID,
@@ -49,13 +52,23 @@ class ReportService(
 
         val savedReport = reportRepository.save(entity)
 
-        if (targetType == ReportTargetType.GATHERING) {
-            userBlockedGatheringRepository.save(
-                UserBlockedGatheringEntity.create(
-                    userUuid = reporterUuid,
-                    gatheringUuid = targetUuid,
+        when (targetType) {
+            ReportTargetType.GATHERING -> {
+                userBlockedGatheringRepository.save(
+                    UserBlockedGatheringEntity.create(
+                        userUuid = reporterUuid,
+                        gatheringUuid = targetUuid,
+                    )
                 )
-            )
+            }
+            ReportTargetType.USER -> {
+                userBlockedUserRepository.save(
+                    UserBlockedUserEntity.create(
+                        blockerUuid = reporterUuid,
+                        blockedUuid = targetUuid,
+                    )
+                )
+            }
         }
 
         return savedReport

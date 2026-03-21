@@ -160,6 +160,7 @@ class GatheringService(
                 resourceUuid = gatheringUuid
             )
 
+        val blockedGatheringUuids = userBlockedGatheringRepository.findBlockedGatheringUuids(userUuid).toSet()
         val blockedUserUuids = userBlockedUserRepository.findBlockedUserUuids(userUuid).toSet()
 
         val host = userRepository.findByUuid(gathering.hostUuid)
@@ -175,9 +176,10 @@ class GatheringService(
         }
 
         val isViewerParticipant = userUuid == host.uuid || guestsWithUsers.any { it.second.uuid == userUuid }
+        val isBlockedGathering = gatheringUuid in blockedGatheringUuids
         val hasBlockedParticipant = host.uuid in blockedUserUuids || guestsWithUsers.any { it.second.uuid in blockedUserUuids }
 
-        if (!isViewerParticipant && hasBlockedParticipant) {
+        if (!isViewerParticipant && (isBlockedGathering || hasBlockedParticipant)) {
             throw BlockingParticipantGatheringException.blocked(gatheringUuid)
         }
 
