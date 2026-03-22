@@ -75,7 +75,7 @@ apiClient.interceptors.response.use(
       useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
 
       originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-      return apiClient(originalRequest);
+      return await apiClient(originalRequest);
     } catch {
       useAuthStore.getState().logout();
       return Promise.reject(error);
